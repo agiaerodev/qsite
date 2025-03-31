@@ -271,6 +271,7 @@ export default {
         "featured": "Feautred | Featured",
         "share": "Share",
         "unit": "Unit | Units",
+        'showLess': 'Show less',
         "showMore": "Show more",
         "date": "Date | Dates",
         "email": "Email | Emails",

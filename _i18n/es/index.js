@@ -269,6 +269,7 @@ export default {
         'featured': 'Destacado | Destacados',
         'share': 'Compartir',
         'unit': 'Unidad | Unidades',
+        'showLess': 'Ver menos',
         'showMore': 'Ver más',
         'date': 'Fecha | Fechas',
         'email': 'Correo | Correos',
