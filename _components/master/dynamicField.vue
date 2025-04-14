@@ -20,7 +20,10 @@
           {{ fieldLabel }}
         </div>
         <!-- Help btn -->
-        <div v-if="helpLoad.load && field.help && field.help.description" :class="helpLoad.class">
+        <div 
+          v-if="(field?.props?.vIf == undefined || field?.props?.vIf) && helpLoad.load && field.help && field.help.description" 
+          :class="helpLoad.class"
+        >
           <help-text 
             :title="field.help?.title || fieldLabel" 
             :description="field.help.description"
