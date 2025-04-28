@@ -112,11 +112,7 @@ export default function multipleDynamicFieldsController(props: any, emit: any) {
   }
   function init() {
     nextTick(() => {
-      loading.value = true;
-      setTimeout(() => {
-        updateFieldsFromValueMultiple();
-        loading.value = false;
-      }, 2000);
+      updateFieldsFromValueMultiple();
     })
   }
   return {
