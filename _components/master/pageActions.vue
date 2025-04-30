@@ -27,6 +27,7 @@
           class="btn-border-dropdown-custom"
           :label="btn.props.label"
           :icon="btn.props.icon"
+          :data-testid="`${btn.type}-${btn.props.label || ''}-${keyAction}`"
         >
           <q-list>
             <q-item v-for="(item, index) in btn.items" :key="index" clickable v-close-popup
