@@ -17,30 +17,15 @@
       item-key="id"
     >
       <template #item="{ element }">
-        <q-item
-          clickable
-          class="
-            tw-py-3
-            tw-border-b
-            tw-bg-white
-            folder-item
-          "
-        >
-          <q-item-section
-            avatar
-            class="f-cursor-grab"
-          >
-            <i class="fa-solid fa-grip-lines drag_handle tw-text-blue-900 tw-text-base"/>
+        <q-item clickable class="tw-py-3 tw-border-b tw-bg-white folder-item">
+          <q-item-section avatar class="f-cursor-grab">
+            <i
+              class="fa-solid fa-grip-lines drag_handle tw-text-blue-900 tw-text-base"
+            />
           </q-item-section>
           <q-item-section>
-            <q-item-label
-              class="tw-font-bold folder-title"
-              lines="1"
-            >
-              <span
-                class="tw-cursor-pointer"
-                @click="show(element)"
-              >
+            <q-item-label class="tw-font-bold folder-title" lines="1">
+              <span class="tw-cursor-pointer" @click="show(element)">
                 {{ element.title || element.id }}
               </span>
             </q-item-label>
@@ -69,14 +54,10 @@
                       v-if="item.vIf !== undefined ? item.vIf : true"
                     >
                       <q-item-section avatar>
-                        <q-icon
-                          :class="item.icon"
-                          color="primary"
-                          size="xs"
-                        />
+                        <q-icon :class="item.icon" color="primary" size="xs" />
                       </q-item-section>
                       <q-item-section>
-                        {{  item.label  }}
+                        {{ item.label }}
                       </q-item-section>
                     </q-item>
                   </template>
@@ -90,23 +71,20 @@
     </draggable>
     <div
       v-if="!dragReports && folder.reportList.length === 0"
-      class="
-        tw-py-8
-        tw-text-center
-        tw-text-5xl"
-      >
-        <div class="fa-light fa-folder-xmark" />
-        <div class="tw-text-base tw-py-2">
-         {{ $tr('isite.cms.message.searchNotFound') }}
-        </div>
+      class="tw-py-8 tw-text-center tw-text-5xl"
+    >
+      <div class="fa-light fa-folder-xmark" />
+      <div class="tw-text-base tw-py-2">
+        {{ $tr('isite.cms.message.searchNotFound') }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import draggable from "vuedraggable";
+import draggable from 'vuedraggable';
 import foldersStore from './store/foldersStore.js';
-import _ from "lodash";
+import _ from 'lodash';
 
 export default {
   components: {
@@ -146,7 +124,7 @@ export default {
       return this.getFieldRelationActions();
     },
     heightDrag() {
-      if(this.dragReports && this.folder.reportList.length === 0) {
+      if (this.dragReports && this.folder.reportList.length === 0) {
         return '100px';
       }
       return this.folder.reportList.length <= 5 ? 'auto' : '300px';
@@ -158,15 +136,18 @@ export default {
       const reportList = elm.draggedContext.element;
       reportList.folderId = Number(elm.to.id);
       this.toFolderId = reportList.folderId;
-      await this.updateRelationData(reportList);
+
+      await this.updateRelationData({ folderId: reportList.folderId, reportId: reportList.id, id: reportList.id });
     },
-    uniqBy(data){
+    uniqBy(data) {
       return _.uniqBy(data, 'id');
     },
     show(report) {
-      const action = this.fieldRelationActions.find(item => item.name =='Show');
-      if(action) {
-        action.action(report)
+      const action = this.fieldRelationActions.find(
+        (item) => item.name == 'Show'
+      );
+      if (action) {
+        action.action(report);
       }
     },
   },
@@ -180,16 +161,16 @@ export default {
 .folder-item .q-focus-helper:after,
 .list-report-menu .q-focus-helper:before,
 .list-report-menu .q-focus-helper:after {
-    background: var(--q-primary) !important;
-    opacity: 1 !important;
+  background: var(--q-primary) !important;
+  opacity: 1 !important;
 }
 .list-report-menu .q-item {
-    min-height: 46px;
+  min-height: 46px;
 }
 .folder-item .q-item__section--avatar .q-icon {
   color: var(--q-primary);
   background: var(--q-primary);
-  opacity: .5;
+  opacity: 0.5;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
