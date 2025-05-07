@@ -192,6 +192,11 @@
                          :label="fieldLabel"
                          :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
         />
+        <dateViewToggle 
+          v-if="loadField('dateViewToggle')"
+          v-model="responseValue"
+        />
+
         <!--Select-->
         <q-select v-model="responseValue" v-bind="fieldProps" :label="fieldLabel" use-input :options="formatOptions"
                   @update:modelValue="matchTags(field)" v-if="loadField('select')" @filter="filterSelectOptions"
@@ -562,6 +567,7 @@ import dateRangePicker from 'modules/qsite/_components/master/dateRangePicker';
 import timeSpent from 'modules/qsite/_components/master/timeSpent';
 import previewFile from 'modules/qsite/_components/v3/previewFile/index.vue';
 import { eventBus } from 'src/plugins/utils';
+import dateViewToggle from 'modules/qsite/_components/master/dateViewToggle';
 
 export default {
   name: 'dynamicField',
@@ -604,7 +610,8 @@ export default {
     multipleDynamicFields,
     dateRangePicker,
     timeSpent,
-    previewFile
+    previewFile,
+    dateViewToggle,
   },
   watch: {
     modelValue: {
@@ -1405,6 +1412,11 @@ export default {
           load: true
         },
         dateRange: {
+          class: 'absolute-right',
+          margin: '1em',
+          load: true
+        },
+        dateViewToggle: {
           class: 'absolute-right',
           margin: '1em',
           load: true
