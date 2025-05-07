@@ -26,7 +26,6 @@ export default function controller(props: any, emit: any) {
 
   const methods = {
     handleChange(){ 
-      console.log('handleChange', state)
       updateDateRange()
       emit('update:modelValue', state)      
     },
