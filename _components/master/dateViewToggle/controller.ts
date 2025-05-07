@@ -39,8 +39,7 @@ export default function controller(props: any, emit: any) {
 
   return {
     ...(toRefs(state)), 
-    ...methods, 
-    store, 
+    ...methods,
     scheduleType
   }
 }
