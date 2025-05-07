@@ -78,14 +78,15 @@ export default function controller(props: any, emit: any) {
       state.readOnlyData[key] = data
     },
 
-    async init(){
+    async init(options = { runGetUrlFilter: true }) {
       state.userData = clone(store.state.quserAuth.userData)
       state.props = clone(props)
       state.props.filters = methods.removeNullValues(state.props.filters)
       state.systemName = state.props?.systemName || ''
       state.useAdminFilter = state.userData.hasOwnProperty('fields')
       await methods.setFilterValues()
-      await methods.getUrlFilters()
+
+      if (options.runGetUrlFilter) await methods.getUrlFilters()
       await methods.addLoadedOptionsCallback()
       await methods.setQuickFilters()
       methods.emitValues()
@@ -391,7 +392,7 @@ export default function controller(props: any, emit: any) {
 
           state.filterValues[key] = filterValues[key]
           state.readOnlyData[key] = {
-            label: state.props.filters[key].props.label || '',
+            label: state.props?.filters[key].props?.label || '',
             value: filterValues[key]
           }
 
