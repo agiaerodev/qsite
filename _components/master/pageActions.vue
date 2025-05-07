@@ -90,6 +90,7 @@
     <div class="row col-12">
       <dynamicFilter
         v-if="dynamicFilter"
+        ref="dynamicFilterComponent"
         :systemName="systemName"
         :filters="dynamicFilter"
         :modelValue="showDynamicFilterModal"
