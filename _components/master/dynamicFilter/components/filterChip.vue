@@ -10,7 +10,9 @@
 		props: {
 			type: Object,
 			default: () => {
-				return {}
+				return {
+					removable: true
+				}
 			}
 		},
 	})
@@ -21,7 +23,7 @@
 			v-if="item.label !== ''"
 			class="tw-pr-5 tw-bg-gray-100"
 			text-color="primary"
-			v-bind="props"
+			v-bind="{ ...props, ...item.quickFilterOption  }"
 			@remove="$emit('remove', itemKey)"
 		>
 			<span class="text-weight-bold">{{ item.label }}</span>

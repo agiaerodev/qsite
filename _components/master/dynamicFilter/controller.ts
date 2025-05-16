@@ -196,7 +196,10 @@ export default function controller(props: any, emit: any) {
           result[key] = {
             label: state.readOnlyData[key].label || state.props.filters[key].label ||  '',
             value: state.readOnlyData[key].value,
-            option: state.readOnlyData[key].value || ''
+            option: state.readOnlyData[key].value || '',
+            quickFilterOption: {
+              removable: state.props.filters[key]?.props?.clearable,
+            }
           }
 
           if(field?.type == 'select' || field?.type == 'treeSelect'){
