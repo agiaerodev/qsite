@@ -9,11 +9,7 @@
 		},
 		props: {
 			type: Object,
-			default: () => {
-				return {
-					removable: true
-				}
-			}
+			default: () => ({})
 		},
 	})
 </script>
