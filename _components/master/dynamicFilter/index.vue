@@ -23,7 +23,7 @@
         </div>
 
         <!--Filters-->
-        <q-scroll-area class="tw-mt-3.5" style="height: calc(100vh - 253px)">
+        <q-scroll-area class="tw-mt-3.5" style="height: calc(100vh - 153px)">
           <div class="q-px-sm" style="height: calc(100vh - 253px)">
             <!--Fields-->
             <template v-for="(field, key) in filter.fields" :key="key">
