@@ -77,7 +77,6 @@
         <!-- summary chips -->
         <filterChip
           :summary="readValues"
-          :props="{removable: true}"
           @remove="(itemKey) => removeReadValue(itemKey)"
         />
       </div>
