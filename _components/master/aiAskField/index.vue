@@ -1,5 +1,5 @@
 <template>
-  <div v-if="havePermission">
+  <div>
     <div 
       v-show="!isOpenAiAsk" 
       class="tw-flex tw-justify-end tw-items-center tw-w-full tw-mb-2"

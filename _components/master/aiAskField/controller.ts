@@ -1,5 +1,6 @@
 import {
   computed, 
+  onMounted, 
   reactive, 
   ref, 
   toRefs 
@@ -14,7 +15,7 @@ export default function controller(props: any, emit: any) {
   const BREAKPOINT = 639;
 
   recognition.continuous = true;
-  recognition.lang = 'en-US';
+  recognition.lang = store.state.qsiteApp.defaultLocale;
   recognition.interimResult = false;
 
   const refs = {
@@ -22,7 +23,6 @@ export default function controller(props: any, emit: any) {
     record: ref(false),
     isOpenAiAsk: ref(false),
     loading: ref(false),
-    havePermission: ref(store.hasAccess('ramp.passenger-work-orders.tickers'))
   }
 
   const state = reactive({
@@ -51,8 +51,13 @@ export default function controller(props: any, emit: any) {
   const methods = {
     startRecord: () => {
       refs.record.value = !refs.record.value;
-      if (refs.record.value) recognition.start();
-      if (!refs.record.value) recognition.abort();
+      try {
+        if (refs.record.value) recognition.start();
+        if (!refs.record.value) recognition.abort();
+      } catch (error) {
+        console.error("Error starting/stopping speech recognition:", error);
+        refs.record.value = false;
+      }
     },
     sendPrompt: () => {
       if (refs.loading.value) return null
@@ -75,7 +80,11 @@ export default function controller(props: any, emit: any) {
     closeAiAsk: () => {
       refs.isOpenAiAsk.value = false;
       refs.record.value = false;
-      recognition.abort();
+      try {
+        recognition.abort();
+      } catch (error) {
+        console.error("Error aborting speech recognition:", error);
+      }
     }
   }
 
