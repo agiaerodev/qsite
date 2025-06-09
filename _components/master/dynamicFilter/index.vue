@@ -15,6 +15,13 @@
             <div class="text-subtitle1 row items-center text-blue-grey">
               <q-icon name="fa-light fa-filter" size="20px" class="q-mr-sm"/>
               <label class="text-weight-bold">{{ $trp('isite.cms.label.filter', {capitalize: true}) }}</label>
+              <speechField 
+                v-if="speech?.api"
+                class="tw-ml-1"
+                @response="loadFiltersFromAIResponse"
+                v-bind="speech"
+                :title="$trp('isite.cms.label.filter', {capitalize: true})"
+              />
             </div>
             <!-- Close icon -->
             <q-icon name="fas fa-times" color="blue-grey" size="20px" class="cursor-pointer" @click="hideModal()"/>
@@ -108,17 +115,26 @@
 import {defineComponent} from 'vue'
 import controller from '@imagina/qsite/_components/master/dynamicFilter/controller'
 import filterChip from '@imagina/qsite/_components/master/dynamicFilter/components/filterChip'
+import speechField from '../speechField'
 
 export default defineComponent({
   props: {    
     systemName: {default: ''},
     filters: {type: Object, default: null},    
     modelValue: { default: false},
-    showOnMobile: { default: false}
+    showOnMobile: { default: false},
+    speech: {
+      type: Object,
+      default: () => ({
+        api: '',
+        extraPrompts: '',
+      })
+    },
   },
   emits:['update:modelValue', 'hideModal', 'showModal', 'update:summary'],
   components: {
-    filterChip
+    filterChip,
+    speechField
   },
   setup(props, {emit}) {
     return controller(props, emit)
