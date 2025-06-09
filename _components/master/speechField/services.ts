@@ -7,6 +7,7 @@ export default {
       return data
     } catch (error) {
       console.error(error)
+      throw new Error('Failed to get AI response')
     }
   },
 }
