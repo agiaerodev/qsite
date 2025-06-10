@@ -93,6 +93,7 @@
         ref="dynamicFilterComponent"
         :systemName="systemName"
         :filters="dynamicFilter"
+        :speech="speech.filters"
         :modelValue="showDynamicFilterModal"
         @showModal="showDynamicFilterModal = true"
         @hideModal="showDynamicFilterModal = false"
@@ -173,6 +174,10 @@ export default {
       type: Boolean,
       default: () => false
     },
+    speech: {
+      type: Object,
+      default: () => ({})
+    }
   },
   emits: ['search', 'new', 'refresh', 'activateTour', 'updateDynamicFilterValues', 'visibleColumns'],
   components: { masterExport, masterSynchronizable, bulkActions, dynamicFilter },
