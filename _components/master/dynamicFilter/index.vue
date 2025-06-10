@@ -81,6 +81,13 @@
           <q-icon name="fa-light fa-filter" class="q-mr-xs" color="amber" size="18px" />
           <b>{{ $trp('isite.cms.label.filter') }}:</b>
         </q-btn>
+        <speechField
+          v-if="speech?.api"
+          class="tw-ml-1"
+          @response="loadFiltersFromAIResponse"
+          v-bind="speech"
+          :label="$trp('isite.cms.label.filter', {capitalize: true})"
+        />
         <!-- summary chips -->
         <filterChip
           :summary="readValues"
