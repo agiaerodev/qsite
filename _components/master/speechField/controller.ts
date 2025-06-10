@@ -96,8 +96,6 @@ export default function controller(props: any, emit: any) {
         emit('response', response);
         eventBus.emit('speechResponse', response)
         refs.responseAi.value = response;
-        refs.loading.value = false;
-        refs.prompt.value = "";
       })
       .finally(() => {
         refs.loading.value = false;
