@@ -25,9 +25,9 @@ export default function controller(props: any, emit: any) {
   }
 
   const state = reactive({
-    extraPrompts: props?.extraPrompts || '',
+    extraPrompts: props?.extraPrompts || {},
     api: props?.api,
-    title: props?.title,
+    label: props?.label,
     fieldProps: props?.fieldProps,
   })
 
@@ -40,7 +40,7 @@ export default function controller(props: any, emit: any) {
         loading: refs.loading.value,
         props: {
           type: 'textarea',
-          label: state.title,
+          label: state.label,
           rows: 1,
           clearable: true,
           loading: refs.loading.value,
