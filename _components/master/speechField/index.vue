@@ -43,6 +43,7 @@
               class="field-sizing"
               :field="field.prompt"
               v-model="prompt"
+              @keydown.enter.prevent="sendPrompt"
             />
             <div class="tw-flex tw-items-center tw-gap-0.5">
               <div>
