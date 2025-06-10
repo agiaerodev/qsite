@@ -116,14 +116,14 @@ import controller from './controller'
 export default defineComponent({
   props: {
     extraPrompts: {
-      type: String,
-      default: ''
+      type: Object,
+      default: () => ({})
     },
     api: {
       type: String,
       default: ''
     },
-    title: String,
+    label: String,
     fieldProps: {
       type: Object,
       default: () => ({})
