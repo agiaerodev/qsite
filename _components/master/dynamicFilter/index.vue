@@ -15,12 +15,12 @@
             <div class="text-subtitle1 row items-center text-blue-grey">
               <q-icon name="fa-light fa-filter" size="20px" class="q-mr-sm"/>
               <label class="text-weight-bold">{{ $trp('isite.cms.label.filter', {capitalize: true}) }}</label>
-              <speechField 
+              <speechField
                 v-if="speech?.api"
                 class="tw-ml-1"
                 @response="loadFiltersFromAIResponse"
                 v-bind="speech"
-                :title="$trp('isite.cms.label.filter', {capitalize: true})"
+                :label="$trp('isite.cms.label.filter', {capitalize: true})"
               />
             </div>
             <!-- Close icon -->
@@ -127,7 +127,7 @@ export default defineComponent({
       type: Object,
       default: () => ({
         api: '',
-        extraPrompts: '',
+        extraPrompts: {},
       })
     },
   },
