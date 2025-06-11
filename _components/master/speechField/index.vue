@@ -13,16 +13,20 @@
           v-model="showPopup"
           @hide="closeAiAsk"
           class="
-            tw-w-full
             !tw-max-h-none
-            md:tw-w-[440px]
-            lg:tw-w-[600px]
-            tw-p-4
+            sm:tw-w-[550px]
+            md:tw-w-[640px]
+            tw-p-3
             tw-rounded-2xl
-            tw-bg-white
-            popup-edit-top-center
             tw-shadow-[0_20px_20px_15px_rgba(0,0,0,0.1),0_10px_10px_8px_rgba(0,0,0,0.04)]
             tw-shadow-purple-500/15
+            tw-border-4
+            tw-border-purple-500/10
+            !tw-inset-x-2
+            !tw-top-2
+            sm:!tw-top-4
+            sm:!tw-left-1/2
+            sm:!-tw-translate-x-1/2
           "
         >
           <section class="tw-flex tw-items-center tw-gap-2">
@@ -143,11 +147,5 @@ export default defineComponent({
 }
 .field-sizing textarea {
   field-sizing: content;
-}
-.popup-edit-top-center {
-  top: 15px !important;
-  left: 50% !important;
-  margin-left: 12px; 
-  transform: translateX(-50%) !important;
 }
 </style>
