@@ -23,6 +23,13 @@
             class="tw-ml-3 tw-font-semibold tw-text-gray-500 tw-text-sm"
             v-bind="chip"
           />
+          <speechField
+            class="tw-ml-2"
+            v-if="speech?.api" 
+            v-bind="speech" 
+            @response="$emit('speech-response', $event)"
+            :label="title"
+          />
           <help-text 
             class="tw-ml-2" 
             v-if="help?.description" 
@@ -58,6 +65,8 @@
 </template>
 
 <script>
+import speechField from './speechField';
+
 export default {
   props: {
     modelValue: { type: Boolean, default: false },
@@ -76,9 +85,16 @@ export default {
     customClass: { type: String, default: '' },
     chip: { type: Object || null, default: null },
     help: { type: Object || null, default: null },
+    speech: {
+      type: Object || null,
+      default: () => ({
+        extraPrompts: {},
+        api: ''
+      })
+    }
   },
-  emits: ['update:modelValue'],
-  components: {},
+  emits: ['update:modelValue', 'speech-response'],
+  components: { speechField },
   watch: {
     modelValue(newValue, oldValue) {
       this.show = this.$clone(newValue);

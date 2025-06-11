@@ -496,7 +496,22 @@ export default function controller(props: any, emit: any) {
         }
       })
       return filters
-    }
+    },
+    loadFiltersFromAIResponse(response) {
+      const values = Object.keys(response || {})
+      if (values.length > 0) {
+        values.forEach(key => {
+          if (state.props.filters[key]) {
+            state.filterValues[key] = response[key];
+          }
+          state.readOnlyData[key] = {
+            label: state.props.filters[key]?.props?.label || '',
+            value: response[key]
+          }
+        });
+        methods.emitValues(true)
+      }
+    },
   }
 
   // Mounted
