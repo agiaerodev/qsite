@@ -2,7 +2,8 @@
   <div>
     <div v-show="!showPopup">
       <q-btn
-        icon="fa-regular fa-sparkles tw-bg-gradient-to-r tw-from-indigo-500 tw-via-purple-500 tw-to-pink-500 tw-bg-clip-text tw-text-transparent"
+        icon="fa-regular fa-sparkles fa-beat tw-bg-gradient-to-r tw-from-indigo-500 tw-via-purple-500 tw-to-pink-500 tw-bg-clip-text tw-text-transparent"
+        style="--fa-animation-duration: 1.5s;"
         class="tw-mr-1"
         size="sm"
         round
