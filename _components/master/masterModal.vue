@@ -11,9 +11,12 @@
   >
     <!--Content-->
     <div :id="id || 'masterModalContent'" :style="customPosition ? '' : `min-width: ${width}`"
-          v-if="show" class="master-dialog__content round relative-position" :class="customClass">
+          v-if="show" class="master-dialog__content !tw-rounded-2xl relative-position" :class="customClass">
       <!--Header-->
-      <div :class="`master-dialog__header text-${color} row justify-between items-center`">
+      <div 
+        v-if="title || speech?.api || help?.description"
+        :class="`master-dialog__header text-${color} row justify-between items-center`"
+      >
         <!--Title-->
         <div class="master-dialog__header-title row items-center">
           <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />
@@ -40,7 +43,7 @@
         <q-btn v-close-popup icon="fa-light fa-xmark" round textColor="blue-grey" unelevated class="btn-medium"
                 v-if="!hideCloseAction" />
       </div>
-      <q-separator class="tw-h-0.5" />
+      <q-separator class="tw-h-0.5" v-if="title || speech?.api || help?.description"/>
       <!--Slot content-->
       <div class="master-dialog__body">
         <slot />
