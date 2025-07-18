@@ -49,7 +49,7 @@
                 <q-separator class="q-my-md" />
                 <!--Title-->
                 <div class="text-blue-grey q-mb-sm">
-                  <b>{{ $tr('isite.cms.messages.lastReport') }}{{ file.fileFormat ? ` (${file.fileFormat})` : '' }}</b>
+                  <b>{{ file.fileFormat ? ` (${file.fileFormat})` : '' }}</b>
                   <span v-if="file.fileName"> - {{ file.fileName }}</span>
                 </div>
                 <!--Date-->
