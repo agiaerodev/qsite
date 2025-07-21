@@ -49,7 +49,7 @@
                 <q-separator class="q-my-md" />
                 <!--Title-->
                 <div class="text-blue-grey q-mb-sm">
-                  <b>{{ $tr('isite.cms.messages.lastReport') }}{{ file.fileFormat ? ` (${file.fileFormat})` : '' }}</b>
+                  <b>{{ file.fileFormat ? ` (${file.fileFormat})` : '' }}</b>
                   <span v-if="file.fileName"> - {{ file.fileName }}</span>
                 </div>
                 <!--Date-->
@@ -276,6 +276,18 @@ export default {
         });
       });
     },
+    buildFileNameWithFilters(fileName) {
+      if (
+        !this.dynamicFilterSummary || 
+        (Object.keys(this.dynamicFilterSummary).length === 0)
+      ) return fileName
+
+      const filters = Object.values(this.dynamicFilterSummary)
+        .map(item => `${item.label}=${item.option}`)
+        .join(', ')
+
+      return `${fileName} (${filters})`;
+    },  
     //Request new report
     newReport() {
       return new Promise(async (resolve, reject) => {
@@ -287,7 +299,8 @@ export default {
         let requestParams = {
           exportParams: {
             ...(this.exportItem ? { ...this.params, ...(this.paramsItem.exportParams || {}) } : this.params),
-            fileFormat: this.filters.fileFormat
+            fileFormat: this.filters.fileFormat,
+            fileName: this.buildFileNameWithFilters(this.params.fileName)
           },
           filter: {
             ...(this.exportItem ? (this.paramsItem.filter || {}) : (filter ? filter : {})),
