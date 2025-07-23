@@ -283,10 +283,11 @@ export default {
       ) return fileName
 
       const filters = Object.values(this.dynamicFilterSummary)
+        .filter(item => item.label && item.option)
         .map(item => `${item.label}=${item.option}`)
         .join(', ')
 
-      return `${fileName} (${filters})`;
+      return `${fileName}${filters ? ` (${filters})` : ''}`;
     },  
     //Request new report
     newReport() {
