@@ -14,6 +14,9 @@
           v-model="showPopup"
           @hide="closeAiAsk"
           class="
+            tw-flex
+            tw-items-start
+            tw-gap-2
             !tw-max-h-none
             sm:tw-w-[550px]
             md:tw-w-[640px]
@@ -30,85 +33,95 @@
             sm:!-tw-translate-x-1/2
           "
         >
-          <section class="tw-flex tw-items-center tw-gap-2">
-            <i 
-              :class="`
-                fa-regular 
-                fa-sparkles 
-                tw-bg-gradient-to-r 
-                tw-from-indigo-500 
-                tw-via-purple-500 
-                tw-to-pink-500 
-                tw-bg-clip-text 
-                tw-text-transparent
-                ${loading ? 'fa-fade' : ''}
-              `"
-            ></i>
-            <dynamic-field
-              class="field-sizing"
-              :field="field.prompt"
-              v-model="prompt"
-              @keydown.enter.prevent="sendPrompt"
-            />
-            <div class="tw-flex tw-items-center tw-gap-0.5">
-              <div>
-                <q-btn
-                  @click="startRecord"
-                  icon="fa-light fa-microphone"
-                  class="hover:tw-text-green-500"
-                  :class="record ? 'tw-text-green-500' : 'tw-text-slate-500'"
-                  size="sm"
-                  round
-                  flat
-                ></q-btn>
-              </div>
-              <div>
-                <q-btn
-                  @click="sendPrompt"
-                  icon="fa-light fa-paper-plane-top"
-                  :class="{
-                    'tw-text-blue-600': isPrompt && !loading,
-                    'tw-text-slate-500': !isPrompt || loading,
-                    'hover:tw-text-blue-600': !loading
-                  }"
-                  size="sm"
-                  round
-                  flat
-                ></q-btn>
-              </div>
-              <div class="tw-ml-2">
-                <q-btn
-                  @click="closeAiAsk"
-                  icon="fa-light fa-xmark"
-                  class="
-                    tw-text-slate-500
-                    hover:tw-text-red-600
-                  "
-                  size="sm"
-                  round
-                  flat
-                ></q-btn>
-              </div>
+          <section class="tw-w-full">
+            <div class="tw-flex tw-items-center tw-gap-2 tw-w-full">
+              <i 
+                :class="`
+                  fa-regular 
+                  fa-sparkles 
+                  tw-bg-gradient-to-r 
+                  tw-from-indigo-500 
+                  tw-via-purple-500 
+                  tw-to-pink-500 
+                  tw-bg-clip-text 
+                  tw-text-transparent
+                  ${loading ? 'fa-fade' : ''}
+                `"
+              ></i>
+              <dynamic-field
+                class="field-sizing"
+                :field="field.prompt"
+                v-model="prompt"
+                @keydown.enter.prevent="sendPrompt"
+              />
+            </div>
+            <div class="tw-flex tw-items-center tw-justify-between tw-mt-1 tw-ml-6">
+              <q-btn
+                v-show="isResponseAi"
+                @click="rejectChange"
+                class="
+                  tw-text-slate-500
+                  hover:tw-text-red-500
+                  tw-text-xs
+                  tw-px-2
+                "
+                flat
+                rounded
+                no-caps
+              >
+                Cancel
+              </q-btn>
+              <a 
+                class="tw-text-slate-500 tw-text-xs hover:tw-text-blue-600" 
+                :href="getHref()"
+                target='_blank'
+              >
+                Do you need help?
+              </a>
             </div>
           </section>
-          <section>
-            <q-btn
-              v-show="isResponseAi"
-              @click="rejectChange"
-              class="
-                tw-text-slate-500
-                hover:tw-text-red-500
-                tw-text-xs
-                tw-px-2
-                tw-ml-6
-                tw-mt-1
-              "
-              flat
-              rounded
-              no-caps
-            >
-              Cancel
-            </q-btn>
+          <section class="tw-flex tw-items-center tw-gap-0.5 tw-mt-1.5">
+            <div>
+              <q-btn
+                @click="startRecord"
+                icon="fa-light fa-microphone"
+                :class="{
+                  'tw-text-green-500': record && !loading,
+                  'tw-text-slate-500': !record || loading,
+                  'hover:tw-text-green-500': !loading,
+                }"
+                size="sm"
+                round
+                flat
+              ></q-btn>
+            </div>
+            <div>
+              <q-btn
+                @click="sendPrompt"
+                icon="fa-light fa-paper-plane-top"
+                :class="{
+                  'tw-text-blue-600': isPrompt && !loading,
+                  'tw-text-slate-500': !isPrompt || loading,
+                  'hover:tw-text-blue-600': !loading
+                }"
+                size="sm"
+                round
+                flat
+              ></q-btn>
+            </div>
+            <div class="tw-ml-2">
+              <q-btn
+                @click="closeAiAsk"
+                icon="fa-light fa-xmark"
+                class="
+                  tw-text-slate-500
+                  hover:tw-text-red-600
+                "
+                size="sm"
+                round
+                flat
+              ></q-btn>
+            </div>
           </section>
         </q-popup-edit>
       </q-btn>
@@ -144,7 +157,7 @@ export default defineComponent({
 </script>
 <style lang="scss">
 .field-sizing {
-  width: calc(100% - 133px);
+  width: calc(100% - 23px);
 }
 .field-sizing textarea {
   field-sizing: content;

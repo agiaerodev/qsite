@@ -2,10 +2,12 @@ import {
   computed,
   reactive, 
   ref, 
-  toRefs 
+  toRefs,
+  onMounted,
 } from 'vue';
-import { store, eventBus } from 'src/plugins/utils'
+import { store, eventBus, helper } from 'src/plugins/utils'
 import services from './services'
+import app from '/src/setup/app.js'
 
 export default function controller(props: any, emit: any) {
   const SpeechRecognition = window?.SpeechRecognition || window?.webkitSpeechRecognition;
@@ -22,6 +24,7 @@ export default function controller(props: any, emit: any) {
     loading: ref(false),
     popupEdit: ref(null),
     responseAi: ref<null | string | object | any[]>(null),
+    token: ref<string>(""),
   }
 
   const state = reactive({
@@ -113,7 +116,6 @@ export default function controller(props: any, emit: any) {
         console.error("Error aborting speech recognition:", error);
       }
     },
-    
     rejectChange: () => {
       if (
         (typeof refs.responseAi.value === 'object') && 
@@ -141,6 +143,15 @@ export default function controller(props: any, emit: any) {
         (typeof refs.responseAi.value === 'object') && 
         !Array.isArray(refs.responseAi.value)
       ) refs.responseAi.value = {}
+    },
+    getHref: () => {
+      const baseUrl = app.kbBaseUrl
+      const path = '/docs/agione/aIFieldAssistant'
+          
+      const url = `${baseUrl}${path}`
+      const parsedUrl = new URL(url);
+      const hash = parsedUrl.hash ? parsedUrl.hash : ''
+      return `${url.replace(/#.*$/, '')}?token=${refs.token.value}${hash}`
     }
   }
 
@@ -152,6 +163,10 @@ export default function controller(props: any, emit: any) {
   recognition.onend = () => {
     refs.record.value = false;
   }
+
+  onMounted(async () => {
+    refs.token.value = await helper.getToken()
+  })
 
   return {...refs, ...(toRefs(state)), ...computeds, ...methods}
 }
