@@ -1,7 +1,16 @@
 <template>
   <template>
-    <master-modal v-model="showModal" icon="fa-light fa-file-arrow-down" width="380px" :loading="loading"
-                  :title="modalTitle" @hide="reset()" @show="init()" custom-position>
+    <master-modal 
+      v-model="showModal" 
+      icon="fa-light fa-file-arrow-down" 
+      width="380px" 
+      :loading="loading"
+      :help="helpText"
+      :title="modalTitle" 
+      @hide="reset()" 
+      @show="init()" 
+      custom-position
+    >
       <div class="relative-position" v-if="!loading">
         <div class="row q-col-gutter-md">
           <!--Generate new report-->
@@ -49,7 +58,7 @@
                 <q-separator class="q-my-md" />
                 <!--Title-->
                 <div class="text-blue-grey q-mb-sm">
-                  <b>{{ $tr('isite.cms.messages.lastReport') }}{{ file.fileFormat ? ` (${file.fileFormat})` : '' }}</b>
+                  <b>{{ file.fileFormat ? ` (${file.fileFormat})` : '' }}</b>
                   <span v-if="file.fileName"> - {{ file.fileName }}</span>
                 </div>
                 <!--Date-->
@@ -76,7 +85,7 @@
   </template>
 </template>
 <script>
-import { eventBus } from 'src/plugins/utils';
+import { eventBus, helper } from 'src/plugins/utils';
 import filterChip from './dynamicFilter/components/filterChip.vue';
 
 export default {
@@ -109,7 +118,8 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(function() {
+    this.$nextTick(async function() {
+      this.token = await helper.getToken()
       this.init();
     });
     eventBus.on('export.data.refresh', () => this.getData());
@@ -122,7 +132,8 @@ export default {
       customExportData: false,
       showModal: false,
       fileExport: [],
-      filters: {}
+      filters: {},
+      token: '',
     };
   },
   computed: {
@@ -192,6 +203,15 @@ export default {
     },
     isDynamicFilterSummary() {
       return Object.keys(this.dynamicFilterSummary).length > 0;
+    },
+    helpText() {
+      return {
+        title: 'Export',
+        description: `
+          Need help? See the documentation for more information on Export.
+          ${helper.documentationLink(`/docs/agione/export`, this.token)}
+        `,
+      }
     }
   },
   methods: {
@@ -276,6 +296,19 @@ export default {
         });
       });
     },
+    buildFileNameWithFilters(fileName) {
+      if (
+        !this.dynamicFilterSummary || 
+        (Object.keys(this.dynamicFilterSummary).length === 0)
+      ) return fileName
+
+      const filters = Object.values(this.dynamicFilterSummary)
+        .filter(item => item.label && item.option)
+        .map(item => `${item.label}=${item.option}`)
+        .join(', ')
+
+      return `${fileName}${filters ? ` (${filters})` : ''}`;
+    },  
     //Request new report
     newReport() {
       return new Promise(async (resolve, reject) => {
@@ -287,7 +320,8 @@ export default {
         let requestParams = {
           exportParams: {
             ...(this.exportItem ? { ...this.params, ...(this.paramsItem.exportParams || {}) } : this.params),
-            fileFormat: this.filters.fileFormat
+            fileFormat: this.filters.fileFormat,
+            fileName: this.buildFileNameWithFilters(this.params.fileName)
           },
           filter: {
             ...(this.exportItem ? (this.paramsItem.filter || {}) : (filter ? filter : {})),
