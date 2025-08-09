@@ -542,7 +542,7 @@ export default {
         "rejected": "Rejected",
         "changeTo": "Change to {text}",
         "listView": "List View",
-        "gribView": "Grib view",
+        "gribView": "Grid view",
         "uploadFile": "Upload File | Upload Files",
         "editFile": "Edit File | Edit File",
         "checked": "Checked",
