@@ -11,9 +11,12 @@
   >
     <!--Content-->
     <div :id="id || 'masterModalContent'" :style="customPosition ? '' : `min-width: ${width}`"
-          v-if="show" class="master-dialog__content round relative-position" :class="customClass">
+          v-if="show" class="master-dialog__content !tw-rounded-2xl relative-position" :class="customClass">
       <!--Header-->
-      <div :class="`master-dialog__header text-${color} row justify-between items-center`">
+      <div 
+        v-if="title || speech?.api || help?.description"
+        :class="`master-dialog__header text-${color} row justify-between items-center`"
+      >
         <!--Title-->
         <div class="master-dialog__header-title row items-center">
           <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />
@@ -22,6 +25,13 @@
             v-if="chip"
             class="tw-ml-3 tw-font-semibold tw-text-gray-500 tw-text-sm"
             v-bind="chip"
+          />
+          <speechField
+            class="tw-ml-2"
+            v-if="speech?.api" 
+            v-bind="speech" 
+            @response="$emit('speech-response', $event)"
+            :label="title"
           />
           <help-text 
             class="tw-ml-2" 
@@ -33,7 +43,7 @@
         <q-btn v-close-popup icon="fa-light fa-xmark" round textColor="blue-grey" unelevated class="btn-medium"
                 v-if="!hideCloseAction" />
       </div>
-      <q-separator class="tw-h-0.5" />
+      <q-separator class="tw-h-0.5" v-if="title || speech?.api || help?.description"/>
       <!--Slot content-->
       <div class="master-dialog__body">
         <slot />
@@ -58,6 +68,8 @@
 </template>
 
 <script>
+import speechField from './speechField';
+
 export default {
   props: {
     modelValue: { type: Boolean, default: false },
@@ -76,9 +88,16 @@ export default {
     customClass: { type: String, default: '' },
     chip: { type: Object || null, default: null },
     help: { type: Object || null, default: null },
+    speech: {
+      type: Object || null,
+      default: () => ({
+        extraPrompts: {},
+        api: ''
+      })
+    }
   },
-  emits: ['update:modelValue'],
-  components: {},
+  emits: ['update:modelValue', 'speech-response'],
+  components: { speechField },
   watch: {
     modelValue(newValue, oldValue) {
       this.show = this.$clone(newValue);
