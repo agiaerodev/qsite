@@ -52,12 +52,33 @@
       <div class="master-dialog__actions" v-if="actions && actions.length">
         <div class="row justify-end q-gutter-sm">
           <template v-for="(btn, keyBtn) in actions" :key="keyBtn">
-            <q-btn
-              v-if="btn.props?.vIf != undefined ? btn.props?.vIf : true"
+            <template v-if="!btn?.type || (btn?.type === 'button')">
+              <q-btn
+                v-if="btn.props?.vIf != undefined ? btn.props?.vIf : true"
+                v-bind="{...actionBtnProps, ...(btn.props || {})}"
+                @click="btn.action ? btn.action() : null"
+                :loading="btn?.props?.loading || false"
+              />
+            </template>
+            <q-btn-dropdown
+              v-if="btn.props?.vIf && (btn?.type === 'dropdown')"
               v-bind="{...actionBtnProps, ...(btn.props || {})}"
-              @click="btn.action ? btn.action() : null"
               :loading="btn?.props?.loading || false"
-            />
+            >
+              <q-list>
+                <template v-for="item in btn.items">
+                  <q-item
+                    clickable 
+                    v-close-popup 
+                    @click="item?.action"
+                  >
+                    <q-item-section>
+                      <q-item-label>{{ item?.label }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-list>
+            </q-btn-dropdown>
           </template>
         </div>
       </div>
