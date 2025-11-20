@@ -515,7 +515,12 @@ export default {
     },
     addColumn(index, data = null) {
       try {
-        const counter = `kanban-${Math.random() + 1}`;
+        const randHexId = Math.floor(Math.random() * 0xFFF)
+                          .toString(16)
+                          .padStart(3, "0")
+                          .toUpperCase(); 
+                                                    
+        const counter = `kanban-${randHexId}`;
         const randomColor = Math.floor(Math.random() * 16777215).toString(16);
         const column = { ...modelColumn };
         column.id = counter;
