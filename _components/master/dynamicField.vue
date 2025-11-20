@@ -20,14 +20,14 @@
           {{ fieldLabel }}
         </div>
         <!-- Help btn -->
-        <div 
-          v-if="(field?.props?.vIf == undefined || field?.props?.vIf) && helpLoad.load && field.help && field.help.description" 
+        <div
+          v-if="(field?.props?.vIf == undefined || field?.props?.vIf) && helpLoad.load && field.help && field.help.description"
           :class="helpLoad.class"
         >
-          <help-text 
-            :title="field.help?.title || fieldLabel" 
+          <help-text
+            :title="field.help?.title || fieldLabel"
             :description="field.help.description"
-            :btn-style="`margin:${helpLoad.margin}`" 
+            :btn-style="`margin:${helpLoad.margin}`"
           />
         </div>
         <!--Crud-->
@@ -37,6 +37,20 @@
         <!--Input-->
         <q-input v-model="responseValue" v-bind="fieldProps" @keyup.enter="$emit('enter')" v-if="loadField('input')"
                  :label="fieldLabel" :class="`${field.help ? 'input-dynamic-field' : ''}`">
+          <template v-slot:append v-if="fieldProps.isMicrophone">
+            <q-btn
+              icon="fa-light fa-microphone"
+              :class="{
+                  'tw-text-green-500': isRecording,
+                  'tw-text-slate-500': !isRecording,
+                  'hover:tw-text-green-500': isRecording,
+              }"
+              size="sm"
+              round
+              flat
+              @click="toggleRecording"
+            />
+          </template>
           <template v-slot:prepend v-if="fieldProps.icon">
             <q-icon :name="fieldProps.icon" size="18px" />
           </template>
@@ -192,7 +206,7 @@
                          :label="fieldLabel"
                          :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
         />
-        <dateViewToggle 
+        <dateViewToggle
           v-if="loadField('dateViewToggle')"
           v-model="responseValue"
         />
@@ -267,15 +281,15 @@
                 <slot name="actions" :opt="scope.opt"></slot>
               </q-item-section>
 
-              <q-item-section 
-                v-if="scope.opt?.help?.description" 
-                :class="helpLoad.class" 
+              <q-item-section
+                v-if="scope.opt?.help?.description"
+                :class="helpLoad.class"
                 @click.stop.prevent
               >
-                <help-text 
-                  :title="scope.opt.help?.title" 
+                <help-text
+                  :title="scope.opt.help?.title"
                   :description="scope.opt.help?.description"
-                  :btn-style="`margin:${helpLoad.margin}`" 
+                  :btn-style="`margin:${helpLoad.margin}`"
                 />
               </q-item-section>
             </q-item>
@@ -682,8 +696,11 @@ export default {
         ]
       },
       sortOptions: true,
-      imageFields: [], 
-      lastQuery: null
+      imageFields: [],
+      lastQuery: null,
+      recognition: null,
+      isRecording: false,
+      lastTranscript: "",
     };
   },
   computed: {
@@ -1519,6 +1536,7 @@ export default {
         this.success = true;//sucess
         //Set options if is type select
         this.setOptions();
+        this.initializeSpeechRecognition();
       }
     },
     //Set default values by type
@@ -1876,7 +1894,7 @@ export default {
               return this.rootOptions.map(val => (val.value || val.id || '').toString()).includes(value.toString())
             }
           );
-          
+
           if(this.loading) return
           //Validate if there is the option for the value
           if (loadOptions.filterByQuery && !includeAll) {
@@ -1959,6 +1977,50 @@ export default {
     },
     selectAllOptions() {
       this.responseValue = this.allSelected ? [] : this.formatOptions.map(opt => opt.value);
+    },
+    initializeSpeechRecognition() {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) return;
+
+      this.recognition = new SpeechRecognition();
+      this.recognition.continuous = true;
+      this.recognition.interimResults = false;
+      this.recognition.lang = this.$store.state.qsiteApp.defaultLocale;
+      this.recognition.onresult = this.handleSpeechResult;
+      this.recognition.onerror = this.handleSpeechError;
+    },
+    handleSpeechResult(event) {
+      const result = event.results[event.resultIndex];
+      const transcript = result[0].transcript.trim();
+
+      if (result.isFinal) {
+        if (transcript === this.lastTranscript) {
+          return;
+        }
+        this.lastTranscript = transcript;
+        const current = this.responseValue || '';
+        this.responseValue = `${current} ${transcript}`.trim();
+      }
+    },
+    handleSpeechError() {
+      this.stopRecording();
+    },
+    startRecording() {
+      if (!this.recognition) return;
+      this.lastTranscript = "";
+      this.recognition.start();
+      this.isRecording = true;
+    },
+    stopRecording() {
+      if (!this.recognition) return;
+
+      this.recognition.stop();
+      this.isRecording = false;
+    },
+    toggleRecording() {
+      this.isRecording ? this.stopRecording() : this.startRecording();
     }
   }
 };
