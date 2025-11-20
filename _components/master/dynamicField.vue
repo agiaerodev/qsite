@@ -587,7 +587,7 @@ export default {
   name: 'dynamicField',
   beforeUnmount() {
     //Close listen event
-
+    this.stopRecording()
   },
   props: {
     modelValue: { default: null },
