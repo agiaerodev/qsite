@@ -35,7 +35,7 @@
   </superModal>
 </template>
 <script>
-import superModal from 'modules/qrequestable/_components/modals/information/components/superModal.vue';
+import superModal from 'modules/qsite/_components/master/dynamicKanban/_components/modals/information/components/superModal.vue';
 
 export default {
   props: {
