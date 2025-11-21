@@ -13,7 +13,7 @@
     <div :id="id || 'masterModalContent'" :style="customPosition ? '' : `min-width: ${width}`"
           v-if="show" class="master-dialog__content !tw-rounded-2xl relative-position" :class="customClass">
       <!--Header-->
-      <div 
+      <div
         v-if="title || speech?.api || help?.description"
         :class="`master-dialog__header text-${color} row justify-between items-center`"
       >
@@ -22,21 +22,50 @@
           <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />
           <b>{{ title }}</b>
           <q-chip
-            v-if="chip"
+            v-if="chip && !Array.isArray(chip)"
             class="tw-ml-3 tw-font-semibold tw-text-gray-500 tw-text-sm"
             v-bind="chip"
           />
+          <div v-else-if="chip && Array.isArray(chip)"
+            class="tw-flex tw-items-center tw-space-x-2 tw-text-xs tw-ml-3"
+          >
+            <div
+              v-for="(c, i) in chip"
+              :key="i"
+              class="tw-flex tw-items-center tw-gap-1"
+            >
+              <q-icon :name="c.icon" class="tw-text-gray-500" size="10px" />
+
+              <span class="tw-text-gray-500">
+            {{ c.text }}
+          </span>
+              <q-chip
+                dense
+                square
+                :class="c.class"
+                class="tw-font-semibold tw-text-xs"
+                size="sm"
+              >
+                {{ c.labelChip }}
+              </q-chip>
+
+              <div
+                v-if="i < chip.length - 1"
+                class="tw-border-r tw-border-gray-300 tw-h-4 tw-mx-1"
+              />
+            </div>
+          </div>
           <speechField
             class="tw-ml-2"
-            v-if="speech?.api" 
-            v-bind="speech" 
+            v-if="speech?.api"
+            v-bind="speech"
             @response="$emit('speech-response', $event)"
             :label="title"
           />
-          <help-text 
-            class="tw-ml-2" 
-            v-if="help?.description" 
-            v-bind="help" 
+          <help-text
+            class="tw-ml-2"
+            v-if="help?.description"
+            v-bind="help"
           />
         </div>
         <!--Close Button-->
@@ -68,8 +97,8 @@
               <q-list>
                 <template v-for="item in btn.items">
                   <q-item
-                    clickable 
-                    v-close-popup 
+                    clickable
+                    v-close-popup
                     @click="item?.action"
                   >
                     <q-item-section>
