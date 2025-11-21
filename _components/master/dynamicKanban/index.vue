@@ -1,21 +1,25 @@
 <template>
   <div>
     <infomation
+      v-show="!loading"
       ref="modalInfortion"
       @kanbanRefresh="kanbanRefresh"
     />
     <crud
+      v-show="!loading"
       :crudData="crudData"
       :custom-data="customData"
       :title="title"
       ref="crudRequests"
     />
+    <inner-loading :visible="loading"/>
   </div>
 </template>
 <script>
 //Components
 
-import infomation from 'modules/qrequestable/_components/modals/information/components/index.vue'
+//import infomation from 'modules/qrequestable/_components/modals/information/components/index.vue'
+import infomation from 'modules/qsite/_components/master/dynamicKanban/_components/modals/information/components/index.vue'
 export default {
   components: { infomation },
   props: {
@@ -27,10 +31,11 @@ export default {
       type: String,
       required: false,
       default: '',
-    },    
+    },
   },
   data() {
     return {
+      loading: false,
       showAsKanban: true
     };
   },
@@ -40,24 +45,27 @@ export default {
     };
   },
   computed: {
+    isMobile() {
+      return window.innerWidth <= 768;
+    },
     deletePermissions() {
       return this.$hasAccess('requestable.requestables.destroy');
     },
     customData() {
       return {
         extraActions: [
-            {
-              label: this.showAsKanban ? 'Cambiar a modo tabla' : 'Camibiar a modo kanban',
-              props: {                
-                icon: this.showAsKanban ? 'fa-light fa-list' : 'fa-light fa-columns-3',
-                id: 'switch-button-crud'
-            },
-              action: () => this.switchMode()
-            }
-          ],
-
+          {
+            label: this.showAsKanban ? 'Table view' : 'Kanban view',
+            vIf: !this.isMobile,
+            props: {
+              icon: this.showAsKanban ? 'fa-light fa-table' : 'fa-light fa-chart-kanban',
+              id: 'switch-button-crud'
+          },
+            action: () => this.switchMode()
+          }
+        ],
         read: {
-          showAs: this.showAsKanban ? 'kanban' : 'table',          
+          showAs: this.showAsKanban && !this.isMobile ? 'kanban' : 'table',
           actions: [
             {
               name: "viewEntity",
@@ -114,10 +122,12 @@ export default {
       }
     },
     async switchMode(){
+      this.loading = true;
       this.showAsKanban = !this.showAsKanban
       this.$refs.crudRequests.$refs.crudIndex.loadComponent().then(() => {
         this.$refs.crudRequests.$refs.crudIndex.init()
         this.$refs.crudRequests.$refs.crudIndex.getDataTable()
+        this.loading = false;
       } ) ;
     }
   },
