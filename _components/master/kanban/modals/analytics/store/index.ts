@@ -1,13 +1,14 @@
 import moment from 'moment';
 import {reactive, computed} from 'vue';
+import { startDateFormat, endDateFormat } from 'modules/qsite/_components/master/kanban/constants/constants';
 
 const state = reactive({
     showModal: false,
     chartsData: null,
     loading: false,
     filterDate: 'currentMonth',
-    from: moment().startOf('month').format('YYYY-MM-DD 00:00:00'),
-    to: moment().endOf('month').format('YYYY-MM-DD 23:59:59'),
+    from: moment().startOf('month').format(startDateFormat),
+    to: moment().endOf('month').format(endDateFormat),
     categoryId: 0,
 });
 
@@ -60,8 +61,8 @@ const store = computed(() => ({
         state.showModal = false;
         state.categoryId = 0;
         state.filterDate = 'currentMonth';
-        state.from = moment().startOf('month').format('YYYY-MM-DD 00:00:00');
-        state.to = moment().endOf('month').format('YYYY-MM-DD 23:59:59');
+        state.from = moment().startOf('month').format(startDateFormat);
+        state.to = moment().endOf('month').format(endDateFormat);
     }
 })).value;
 
