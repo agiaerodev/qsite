@@ -90,7 +90,13 @@ export default {
         'cacheCleanupMessage': 'Limpiar la caché puede liberar espacio y resolver algunos problemas. La aplicación puede tardar un poco más en cargar los datos la próxima vez, ya que generará una nueva caché.',
         'dispatchBulkAction': 'Acción masiva de envío de <b class="text-blue-grey">{pageTitle}</b>',
         'errorDispatchingAction': 'Error al despachar acción',
-        'actionSuccessfullyDispatched': 'Acción despachada con éxito'
+        'actionSuccessfullyDispatched': 'Acción despachada con éxito',
+        "savedComment": "Comentario guardado con exitoso",
+        "savedNoComment": "No se puedo guardar su comentario",
+        "updateComment": "Comentario actualizado",
+        "updateNoComment": "No se puedo actualizar el commentario",
+        "undoComment": "¿Desea cancelar el comentario?",
+        "writeComment": "Escriba un comentario..."
       },
       'startTime': 'Hora de inicio',
       'endTime': 'Hora de finalización',

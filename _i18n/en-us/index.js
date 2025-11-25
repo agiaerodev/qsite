@@ -89,7 +89,13 @@ export default {
         "cacheCleanupMessage": "Clearing the cache can free up space and resolve some issues. The application may take a little longer to load the data next time as it will generate a new cache.",
         "dispatchBulkAction": "Dispatch <b class=\"text-blue-grey\">{pageTitle}</b> bulk action",
         "errorDispatchingAction": "Error dispatching action",
-        "actionSuccessfullyDispatched": "Action successfully dispatched"
+        "actionSuccessfullyDispatched": "Action successfully dispatched",
+        "savedComment": "Comment saved with success",
+        "savedNoComment": "I can't save your comment",
+        "updateComment": "Updated comment",
+        "updateNoComment": "Can't update comment",
+        "undoComment": "Do you want to cancel the comment?",
+        "writeComment": "Write a comment..."
       },
       "startTime": "Start time",
       "endTime": "End time",
