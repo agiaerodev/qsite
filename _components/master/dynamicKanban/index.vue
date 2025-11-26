@@ -42,6 +42,7 @@ export default {
   provide() {
     return {
       saveForm: this.saveForm,
+      runShowModal: this.showModal,
     };
   },
   computed: {

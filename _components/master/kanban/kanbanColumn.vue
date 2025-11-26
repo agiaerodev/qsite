@@ -182,8 +182,8 @@
         </div>
       </div>
       <div class="c-plus" v-if="permissionRequestable.create">
-        <q-btn 
-          flat 
+        <q-btn
+          flat
           class="
             tw-w-full
             hover:tw-text-white
@@ -213,6 +213,8 @@
           @start="dragColumn = true"
           @end="move"
           @change="countTotalRecords"
+          @choose="dragCursor = true"
+          @unchoose="dragCursor = false"
           item-key="id"
           :disabled="!permissionStatuses.edit"
         >
@@ -222,6 +224,7 @@
               :colorColumn="element.color"
               class="tw-cursor-pointer"
               :id="element.id"
+              :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointers'"
             />
           </template>
           <template #footer>
@@ -334,6 +337,7 @@ export default {
       hover: false,
       arrowKanbanNameHover: false,
       dragColumn: false,
+      dragCursor: false
     };
   },
   components: {
@@ -341,6 +345,9 @@ export default {
     kanbanCard,
   },
   computed: {
+    isDragCursor() {
+      return this.dragCursor;
+    },
     allowCreateRequestable() {
       return typeof this.columnData.id == 'string' || !this.permissionRequestable.create;
     },

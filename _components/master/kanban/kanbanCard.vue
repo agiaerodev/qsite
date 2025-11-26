@@ -10,8 +10,10 @@
       tw-border-l-2
       tw-my-2
       kb-card
+      tw-select-none
     "
     :style="{ borderLeftColor: colorColumn }"
+    @click="runShowModal(cardData)"
   >
     <section class="tw-flex tw-justify-between">
       <div class="tw-w-full">
@@ -189,6 +191,10 @@ export default {
       default: () => false,
     },
     openFormComponentModal:  {
+      type: Function,
+      default: () => false,
+    },
+    runShowModal: {
       type: Function,
       default: () => false,
     },
