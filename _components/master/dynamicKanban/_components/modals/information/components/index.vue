@@ -290,69 +290,75 @@ export default {
     // },
     //Fields to show
     async showRequestData(requestData) {
-      this.requestableId = requestData.id;
-      this.statusId = requestData.statusId || null;
-      this.categoryType = requestData.type || null;
-      this.dynamicFieldForm.requestedById = requestData.requestedById || null;
-      this.dynamicFieldForm.sourceId = requestData.sourceId || null;
-      this.dynamicFieldForm.responsibleId = requestData.responsibleId || null
-      this.conversations = requestData.conversation || null;
-      const statusTitle = requestData.status
-        ? `- Estado: ${requestData?.status?.title}`
-        : '';
-      //Set modal data
-      this.modal = {
-        title: `ID:${this.requestableId} ${statusTitle}`,
-        show: true,
-        loading: true,
-        requestData: [],
-        comments: [],
-      };
-      //Get form data
-      let form = requestData.category?.form || false;
-      //Merge values
-      if (form) {
-        this.formId = form.id;
-        //Get field values
-        let requestValues = {}
-        requestData.fields.forEach(item => requestValues[item.name] = item.value)
-        //get files
-        let files = this.$clone(requestData.files || [])
-        //Request data
-        let requestFormParams = {refresh: true, params: {include: 'fields'}}
-        //Get form
-        await this.$crud.show('apiRoutes.qform.forms', form.id, requestFormParams).then(async response => {
-          await this.$clone(response.data.fields).forEach(field => {
-            let fieldType = field.dynamicField?.type || 'input'//get field type
-            let fieldValue = requestValues[this.$helper.convertStringToSnakeCase(field.name)] || '-'//get field value
-            //Get field file
-            let fieldFile = (fieldType != 'media') ? null :
-                files.find(item => item.zone == (field.dynamicField.props.zone || 'mainimage'))
 
-            //Add extra data to field
-            this.modal.requestData.push({
-              ...field,
-              label: field.label.replace('*', ''),
-              value: (fieldType != 'media') ? fieldValue : [{
-                id: this.$uid(),
-                ...fieldFile,
-                filename: field.label,
-              }],
-              fieldType: fieldType
+      return new Promise(async (resolve, reject) => {
+      
+        this.requestableId = requestData.id;
+        this.statusId = requestData.statusId || null;
+        this.categoryType = requestData.type || null;
+        this.dynamicFieldForm.requestedById = requestData.requestedById || null;
+        this.dynamicFieldForm.sourceId = requestData.sourceId || null;
+        this.dynamicFieldForm.responsibleId = requestData.responsibleId || null
+        this.conversations = requestData.conversation || null;
+        const statusTitle = requestData.status
+          ? `- Estado: ${requestData?.status?.title}`
+          : '';
+        //Set modal data
+        this.modal = {
+          title: `ID:${this.requestableId} ${statusTitle}`,
+          show: true,
+          loading: true,
+          requestData: [],
+          comments: [],
+        };
+        //Get form data
+        let form = requestData.category?.form || false;
+        //Merge values
+        if (form) {
+          this.formId = form.id;
+          //Get field values
+          let requestValues = {}
+          requestData.fields.forEach(item => requestValues[item.name] = item.value)
+          //get files
+          let files = this.$clone(requestData.files || [])
+          //Request data
+          let requestFormParams = {refresh: true, params: {include: 'fields'}}
+          //Get form
+          await this.$crud.show('apiRoutes.qform.forms', form.id, requestFormParams).then(async response => {
+            await this.$clone(response.data.fields).forEach(field => {
+              let fieldType = field.dynamicField?.type || 'input'//get field type
+              let fieldValue = requestValues[this.$helper.convertStringToSnakeCase(field.name)] || '-'//get field value
+              //Get field file
+              let fieldFile = (fieldType != 'media') ? null :
+                  files.find(item => item.zone == (field.dynamicField.props.zone || 'mainimage'))
+
+              //Add extra data to field
+              this.modal.requestData.push({
+                ...field,
+                label: field.label.replace('*', ''),
+                value: (fieldType != 'media') ? fieldValue : [{
+                  id: this.$uid(),
+                  ...fieldFile,
+                  filename: field.label,
+                }],
+                fieldType: fieldType
+              })
+            })
+            await this.modal.requestData.forEach(item => {
+              //item.dynamicField.value = item.value;
+              this.form[item.dynamicField.name] = item.value;
+            });
+            this.modal.loading = false
+          }).catch(error => {
+            this.$apiResponse.handleError(error, () => {
+              this.modal.loading = false
+              reject(false);
             })
           })
-          await this.modal.requestData.forEach(item => {
-            //item.dynamicField.value = item.value;
-            this.form[item.dynamicField.name] = item.value;
-          });
-          this.modal.loading = false
-        }).catch(error => {
-          this.$apiResponse.handleError(error, () => {
-            this.modal.loading = false
-          })
-        })
-      }
-      this.modal.loading = false
+        }
+        this.modal.loading = false
+        resolve(true);
+      })
     },
     //Reset Modal
     resetModal() {

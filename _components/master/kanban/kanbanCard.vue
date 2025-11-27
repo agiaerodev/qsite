@@ -45,6 +45,7 @@
               tw-h-7
             "
             icon="fa-solid fa-ellipsis"
+            @click.stop
           >
             <q-list
               dense

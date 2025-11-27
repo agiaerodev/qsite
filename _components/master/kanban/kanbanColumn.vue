@@ -224,7 +224,7 @@
               :colorColumn="element.color"
               class="tw-cursor-pointer"
               :id="element.id"
-              :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointers'"
+              :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
             />
           </template>
           <template #footer>

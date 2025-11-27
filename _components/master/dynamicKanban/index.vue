@@ -36,7 +36,8 @@ export default {
   data() {
     return {
       loading: false,
-      showAsKanban: true
+      showAsKanban: true,
+      loadInformatioModal: false
     };
   },
   provide() {
@@ -109,7 +110,13 @@ export default {
   methods: {
     //update
     async showModal(requestData) {
-      await this.$refs.modalInfortion.showRequestData(requestData);
+      if(!this.loadInformatioModal){
+        console.log('loadInformatioModal')
+        this.loadInformatioModal = true;
+        await this.$refs.modalInfortion.showRequestData(requestData).then(() => {
+          this.loadInformatioModal = false;
+        });        
+      }      
     },
     //delete
     async delete(item, automation = false) {
