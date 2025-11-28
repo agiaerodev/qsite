@@ -144,15 +144,38 @@
         tw-cursor-pointer
       "
       v-if="fullName"
+      @click.stop
     >
       <img
         class="
-          tw-w-5
-          tw-h-5
-          tw-rounded-md
+          tw-w-6
+          tw-h-6
+          tw-rounded-xl
+          tw-border-2
+          tw-border-solid
+          tw-border-white
+          hover:tw-border-blue-500
         "
         :src="urlAvatar"
       />
+
+      <q-popup-proxy cover :breakpoint="600">
+        <div class="tw-bg-white tw-shadow-md tw-rounded tw-p-4 tw-w-48">
+          <img
+            class="
+              tw-w-10
+              tw-h-10
+              tw-rounded-xl
+            "
+            :src="urlAvatar"
+          />
+          <p class="tw-font-semibold tw-mb-2">
+            {{ fullName.firstName + ' ' + fullName.lastName }}
+          </p>
+          <!-- Additional user information can be added here -->
+        </div>
+      </q-popup-proxy>
+
       <q-tooltip
         anchor="top left"
         self="bottom left"
