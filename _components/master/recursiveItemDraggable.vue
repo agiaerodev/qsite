@@ -21,7 +21,7 @@
               <div :class="{'q-py-md': element.subTitle }">
                 <q-icon class="cursor-pointer q-pr-sm" color="blue-grey" name="fa-light fa-bars"/>
               </div>
-              <div class="text-subtitle2 text-weight-light" :class="{'q-py-xs': element.subTitle}">
+              <div class="text-subtitle2 text-weight-light tw-truncate" :class="{'q-py-xs': element.subTitle}">
                 {{ element.title }}
                 <span v-if="!!element.subTitle" class="block text-caption text-grey-8">
                 {{ element.subTitle }}
@@ -94,7 +94,10 @@ export default {
     cursor: move;
     display: block;
     .item {
-      border-bottom: lightgray 1px solid;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid #d3d3d3;
+      margin-bottom: 10px;
     }
   }
 
