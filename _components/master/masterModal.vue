@@ -69,7 +69,7 @@
           />
         </div>
         <!--Close Button-->
-        <q-btn v-close-popup icon="fa-light fa-xmark" round textColor="blue-grey" unelevated class="btn-medium"
+        <q-btn v-close-popup icon="fa-light fa-xmark" round textColor="blue-grey" unelevated class="btn-medium tw-absolute tw-top-0 lg:tw-top-[8px] tw-right-3 tw-z-50"
                 v-if="!hideCloseAction" />
       </div>
       <q-separator class="tw-h-0.5" v-if="title || speech?.api || help?.description"/>
