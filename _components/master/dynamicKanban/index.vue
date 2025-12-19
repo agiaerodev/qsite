@@ -19,7 +19,7 @@
 //Components
 
 //import infomation from 'modules/qrequestable/_components/modals/information/components/index.vue'
-import infomation from 'modules/qsite/_components/master/dynamicKanban/_components/modals/information/components/index.vue'
+import infomation from 'modules/qsite/_components/master/kanban/_components/modals/information/components/index.vue'
 export default {
   components: { infomation },
   props: {
