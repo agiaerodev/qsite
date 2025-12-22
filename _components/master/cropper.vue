@@ -64,6 +64,7 @@ export default {
       imgType: false,
       callBack: false,
       aspectRatio: NaN,
+      isCompressed: true,
     }
   },
   computed: {
@@ -181,6 +182,9 @@ export default {
         if (params.type) this.imgType = this.$clone(params.type)
         if (params.callBack) this.callBack = params.callBack
         if (params.ratio) this.aspectRatio = this.parseRatio(params.ratio)
+        if (params?.isCompressed !== undefined) {
+          this.isCompressed = params.isCompressed
+        }
       })
     },
     //Open crop
@@ -211,10 +215,13 @@ export default {
         let base64 = this.$refs.cropper.getCroppedCanvas().toDataURL(this.imgType)
 
         /* if didn't crop returns original image */
-        if( this.information.image.naturalWidth == this.information.cropper.width &&
-          this.information.image.naturalHeight == this.information.cropper.height){
-          base64 = this.imgSrc
+        if(this.isCompressed) {
+          if( this.information.image.naturalWidth == this.information.cropper.width &&
+            this.information.image.naturalHeight == this.information.cropper.height){
+            base64 = this.imgSrc
+          }
         }
+
 
         //Data response
         let dataResponse = {
