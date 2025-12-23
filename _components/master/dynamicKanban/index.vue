@@ -1,14 +1,10 @@
 <template>
   <div>
-    <infomation
-      v-show="!loading"
-      ref="modalInfortion"
-      @kanbanRefresh="kanbanRefresh"
-    />
+    
     <crud
       v-show="!loading"
       :crudData="crudData"
-      :custom-data="customData"
+      
       :title="title"
       ref="crudRequests"
     />
@@ -37,13 +33,12 @@ export default {
     return {
       loading: false,
       showAsKanban: true,
-      loadInformatioModal: false
+      
     };
   },
   provide() {
     return {
-      saveForm: this.saveForm,
-      runShowModal: this.showModal,
+      saveForm: this.saveForm,      
     };
   },
   computed: {
@@ -56,18 +51,11 @@ export default {
     customData() {
       return {
         extraActions: [
-          {
-            label: this.showAsKanban ? 'Table view' : 'Kanban view',
-            vIf: !this.isMobile,
-            props: {
-              icon: this.showAsKanban ? 'fa-light fa-table' : 'fa-light fa-chart-kanban',
-              id: 'switch-button-crud'
-          },
-            action: () => this.switchMode()
-          }
+          
         ],
         read: {
-          showAs: this.showAsKanban && !this.isMobile ? 'kanban' : 'table',
+          //showAs: this.showAsKanban && !this.isMobile ? 'kanban' : 'table',
+          /*
           actions: [
             {
               name: "viewEntity",
@@ -103,32 +91,21 @@ export default {
               },
             }
           ],
+          */
         },
       };
     },
   },
   methods: {
     //update
-    async showModal(requestData) {
-      if(!this.loadInformatioModal){
-        console.log('loadInformatioModal')
-        this.loadInformatioModal = true;
-        await this.$refs.modalInfortion.showRequestData(requestData).then(() => {
-          this.loadInformatioModal = false;
-        });        
-      }      
-    },
+    
     //delete
     async delete(item, automation = false) {
       if (this.$refs.crudRequests.$refs.crudIndex.$refs.kanban) {
         this.$refs.crudRequests.$refs.crudIndex.$refs.kanban.deleteKanbanCard(item, automation);
       }
     },
-    async kanbanRefresh(statusId) {
-      if (this.$refs.crudRequests.$refs.crudIndex.$refs.kanban) {
-          this.$refs.crudRequests.$refs.crudIndex.$refs.kanban.addCard(statusId);
-      }
-    },
+    
     async switchMode(){
       this.loading = true;
       this.showAsKanban = !this.showAsKanban

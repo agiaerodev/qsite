@@ -1,5 +1,11 @@
 <template>
   <div class="tw-py-2">
+    <infomation
+      v-show="!loading"
+      ref="modalInfortion"
+      @kanbanRefresh="kanbanRefresh"
+    />
+    
     <div
       :id="`kanbanCtn${uId}`"
       v-if="checkIfFunnelExists"
@@ -131,6 +137,7 @@ import modalStatus from './modals//statusModal/index.vue';
 import modalAnalytics from './modals/analytics/index.vue';
 import showaAnalytics from './modals/analytics/actions/show.ts';
 import storeAnalytics from './modals/analytics/store/index.ts';
+import infomation from './_components/modals/information/components/index.vue'
 
 const modelPayload = {
   id: null,
@@ -204,7 +211,8 @@ export default {
       crudfieldActions: this.crudfieldActions,
       deleteKanbanCard: this.deleteKanbanCard,
       updateCardColumn: this.updateCard,
-      getStatus: this.getStatus
+      getStatus: this.getStatus, 
+      runShowModal: this.showModal,
     };
   },
   inject: ['funnelPageAction', 'fieldActions'],
@@ -215,7 +223,8 @@ export default {
     formComponent,
     formRules,
     modalStatus,
-    modalAnalytics
+    modalAnalytics, 
+    infomation
   },
   data() {
     return {
@@ -230,7 +239,8 @@ export default {
       uId: this.$uid(),
       search: null,
       hoverArrow: false,
-      scrollTotal: 0
+      scrollTotal: 0, 
+      loadInformatioModal: false
     };
   },
   mounted() {
@@ -637,7 +647,15 @@ export default {
           });
         }
       });
-    }
+    },
+    async showModal(requestData) {
+      if(!this.loadInformatioModal){
+        this.loadInformatioModal = true;
+        await this.$refs.modalInfortion.showRequestData(requestData).then(() => {
+          this.loadInformatioModal = false;
+        });        
+      }      
+    },
   }
 };
 </script>
