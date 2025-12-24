@@ -104,17 +104,8 @@ export default {
       if (this.$refs.crudRequests.$refs.crudIndex.$refs.kanban) {
         this.$refs.crudRequests.$refs.crudIndex.$refs.kanban.deleteKanbanCard(item, automation);
       }
-    },
+    },    
     
-    async switchMode(){
-      this.loading = true;
-      this.showAsKanban = !this.showAsKanban
-      this.$refs.crudRequests.$refs.crudIndex.loadComponent().then(() => {
-        this.$refs.crudRequests.$refs.crudIndex.init()
-        this.$refs.crudRequests.$refs.crudIndex.getDataTable()
-        this.loading = false;
-      } ) ;
-    }
   },
 };
 </script>

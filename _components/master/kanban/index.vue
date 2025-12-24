@@ -2,8 +2,7 @@
   <div class="tw-py-2">
     <infomation
       v-show="!loading"
-      ref="modalInfortion"
-      @kanbanRefresh="kanbanRefresh"
+      ref="kanbanModalInformation"
     />
     
     <div
@@ -651,7 +650,7 @@ export default {
     async showModal(requestData) {
       if(!this.loadInformatioModal){
         this.loadInformatioModal = true;
-        await this.$refs.modalInfortion.showRequestData(requestData).then(() => {
+        await this.$refs.kanbanModalInformation.showRequestData(requestData).then(() => {
           this.loadInformatioModal = false;
         });        
       }      

@@ -225,7 +225,19 @@
               class="tw-cursor-pointer"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-            />
+            >
+              
+              <template #content>
+                <component 
+                  :is="cardComponent"
+                  v-bind="{data: element}"
+                />
+              </template>
+
+
+            </kanbanCard>
+
+
           </template>
           <template #footer>
             <div>
@@ -262,6 +274,7 @@
 </template>
 
 <script>
+import { markRaw } from "vue";
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
 import kanbanStore from "modules/qsite/_components/master/kanban/store/kanbanStore.js";
@@ -310,6 +323,9 @@ export default {
     'updateCardColumn',
   ],
   mounted() {
+
+    this.getCardComponent()
+
     const parent = document.querySelector(`#kanbanCtn${this.uId}`);
     this.initialheight = `${window.innerHeight - parent.offsetTop - this.heightColumn}px`;
     window.addEventListener("resize", () => {
@@ -337,7 +353,9 @@ export default {
       hover: false,
       arrowKanbanNameHover: false,
       dragColumn: false,
-      dragCursor: false
+      dragCursor: false, 
+
+      cardComponent: null
     };
   },
   components: {
@@ -401,6 +419,10 @@ export default {
     },
   },
   methods: {
+    getCardComponent(){      
+      this.cardComponent =  markRaw(this?.routes?.cardComponent.content)
+      console.log(this.cardComponent)
+    },
     addColumnKanban() {
       this.addColumn(this.columnIndex, this.columnData);
     },
