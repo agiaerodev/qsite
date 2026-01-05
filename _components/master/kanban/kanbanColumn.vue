@@ -1,6 +1,6 @@
 <template>
-  <div class="tw-relative bg-white no-shadow"
-      :class="columnCtn"
+  <div class="columnCtn tw-relative bg-white no-shadow"      
+      :style="columnWidth"
     >
     <div
       class="tw-h-auto"
@@ -95,7 +95,7 @@
             />
           </div>
           <div
-            v-if="allowEColumn"
+            v-if="allowEditColumn"
             class="
               tw-w-1/12
               tw-text-xs
@@ -228,7 +228,12 @@
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
             >
-              
+              <template #header>
+                <component 
+                  :is="headerComponent"
+                  v-bind="{data: element}"
+                />
+              </template>
               <template #content>
                 <component 
                   :is="cardComponent"
@@ -424,13 +429,16 @@ export default {
     isTotalNumberOfRecords() {
       return this.columnData.total === this.columnData.data.length;
     },
-    columnCtn(){
-      return  this?.routes?.columnWidht || 'tw-w-60'
+    columnWidth(){      
+      return {
+        width: this?.routes?.columnWidth || '240px'
+      }
     }
   },
   methods: {
     getCardComponent(){      
       this.cardComponent =  markRaw(this?.routes?.cardComponent.content)
+      this.headerComponent =  markRaw(this?.routes?.cardComponent.header)
     },
     addColumnKanban() {
       this.addColumn(this.columnIndex, this.columnData);
@@ -503,11 +511,13 @@ export default {
 </script>
 
 <style>
-  /*
+  
 .columnCtn {
+  /*
   @apply tw-w-60;
-}
   */
+}
+  
 
 .dragCard {
   @apply tw-bg-white tw-transform tw-rotate-6;

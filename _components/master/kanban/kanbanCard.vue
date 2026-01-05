@@ -13,7 +13,7 @@
       tw-select-none
     "
     :style="{ borderLeftColor: colorColumn }"
-    @click="runShowModal(cardData)"
+    
   >
     
     <section class="tw-flex tw-justify-between">
@@ -29,17 +29,16 @@
             round
             color="gray-4"
             flat
-            size="10px"
-            padding="5px 5px"
+            size="12px"
+            padding="2px 4px"
             class="
               kd-without-arrow
               tw-float-right
               tw-cursor-pointer
-              tw-text-xs
-              tw-bg-gray-100
+              tw-text-xs              
               tw-h-7
             "
-            icon="fa-solid fa-ellipsis"
+            icon="fa-light fa-ellipsis-vertical"
             @click.stop
           >
             <q-list
@@ -77,7 +76,11 @@
     </section>
 
     <!-- content slot -->
-    <slot name="content" />
+    <div
+      @click="runShowModal(cardData)"
+    >
+      <slot name="content" />
+    </div>
    
   </div>
 </template>
