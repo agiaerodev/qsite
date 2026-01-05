@@ -1,5 +1,7 @@
 <template>
-  <div class="columnCtn tw-relative bg-white no-shadow">
+  <div class="tw-relative bg-white no-shadow"
+      :class="columnCtn"
+    >
     <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
@@ -41,7 +43,7 @@
           hover:tw-ease-in
           hover:tw--translate-y-1 icon-plus
         "
-        v-if="allowCreateStatuses"
+        v-if="allowCreateColumn"
         @click="addColumnKanban"
       >
         <i
@@ -93,7 +95,7 @@
             />
           </div>
           <div
-            v-if="allowEditStatuses"
+            v-if="allowEColumn"
             class="
               tw-w-1/12
               tw-text-xs
@@ -181,7 +183,7 @@
           </div>
         </div>
       </div>
-      <div class="c-plus" v-if="permissionRequestable.create">
+      <div class="c-plus" v-if="cardPermissions.create">
         <q-btn
           flat
           class="
@@ -189,7 +191,7 @@
             hover:tw-text-white
             hover:tw-bg-gray-200"
           @click="openFormComponentModal(columnData.id, columnData.title)"
-          :disabled="allowCreateRequestable"
+          :disabled="allowCreateCard"
           >
           <i class="fa-solid fa-plus"></i>
         </q-btn>
@@ -216,7 +218,7 @@
           @choose="dragCursor = true"
           @unchoose="dragCursor = false"
           item-key="id"
-          :disabled="!permissionStatuses.edit"
+          :disabled="!columnPermissions.edit"
         >
           <template #item="{ element }">
             <kanbanCard
@@ -366,34 +368,39 @@ export default {
     isDragCursor() {
       return this.dragCursor;
     },
-    allowCreateRequestable() {
-      return typeof this.columnData.id == 'string' || !this.permissionRequestable.create;
+    allowCreateCard() {
+      return typeof this.columnData.id == 'string' || !this.cardPermissions.create;
     },
-    permissionRequestable() {
+    kanbanPermissions(){
+      return this?.routes?.permissions || null
+    },
+    cardPermissions() {
+      const permissions = this.kanbanPermissions?.card || null
       return {
-        index: this.$hasAccess('requestable.requestables.index'),
-        create: this.$hasAccess('requestable.requestables.create'),
-        edit: this.$hasAccess('requestable.requestables.edit'),
-        delete: this.$hasAccess('requestable.requestables.delete')
+        index: permissions?.index || false,
+        create: permissions?.create || false,
+        edit: permissions?.edit || false,
+        delete: permissions?.delete || false
       }
     },
-    permissionStatuses() {
+    columnPermissions() {
+      const permissions = this.kanbanPermissions?.column || null
       return {
-        index: this.$hasAccess('requestable.statuses.index'),
-        create: this.$hasAccess('requestable.statuses.create'),
-        edit: this.$hasAccess('requestable.statuses.edit'),
-        delete: this.$hasAccess('requestable.statuses.delete'),
-        moveRequestables: this.$hasAccess('requestable.requestables.move')
+        index: permissions?.index || false,
+        create: permissions?.create || false,
+        edit: permissions?.edit || false,
+        delete: permissions?.delete || false
+        //moveRequestables: this.$hasAccess('requestable.requestables.move')
       }
     },
-    allowCreateStatuses() {
-      if(this.permissionStatuses.create) {
+    allowCreateColumn() {
+      if(this.columnPermissions.create) {
         return !this.disableCrud && this.hover && this.columnData.type !== 2;
       }
       return false;
     },
-    allowEditStatuses() {
-      if(this.permissionStatuses.edit) {
+    allowEditColumn() {
+      if(this.columnPermissions.edit) {
         return !this.disableCrud && this.arrowKanbanNameHover && !this.columnData.new
       }
       return false;
@@ -417,11 +424,13 @@ export default {
     isTotalNumberOfRecords() {
       return this.columnData.total === this.columnData.data.length;
     },
+    columnCtn(){
+      return  this?.routes?.columnWidht || 'tw-w-60'
+    }
   },
   methods: {
     getCardComponent(){      
       this.cardComponent =  markRaw(this?.routes?.cardComponent.content)
-      console.log(this.cardComponent)
     },
     addColumnKanban() {
       this.addColumn(this.columnIndex, this.columnData);
@@ -494,9 +503,11 @@ export default {
 </script>
 
 <style>
+  /*
 .columnCtn {
   @apply tw-w-60;
 }
+  */
 
 .dragCard {
   @apply tw-bg-white tw-transform tw-rotate-6;
