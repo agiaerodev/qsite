@@ -1,5 +1,11 @@
 <template>
   <div class="tw-py-2">
+    <div>
+      <pre>
+        {{ checkIfFunnelExists }}
+      </pre>
+    </div>
+    
     <infomation
       v-show="!loading"
       ref="kanbanModalInformation"
@@ -7,7 +13,6 @@
     
     <div
       :id="`kanbanCtn${uId}`"
-      v-if="checkIfFunnelExists"
       @mouseover="hoverArrow = true"
       @mouseleave="hoverArrow = false"
     >
@@ -102,10 +107,7 @@
         </template>
       </draggable>
     </div>
-    <div v-else>
-      <i class="fa-regular fa-square-kanban" />
-      No has selecionado ningun funnel
-    </div>
+    
     <automationRules
       ref="automationRules"
       :funnelId="funnelSelectedComputed"
@@ -245,14 +247,14 @@ export default {
   mounted() {
     this.$nextTick(async function() {
       await this.init();
-      if (this.checkIfFunnelExists) {
+      //if (this.checkIfFunnelExists) {
         const elementColumnKanban = document.getElementById(`columnKanban${this.uId}`);
         if (elementColumnKanban) {
           elementColumnKanban.addEventListener('scroll', evt =>
             this.scrollTotal = evt.target.scrollLeft
           );
         }
-      }
+      //}
     });
   },
   computed: {

@@ -218,11 +218,12 @@
           @choose="dragCursor = true"
           @unchoose="dragCursor = false"
           item-key="id"
-          :disabled="!columnPermissions.edit"
+          :disabled="!cardPermissions.move"
         >
           <template #item="{ element }">
             <kanbanCard
               :cardData="element"
+              :cardPermissions
               :colorColumn="element.color"
               class="tw-cursor-pointer"
               :id="element.id"
@@ -232,6 +233,7 @@
                 <component 
                   :is="headerComponent"
                   v-bind="{data: element}"
+                  @openModal="runShowModal(element)"
                 />
               </template>
               <template #content>
@@ -328,6 +330,7 @@ export default {
     'countTotalRecords',
     'addCard',
     'updateCardColumn',
+    'runShowModal'
   ],
   mounted() {
 
@@ -361,8 +364,9 @@ export default {
       arrowKanbanNameHover: false,
       dragColumn: false,
       dragCursor: false, 
-
-      cardComponent: null
+      headerComponent: null,
+      cardComponent: null,
+      quickActions: null,
     };
   },
   components: {
@@ -385,7 +389,8 @@ export default {
         index: permissions?.index || false,
         create: permissions?.create || false,
         edit: permissions?.edit || false,
-        delete: permissions?.delete || false
+        delete: permissions?.delete || false, 
+        drag: permissions?.drag || false, 
       }
     },
     columnPermissions() {
@@ -439,6 +444,7 @@ export default {
     getCardComponent(){      
       this.cardComponent =  markRaw(this?.routes?.cardComponent.content)
       this.headerComponent =  markRaw(this?.routes?.cardComponent.header)
+      this.quickActions =  this?.routes?.cardComponent?.quickActions || null
     },
     addColumnKanban() {
       this.addColumn(this.columnIndex, this.columnData);
