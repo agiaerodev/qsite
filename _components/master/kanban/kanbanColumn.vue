@@ -286,17 +286,6 @@
 import { markRaw } from "vue";
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
-import kanbanStore from "modules/qsite/_components/master/kanban/store/kanbanStore.js";
-const modelColumn = {
-    id: null,
-    title: null,
-    color: null,
-    data: [],
-    loading: false,
-    page: 1,
-    total: 0,
-    new: true,
-}
 
 export default {
   props: {

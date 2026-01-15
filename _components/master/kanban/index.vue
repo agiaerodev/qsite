@@ -229,9 +229,6 @@ export default {
   },
   data() {
     return {
-      routeCreate: {
-        name: 'qrequestable.main.requestables.create'
-      },
       kanbanColumns: [],
       funnelList: [],
       funnelSelected: null,
@@ -302,14 +299,8 @@ export default {
         }
       };
     },
-    funnelSelectedComputed: {
-      get() {
-        return this.funnelSelected;
-      },
-      set(value) {
-        this.setResetPage();
-        this.funnelSelected = Number(value);
-      }
+    funnelSelectedComputed(){
+      return 8      
     },
     checkIfFunnelExists() {
       return (this.funnelId || this.funnelPageAction);
@@ -320,19 +311,8 @@ export default {
   },
   methods: {
     async init(refresh = false, isModal = false) {
-      this.kanbanColumns = [];
-      await this.getFunnel();
+      this.kanbanColumns = [];      
       await this.getColumns(refresh, isModal);
-    },
-    async getFunnel() {
-      try {
-        if (this.checkIfFunnelExists) {
-          this.funnelSelectedComputed = this.funnelPageAction || this.funnelId;
-          return;
-        }
-      } catch (error) {
-        console.log(error);
-      }
     },
     setResetPage() {
       this.kanbanColumns.forEach((item) => {

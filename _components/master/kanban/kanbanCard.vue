@@ -178,33 +178,7 @@ export default {
         }
       ];
 
-      const defaultActions = [
-        //Edit card  action 
-         {
-          name: 'viewLead',
-          icon: 'fas fa-info-circle',
-          color: 'info',
-          tooltip: this.$tr('isite.cms.label.information'),
-          vIf: this.cardPermissions.edit,
-          action: (item) => {
-           this.runShowModal(this.cardData)
-          }
-        },
-        {
-          icon: 'fa-light fa-trash-can',
-          color: 'red',
-          label: this.$tr('isite.cms.label.delete'),
-          vIf: this.cardPermissions.delete,
-          action: (item) => {
-            if(this.deleteKanbanCard) this.deleteKanbanCard(item);
-          }
-        },
-      ];
-
-      let response = [...this.actionsData, ...defaultActions];
-
-
-      return this.automation ?  automationActions : response;
+      return this.automation ?  automationActions : this.actionsData;
     },
     actionsData() {
       return this.actions.map((item) => {
