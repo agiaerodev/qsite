@@ -218,7 +218,7 @@
           @choose="dragCursor = true"
           @unchoose="dragCursor = false"
           item-key="id"
-          :disabled="!cardPermissions.move"
+          :disabled="!cardPermissions.drag"
         >
           <template #item="{ element }">
             <kanbanCard
@@ -286,6 +286,7 @@
 import { markRaw } from "vue";
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
+
 
 export default {
   props: {

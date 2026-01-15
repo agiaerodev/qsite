@@ -429,19 +429,7 @@ export default {
     getCardList(response) {
       return {
         total: response.meta.page.total,
-        data: response.data.map((card) => {
-          const nameCreator = card.creator
-            ? `${card.creator.firstName} ${card.creator.lastName}`
-            : null;
-          return {
-            title: card.name || nameCreator || card.title,
-            type: card.type || null,
-            fields: card.fields || [],
-            category: card.category || [],
-            statusId: card.statusId,
-            ...card
-          };
-        })
+        data: response.data        
       };
     },
     async addKanbanCard(column, page) {
