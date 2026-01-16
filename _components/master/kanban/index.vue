@@ -1,11 +1,5 @@
 <template>
   <div class="tw-py-2">
-    <div>
-      <pre>
-        {{ checkIfFunnelExists }}
-      </pre>
-    </div>
-    
     <infomation
       v-show="!loading"
       ref="kanbanModalInformation"
@@ -139,6 +133,10 @@ import modalAnalytics from './modals/analytics/index.vue';
 import showaAnalytics from './modals/analytics/actions/show.ts';
 import storeAnalytics from './modals/analytics/store/index.ts';
 import infomation from './_components/modals/information/components/index.vue'
+
+/* tests */
+import testColumns from './test/columns'
+import testCards from './test/cards'
 
 const modelPayload = {
   id: null,
@@ -338,7 +336,8 @@ export default {
         [route.filter.name]: this.funnelSelectedComputed, ...id,
         order: { field: 'type', way: 'asc' }
       };
-      const response = await this.$crud.index(route.apiRoute, parameters);
+      //const response = await this.$crud.index(route.apiRoute, parameters);
+      const response = testColumns
       return response;
     },
     async getColumns(refresh = false, isModal = false) {
@@ -419,7 +418,18 @@ export default {
         };
         parameters.params.page = page;
         parameters.params.take = 10;
-        const response = await this.$crud.index(route.apiRoute, parameters);
+        //const response = await this.$crud.index(route.apiRoute, parameters);
+        const response = {
+          data: [], 
+          "meta": {
+          "page": {
+              "total": 1,
+              "lastPage": 1,
+              "perPage": "10",
+              "currentPage": 1
+            }
+          }
+        }
         return this.getCardList(response);
       } catch (error) {
         column.loading = false;
