@@ -36,31 +36,33 @@ export default function controller(props: any, emit: any) {
 
   const methods = {
     getDashboardElements: async (settings: Setting[]): Promise<View[] | []> => {
-      if (!settings) return [];
-      const { hasAccess } = storeUtil;
+      try {
+        if (!settings || !Array.isArray(settings)) return [];
+        const { hasAccess } = storeUtil;
 
-      return Promise.all(
-        settings.flatMap((quickCard) => {
-          const { type, permission } = quickCard;
-          if (!type) return [];
-          if (permission && !hasAccess(permission)) return [];
-          return {
-            component: markRaw(
-              defineAsyncComponent(() => import(`./views/${type}`))
-            ),
-            ...quickCard,
-          };
-        })
-      );
+        return Promise.all(
+          settings.flatMap((quickCard) => {
+            const { type, permission } = quickCard;
+            if (!type) return [];
+            if (permission && !hasAccess(permission)) return [];
+            return {
+              component: markRaw(
+                defineAsyncComponent(() => import(`./views/${type}`))
+              ),
+              ...quickCard,
+            };
+          })
+        );
+      } catch (e) {
+        console.log(e)
+      }
     },
   };
-
   onMounted(async () => {
     const { module, entity } =
       helper.getInfoFromPermission(route?.meta?.permission) || {};
     store.globalFilters = computeds.filters.value;
-
-    if (!props.quickCards) {
+    if (Object.keys(props.quickCards).length === 0) {
       if (props.configName) {
         refs.settings.value = await service.getConfig(props.configName, true);
       } else {
