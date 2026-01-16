@@ -6,33 +6,33 @@ import {
   toRefs,
   defineAsyncComponent,
   markRaw,
-  watch,
+  watch
 } from 'vue';
-import { store as storeUtil, helper } from 'src/plugins/utils'
-import { useRoute } from 'vue-router'
-import service from './services'
-import { Setting, View } from './interface'
-import store from './store'
+import { store as storeUtil, helper } from 'src/plugins/utils';
+import { useRoute } from 'vue-router';
+import service from './services';
+import { Setting, View } from './interface';
+import store from './store';
 
 export default function controller(props: any, emit: any) {
 
-  const route = useRoute()
+  const route = useRoute();
   const refs = {
     settings: ref([])
-  }
+  };
 
-  const { dynamicFilterValues } = toRefs(props)
+  const { dynamicFilterValues } = toRefs(props);
 
   const state = reactive<{ views: View[] }>({
-    views: [],
-  })
+    views: []
+  });
 
   const computeds = {
     filters: computed(() => ({
       ...props.baseFilters,
       ...props.dynamicFilterValues
     }))
-  }
+  };
 
   const methods = {
     getDashboardElements: async (settings: Setting[]): Promise<View[] | []> => {
@@ -49,40 +49,44 @@ export default function controller(props: any, emit: any) {
               component: markRaw(
                 defineAsyncComponent(() => import(`./views/${type}`))
               ),
-              ...quickCard,
+              ...quickCard
             };
           })
         );
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
-    },
+    }
   };
   onMounted(async () => {
-    const { module, entity } =
+    try {
+      const { module, entity } =
       helper.getInfoFromPermission(route?.meta?.permission) || {};
-    store.globalFilters = computeds.filters.value;
-    if (Object.keys(props.quickCards).length === 0) {
-      if (props.configName) {
-        refs.settings.value = await service.getConfig(props.configName, true);
-      } else {
-        const configName = `${module}.config.quickCards.${entity}`;
-        refs.settings.value = await service.getConfig(configName);
-      }
+      store.globalFilters = computeds.filters.value;
+      if (Object.keys(props.quickCards).length === 0) {
+        if (props.configName) {
+          refs.settings.value = await service.getConfig(props.configName, true);
+        } else {
+          const configName = `${module}.config.quickCards.${entity}`;
+          refs.settings.value = await service.getConfig(configName);
+        }
 
-      const quickCards = await methods.getDashboardElements(
-        refs.settings.value
-      );
-      state.views = quickCards;
-    } else {
-      const quickCards = await methods.getDashboardElements(props.quickCards);
-      state.views = quickCards;
+        const quickCards = await methods.getDashboardElements(
+          refs.settings.value
+        );
+        state.views = quickCards;
+      } else {
+        const quickCards = await methods.getDashboardElements(props.quickCards);
+        state.views = quickCards;
+      }
+    } catch (e) {
+      console.log(e);
     }
   });
 
   watch(dynamicFilterValues, () => {
-    store.globalFilters = computeds.filters.value
-  }, { deep: true })
+    store.globalFilters = computeds.filters.value;
+  }, { deep: true });
 
-  return { ...refs, ...(toRefs(state)), ...computeds, ...methods }
+  return { ...refs, ...(toRefs(state)), ...computeds, ...methods };
 }
