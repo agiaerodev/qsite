@@ -13,7 +13,6 @@
         :funnelId="funnelId"
         :heightColumn="170"
         :dragColumn="false"
-        :disableCrud="true"
         :automation="true"
       />
     </master-modal>

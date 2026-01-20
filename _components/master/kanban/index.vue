@@ -176,10 +176,6 @@ export default {
       type: Boolean,
       default: () => true
     },
-    disableCrud: {
-      type: Boolean,
-      default: () => false
-    },
     automation: {
       type: Boolean,
       default: () => false
@@ -200,8 +196,7 @@ export default {
       addColumn: this.addColumn,
       heightColumn: this.heightColumn,
       uId: this.uId,
-      init: this.init,
-      disableCrud: this.disableCrud,
+      init: this.init,      
       routes: this.routes,
       automation: this.automation,
       openFormComponentModal: this.openFormComponentModal,
@@ -327,22 +322,15 @@ export default {
       });
     },
     async getStatus(refresh = false) {
-      if (!this.routes.column) return;
-      const route = this.routes.column;
-      const parameters = { params: {}, refresh };
-      parameters.params.include = route.include;
-      const id = { id: this.filter.statusId } || {};
-      parameters.params.filter = {
-        [route.filter.name]: this.funnelSelectedComputed, ...id,
-        order: { field: 'type', way: 'asc' }
-      };
+      
+      
       //const response = await this.$crud.index(route.apiRoute, parameters);
-      const response = testColumns
+      const response = testColumns.list()
       return response;
     },
     async getColumns(refresh = false, isModal = false) {
       try {
-        if (!this.routes.column) return;
+        
         this.loading = true;
         const response = await this.getStatus(isModal ? !refresh : refresh);
         //Set the initial data for kanbanColumns
@@ -361,9 +349,7 @@ export default {
           };
         });
         await this.getKanbanColumns(response.data, refresh);
-        setTimeout(() => {
-          this.loading = false;
-        }, 100);
+        
 
       } catch (error) {
         this.loading = false;
@@ -373,6 +359,7 @@ export default {
     },
     async getKanbanColumns(data, refresh = false) {
       Promise.all(this.kanbanColumns.map(column => {
+        this.loading = false
         return new Promise(resolve => {
           this.getKanbanCard(column, 1, refresh).then(response => {
             column.data = response.data;
@@ -402,34 +389,7 @@ export default {
     },
     async getKanbanCardList(column, page, refresh = false) {
       try {
-        const nameRoute = this.automation ? 'automation' : 'card';
-        if (!this.routes[nameRoute]) {
-          return { total: 0, data: [] };
-        }
-        const route = this.routes[nameRoute];
-        const parameters = { params: {}, refresh };
-        const search = this.automation && !this.search ? {} : { search: this.search };
-        parameters.params.include = route.include;
-        parameters.params.filter = {
-          [route.filter.name]: column.id,
-          ...this.filter,
-          ...search,
-          order: { way: 'desc' }
-        };
-        parameters.params.page = page;
-        parameters.params.take = 10;
-        //const response = await this.$crud.index(route.apiRoute, parameters);
-        const response = {
-          data: [], 
-          "meta": {
-          "page": {
-              "total": 1,
-              "lastPage": 1,
-              "perPage": "10",
-              "currentPage": 1
-            }
-          }
-        }
+        const response = testCards.findByStatusId(column.id, page);
         return this.getCardList(response);
       } catch (error) {
         column.loading = false;

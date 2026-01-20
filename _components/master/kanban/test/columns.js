@@ -1,5 +1,4 @@
-const response =  {
-  "data": [
+const data =  [
       {
           "cancelledElapsedTime": 0,
           "category": {
@@ -977,7 +976,20 @@ const response =  {
           "value": null
       }
   ]
+
+  const meta = {
+        "page": {
+            "total": 1,
+            "lastPage": 1,
+            "perPage": "10",
+            "currentPage": 1
+        }
+    }
+
+function list(){
+    return {data, meta}
 }
 
-
-export default response
+export default {
+    list
+}

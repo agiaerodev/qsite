@@ -115,7 +115,7 @@
             </q-btn>
           </div>
           <div
-            v-if="!disableCrud && arrowKanbanNameHover && !columnData.new"
+            v-if="arrowKanbanNameHover && !columnData.new"
             class="tw-w-1/12
               tw-text-xs
               tw-cursor-pointer icon-edit"
@@ -313,7 +313,6 @@ export default {
     'addColumn',
     'heightColumn',
     'uId',
-    'disableCrud',
     'automation',
     'routes',
     'openFormComponentModal',
@@ -322,9 +321,11 @@ export default {
     'updateCardColumn',
     'runShowModal'
   ],
-  mounted() {
 
-    this.getCardComponent()
+  async beforeMount(){
+    await this.getCardComponent();
+  },
+  mounted() {
 
     const parent = document.querySelector(`#kanbanCtn${this.uId}`);
     this.initialheight = `${window.innerHeight - parent.offsetTop - this.heightColumn}px`;
@@ -395,13 +396,13 @@ export default {
     },
     allowCreateColumn() {
       if(this.columnPermissions.create) {
-        return !this.disableCrud && this.hover && this.columnData.type !== 2;
+        return this.hover;
       }
       return false;
     },
     allowEditColumn() {
       if(this.columnPermissions.edit) {
-        return !this.disableCrud && this.arrowKanbanNameHover && !this.columnData.new
+        return this.arrowKanbanNameHover && !this.columnData.new
       }
       return false;
     },
@@ -459,8 +460,8 @@ export default {
       });
     },
     async infiniteHandler() {
-      try {
-          if (!this.columnData.loading) {
+      try {        
+          if (!this.columnData.loading && !this.isTotalNumberOfRecords) {
             this.loading = true;
             this.columnData.page = this.columnData.page + 1;
             await this.addKanbanCard(
