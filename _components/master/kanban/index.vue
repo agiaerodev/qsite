@@ -123,7 +123,6 @@
 
 <script>
 import kanbanColumn from 'modules/qsite/_components/master/kanban/kanbanColumn.vue';
-import kanbanStore from 'modules/qsite/_components/master/kanban/store/kanbanStore.js';
 import automationRules from './automationRules/index.vue';
 import draggable from 'vuedraggable';
 import formComponent from './modals/form.vue';
@@ -276,7 +275,7 @@ export default {
             padding: '3px 15px'
           },
           action: () => {
-            kanbanStore().setModalStatus(true);
+            //kanbanStore().setModalStatus(true);
           }
         }];
     },

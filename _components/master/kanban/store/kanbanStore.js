@@ -1,12 +1,6 @@
 import { reactive } from 'vue';
 import baseService from 'modules/qcrud/_services/baseService.js';
-import getKanbanCardList from './actions/getKanbanCardList.js';
-import getColumns from './actions/getColumns.js';
-import deleteColumn from './actions/deleteColumn.js';
-import updateColumn from './actions/updateColumn.js';
-import saveColumn from './actions/saveColumn.js';
-import saveStatusOrdering from './actions/saveStatusOrdering.js';
-import getFunnel from './actions/getFunnel.js';
+
 
 
 const modelPayload = {
@@ -164,29 +158,25 @@ export default function kanbanStore() {
     return {
         getKanbanColumn,
         addColumn,
-        deleteColumn,
         addKanbanCard,
         deleteKanbanCard,
-        getColumns,
         getFunnelList,
         setFunnelList,
         setFunnelSelected,
         getFunnelSelected,
         getLoading,
         hideLoading,
-        showLoading,
-        getKanbanCardList,
+        showLoading,        
         getKanbanCard,
         setResetPage,
         getInputDynamicField,
         reorder,
-        saveStatusOrdering,
-        saveColumn,
-        updateColumn,
+        
+        
         setPayloadStatus,
         setKanbanColumn,
         getPayloadStatus,
-        getFunnel,
+        
         setRoutes,
         getRoutes,
         getModalStatus,
