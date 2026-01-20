@@ -196,14 +196,14 @@ export default {
     getCropperData() {
       //Get all information
       this.information = {
-        cropper: this.$refs.cropper.getData(true),
-        container: this.$refs.cropper.getContainerData(),
-        image: this.$refs.cropper.getImageData()
+        cropper: this.$refs?.cropper?.getData(true),
+        container: this.$refs?.cropper?.getContainerData(),
+        image: this.$refs?.cropper?.getImageData()
       }
       //Set cropper size information
       this.cropperSize = {
-        width: parseInt(this.information.cropper.width),
-        height: parseInt(this.information.cropper.height)
+        width: parseInt(this.information?.cropper?.width),
+        height: parseInt(this.information?.cropper?.height)
       }
     },
     //Crop Image
