@@ -2,6 +2,7 @@
   <div class="columnCtn tw-relative bg-white no-shadow"      
       :style="columnWidth"
     >
+    <pre>{{ cardActions.length }}</pre>
     <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
@@ -222,6 +223,7 @@
         >
           <template #item="{ element }">
             <kanbanCard
+              :crudData="crudData"
               :cardData="element"
               :cardPermissions
               :colorColumn="element.color"
@@ -286,10 +288,15 @@
 import { markRaw } from "vue";
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
+import { set } from "lodash";
 
 
 export default {
   props: {
+    crudData: {
+      type: Object,
+      required: true,
+    },
     columnData: {
       type: Object,
       required: true,
@@ -314,7 +321,7 @@ export default {
     'heightColumn',
     'uId',
     'automation',
-    'routes',
+    
     'openFormComponentModal',
     'countTotalRecords',
     'addCard',
@@ -358,6 +365,7 @@ export default {
       headerComponent: null,
       cardComponent: null,
       quickActions: null,
+      cardActions: [],
     };
   },
   components: {
@@ -365,6 +373,9 @@ export default {
     kanbanCard,
   },
   computed: {
+    kanban(){
+      return this.crudData?.read?.kanban || null;
+    },
     isDragCursor() {
       return this.dragCursor;
     },
@@ -372,7 +383,7 @@ export default {
       return typeof this.columnData.id == 'string' || !this.cardPermissions.create;
     },
     kanbanPermissions(){
-      return this?.routes?.permissions || null
+      return this.kanban?.permissions || null
     },
     cardPermissions() {
       const permissions = this.kanbanPermissions?.card || null
@@ -429,14 +440,17 @@ export default {
       return {
         width: this?.routes?.columnWidth || '240px'
       }
-    }
+    }, 
+    
   },
   methods: {
-    getCardComponent(){      
-      this.cardComponent =  markRaw(this?.routes?.cardComponent.content)
-      this.headerComponent =  markRaw(this?.routes?.cardComponent.header)
-      this.quickActions =  this?.routes?.cardComponent?.quickActions || null
+    getCardComponent(){
+      console.log(this.crudData)
+      if(!this.kanban) return
+      this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
+      this.headerComponent =  markRaw(this?.kanban?.cardComponent?.header)
     },
+    
     addColumnKanban() {
       this.addColumn(this.columnIndex, this.columnData);
     },
@@ -488,32 +502,29 @@ export default {
         this.setPayloadStatus();
       }
     },
-    updateCard(data, route) {
-      this.$crud.update(route.apiRoute, data.id, data).then(response => {
+    updateCard(data) {
+      this.$crud.update('', data.id, data).then(response => {
       }).catch(error => {
         console.log(error);
       })
     },
     move(elm) {
       if (elm.from.id === elm.to.id) return;
-      const nameRoute = this.automation ? 'automation' : 'card';
-      const route = this.routes[nameRoute];
-      if(!route) return;
-      const data = { id: elm.clone.id, [route.filter.name]: elm.to.id };
+      const data = { id: elm.clone.id, toId: elm.to.id };
       this.updateCardColumn(Number(elm.to.id));
-      this.updateCard(data , route);
+      this.updateCard(data);
     }
   },
 };
 </script>
 
 <style>
-  
+/*  
 .columnCtn {
-  /*
+  
   @apply tw-w-60;
-  */
 }
+  */
   
 
 .dragCard {

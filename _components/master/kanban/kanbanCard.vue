@@ -14,8 +14,10 @@
     "
     :style="{ borderLeftColor: colorColumn }"
     
-  >
-    
+  ><pre>
+    {{ kanban }}
+  </pre>
+     
     <section class="tw-flex tw-justify-between">
       <div class="tw-w-full">
         <div class="tw-flex">
@@ -40,7 +42,7 @@
             "
             icon="fa-light fa-ellipsis-vertical"
             @click.stop
-          >
+          >          
             <q-list
               dense
               class="
@@ -49,7 +51,7 @@
                 tw-text-xs"
             >
               <template
-                v-for="(action, keyAction) in actionsAutomations"
+                v-for="(action, keyAction) in cardActions"
                 :key="keyAction"
               >
               <q-item
@@ -61,7 +63,7 @@
               >
                   <q-item-section>
                     <div class="tw-flex tw-space-x-2 tw-py-2">
-                      <q-icon :name="action.icon" color="primary" size="20px"/>
+                      <q-icon v-if="action?.icon" :name="action.icon" color="primary" size="20px"/>
                       <div class="tw-mt-0.5 tw-font-semibold">
                         {{ action.label || action.tooltip }}
                       </div>
@@ -122,12 +124,16 @@ export default {
       default: () => false,
     },
   },
-  props: {
+  props: {    
     cardData: {
       type: Object,
       default: () => this.cardDataDefault,
     },
     cardPermissions: {
+      type: Object,
+      default: () => ({}),
+    },
+    crudData: {
       type: Object,
       default: () => ({}),
     },
@@ -151,60 +157,47 @@ export default {
       },
     };
   },
-  computed: {    
-    actions() {
-      return this.crudfieldActions(this.cardData);
+  computed: {
+    kanban(){
+      return this.crudData?.kanban || null;
     },
-    
-    
-    actionsAutomations() {
-      let automationActions = [
-       //Delete action
-        {
-          icon: 'fa-light fa-trash-can',
-          color: 'red',
-          label: this.$tr('isite.cms.label.delete'),
-          action: (item) => {
-            if(this.deleteKanbanCard) this.deleteKanbanCard(item);
-          }
-        },
-        {
-          icon: 'fa-light fa-pencil',
-          color: 'red',
-          label: this.$tr('isite.cms.label.edit'),
-          action: (item) => {
-            if(this.openFormComponentModal) this.openFormComponentModal(item.statusId, item.title, item.id);
-          }
+    cardActions(){
+      console.count('setCardActions')
+      const response = this.crudData.read.kanban?.actions || [];      
+
+      /* Edit card  action */
+        if(this.cardPermissions.edit){
+          response.push(
+          {
+            name: 'viewLead',
+            label: this.$tr('isite.cms.label.information'),
+            icon: 'fas fa-info-circle',
+            action: (item) => {
+              //this.$refs.kanban.showModal(item)
+            }
+          })
         }
-      ];
+        /* Delete card  action */
+        if(this.cardPermissions.delete){
+          response.push({
+            icon: 'fa-light fa-trash-can',
+            color: 'red',
+            label: this.$tr('isite.cms.label.delete'),
+            action: (item) => {
+              /*
+              this.$refs.kanban.deleteKanbanCard(item).then(() => {
+                this.getDataTable(true)
+              })
+                */
+            }
+          })
+        }
+        return response;
 
-      return this.automation ?  automationActions : this.actionsData;
-    },
-    actionsData() {
-      return this.actions.map((item) => {
-        //Instance item props
-        item.props = { tag: "a", key: this.$uid(), clickable: true };
-
-        //Define external redirect
-        if (item.toRoute) item.props.href = item.toRoute;
-
-        //Instance vue route redirect
-        if (item.route)
-          item.props.to = {
-            name: item.route,
-            params: this.$clone(this.cardData || {}),
-          };
-
-        // Formatting all instances
-        if (item.format)
-          item = { ...item, ...(item.format(this.cardData) || {}) };
-
-        //Return item
-        return item;
-      });
     },
   },
   methods: {
+    
     openModal() {
       if (this.showRequestData) this.showRequestData(this.cardData);
     },

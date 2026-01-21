@@ -1,9 +1,18 @@
 <template>
-  <div class="tw-py-2">
+  <div>
+    <div>
+      <page-actions 
+        title="kanban"
+      />
+    </div>
+
+
+
     <infomation
       v-show="!loading"
       ref="kanbanModalInformation"
     />
+    <p>kanban</p>
     
     <div
       :id="`kanbanCtn${uId}`"
@@ -27,6 +36,7 @@
         <template #item="{element, index}">
           <div v-if="!loading" :class="{'notMoveBetweenColumns': element.type !== 1}">
             <kanbanColumn
+              :crudData="crudData"
               :column-data="element"
               :columnIndex="index"
               :totalColumns="kanbanColumns.length"
@@ -104,21 +114,23 @@
     
     <automationRules
       ref="automationRules"
-      :funnelId="funnelSelectedComputed"
+      funnelId="8"
     />
     <formComponent
       ref="formComponent"
-      :funnelId="funnelSelectedComputed"
-      :filterName="routes.column ? routes.column.filter.name : null"
+      funnelId="8"
+      :filterName="crudData.column ? crudData.column.filter.name : null"
     />
     <formRules
       ref="formRules"
-      :funnelId="funnelSelectedComputed"
-      :filterName="routes.column ? routes.column.filter.name : null"
+      funnelId="8"
+      :filterName="crudData.column ? crudData.column.filter.name : null"
     />
     <modalStatus />
     <modalAnalytics />
-  </div>
+</div>
+    
+    
 </template>
 
 <script>
@@ -155,7 +167,7 @@ const modelColumn = {
 };
 export default {
   props: {
-    routes: {
+    crudData: {
       type: Object,
       default: () => ({})
     },
@@ -166,11 +178,7 @@ export default {
     showFunnel: {
       type: Boolean,
       default: () => false
-    },
-    funnelId: {
-      type: Number,
-      default: () => null
-    },
+    },    
     dragColumn: {
       type: Boolean,
       default: () => true
@@ -196,7 +204,7 @@ export default {
       heightColumn: this.heightColumn,
       uId: this.uId,
       init: this.init,      
-      routes: this.routes,
+      
       automation: this.automation,
       openFormComponentModal: this.openFormComponentModal,
       addCard: this.addCard,
@@ -208,7 +216,7 @@ export default {
       runShowModal: this.showModal,
     };
   },
-  inject: ['funnelPageAction', 'fieldActions'],
+  inject: ['fieldActions'],
   components: {
     kanbanColumn,
     draggable,
@@ -247,6 +255,8 @@ export default {
     });
   },
   computed: {
+    
+
     extraPageActions() {
       return [
         {
@@ -278,25 +288,9 @@ export default {
             //kanbanStore().setModalStatus(true);
           }
         }];
-    },
-    funnel() {
-      return {
-        value: null,
-        type: 'select',
-        props: {
-          label: 'Funnel'
-        },
-        loadOptions: {
-          apiRoute: this.routes.funnel ? this.routes.funnel.apiRoute : null
-        }
-      };
-    },
-    funnelSelectedComputed(){
-      return 8      
-    },
-    checkIfFunnelExists() {
-      return (this.funnelId || this.funnelPageAction);
-    },
+    },  
+    
+    
     scroll() {
       return document.getElementById(`columnKanban${this.uId}`);
     }
@@ -424,11 +418,6 @@ export default {
               label: this.$tr('isite.cms.label.delete'),
               color: 'red',
               handler: async () => {
-                const nameRoute = this.automation ? 'automation' : 'card';
-                if (!this.routes[nameRoute]) {
-                  return { total: 0, data: [] };
-                }
-                const route = this.routes[nameRoute];
                 const column = this.kanbanColumns.find(column => column.id === item.statusId);
                 if (column) column.loading = true;
                 await this.$crud.delete(route.apiRoute, item.id);
