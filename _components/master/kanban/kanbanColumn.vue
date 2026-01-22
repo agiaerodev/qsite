@@ -2,7 +2,6 @@
   <div class="columnCtn tw-relative bg-white no-shadow"      
       :style="columnWidth"
     >
-    <pre>{{ cardActions.length }}</pre>
     <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
@@ -288,8 +287,6 @@
 import { markRaw } from "vue";
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
-import { set } from "lodash";
-
 
 export default {
   props: {
@@ -438,14 +435,13 @@ export default {
     },
     columnWidth(){      
       return {
-        width: this?.routes?.columnWidth || '240px'
+        width: this?.kanban?.columnWidth || '240px'
       }
     }, 
     
   },
   methods: {
     getCardComponent(){
-      console.log(this.crudData)
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
       this.headerComponent =  markRaw(this?.kanban?.cardComponent?.header)
@@ -520,7 +516,7 @@ export default {
 
 <style>
 /*  
-.columnCtn {
+.columnCtn  {
   
   @apply tw-w-60;
 }

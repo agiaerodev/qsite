@@ -58,7 +58,6 @@
 
 export default {
     props: {
-        funnelId: { type: Number, default: () => null }
     },
     inject: {
         addCard: {
@@ -377,8 +376,7 @@ export default {
                           filter: {
                               type: this.categorySelected?.options?.filterFormFieldType
                           }
-                        }, 
-                        { categoryId: this.funnelId }
+                        }                         
                       ).then(response => 
                       resolve(response.data)).catch(error => resolve([])
                     );

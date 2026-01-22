@@ -14,10 +14,7 @@
     "
     :style="{ borderLeftColor: colorColumn }"
     
-  ><pre>
-    {{ kanban }}
-  </pre>
-     
+  >
     <section class="tw-flex tw-justify-between">
       <div class="tw-w-full">
         <div class="tw-flex">

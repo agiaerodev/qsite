@@ -6,13 +6,10 @@
       />
     </div>
 
-
-
     <infomation
       v-show="!loading"
       ref="kanbanModalInformation"
     />
-    <p>kanban</p>
     
     <div
       :id="`kanbanCtn${uId}`"
@@ -113,17 +110,15 @@
     </div>
     
     <automationRules
+      v-if="false"
       ref="automationRules"
-      funnelId="8"
     />
     <formComponent
       ref="formComponent"
-      funnelId="8"
       :filterName="crudData.column ? crudData.column.filter.name : null"
     />
     <formRules
       ref="formRules"
-      funnelId="8"
       :filterName="crudData.column ? crudData.column.filter.name : null"
     />
     <modalStatus />
@@ -209,14 +204,13 @@ export default {
       openFormComponentModal: this.openFormComponentModal,
       addCard: this.addCard,
       countTotalRecords: this.countTotalRecords,
-      crudfieldActions: this.crudfieldActions,
       deleteKanbanCard: this.deleteKanbanCard,
       updateCardColumn: this.updateCard,
       getStatus: this.getStatus, 
       runShowModal: this.showModal,
     };
   },
-  inject: ['fieldActions'],
+  
   components: {
     kanbanColumn,
     draggable,
@@ -243,8 +237,7 @@ export default {
   },
   mounted() {
     this.$nextTick(async function() {
-      await this.init();
-      //if (this.checkIfFunnelExists) {
+      await this.init();      
         const elementColumnKanban = document.getElementById(`columnKanban${this.uId}`);
         if (elementColumnKanban) {
           elementColumnKanban.addEventListener('scroll', evt =>
@@ -383,17 +376,17 @@ export default {
     async getKanbanCardList(column, page, refresh = false) {
       try {
         const response = testCards.findByStatusId(column.id, page);
-        return this.getCardList(response);
+        return {
+          total: response.meta.page.total,
+          data: response.data        
+        };
       } catch (error) {
         column.loading = false;
         console.log(error);
       }
     },
     getCardList(response) {
-      return {
-        total: response.meta.page.total,
-        data: response.data        
-      };
+      
     },
     async addKanbanCard(column, page) {
       const kanbancolumn = this.kanbanColumns.find(
@@ -440,8 +433,8 @@ export default {
     },
     async saveStatusOrdering() {
       try {
-        if (!this.routes.orderStatus) return;
-        const route = this.routes.orderStatus;
+        if (!this.kanban.orderStatus) return;
+        const route = this.kanban.orderStatus;
         const statusId = this.kanbanColumns.map((item) => ({ id: item.id }));
         await this.$crud.create(route.apiRoute, {
           [route.filter.name]: statusId
@@ -470,8 +463,8 @@ export default {
     },
     async deleteColumn(columnId) {
       try {
-        if (!this.routes.column) return;
-        const route = this.routes.column;
+        if (!this.kanban.column) return;
+        const route = this.kanban.column;
         const kanbanColumn = this.kanbanColumns.filter(
           (item) => item.id !== columnId
         );
@@ -485,8 +478,8 @@ export default {
     },
     async saveColumn(data) {
       try {
-        if (!this.routes.column) return;
-        const route = this.routes.column;
+        if (!this.kanban.column) return;
+        const route = this.kanban.column;
         const payloadStatus = {};
         payloadStatus.title = data.title;
         payloadStatus.color = data.color;
@@ -500,8 +493,8 @@ export default {
     },
     async updateColumn(data) {
       try {
-        if (!this.routes.column) return;
-        const route = this.routes.column;
+        if (!this.kanban.column) return;
+        const route = this.kanban.column;
         const payloadStatus = {};
         payloadStatus.id = data.id;
         payloadStatus.title = data.title;
@@ -519,7 +512,7 @@ export default {
         title: null,
         color: null,
         value: 1,
-        [this.routes.column.filter.name]: null
+        [this.kanban.column.filter.name]: null
       };
     },
     openAutomationRulesModal() {
@@ -546,13 +539,7 @@ export default {
         console.log(error);
       }
     },
-    crudfieldActions(field) {
-      try {
-        return this.fieldActions(field);
-      } catch (error) {
-        console.log(error);
-      }
-    },
+    
     setSearch(value) {
       this.search = value && value !== '' ? value : null;
     },

@@ -16,7 +16,7 @@ export default function useModalAnalytics() {
     });
     const loading = ref(false);
     const getStatus = inject("getStatus", () => ({ data: [] }));
-    const routes: any = inject("routes");
+    ///const routes: any = inject("routes");
     const saveColumn = inject("saveColumn", false);
     const updateColumn = inject("updateColumn", false);
     const init: any = inject("init", () => false);

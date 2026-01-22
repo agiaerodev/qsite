@@ -38,11 +38,7 @@
 import superModal from 'modules/qsite/_components/master/kanban/_components/modals/information/components/superModal.vue';
 
 export default {
-  props: {
-    funnelId: {
-      type: Number,
-      default: () => null,
-    },
+  props: {    
     filterName: {
       type: String,
       default: () => null,
@@ -52,12 +48,7 @@ export default {
     init: {
       type: Function,
       default: () => false,
-    },
-    routes: {
-      type: Object,
-      default: () => {
-      },
-    },
+    },    
     automation: {
       type: Boolean,
       default: () => false,
@@ -172,11 +163,7 @@ export default {
     openModal(statusId, title = null) {
       this.statusId = statusId;
       this.title = title;
-      const funnel =
-          this.$helper.getDynamicSelectList()[this.filterName] || null;
-      if (funnel) {
-        this.funnelForm = funnel.find((item) => item.id == this.funnelId);
-      }
+      
       if (!this.formCategory.vIf) {
         this.$alert.warning({message: 'No existen formulario para esta categoría'})
         return;
@@ -187,8 +174,7 @@ export default {
       try {
         this.loading = true;
         const nameRoute = this.automation ? "automation" : "card";
-        if (!this.routes[nameRoute]) return;
-        const route = this.routes[nameRoute];
+        ;
         const form = {
           ...this.form,
           type: this.funnelForm.type,
@@ -196,7 +182,7 @@ export default {
           ...this.dynamicFieldForm,
           requestedById: this.dynamicFieldForm.requestedById || this.$store.state.quserAuth.userId
         };
-        await this.$crud.create(route.apiRoute, form);
+        await this.$crud.create('', form);
         await this.addCard(this.statusId);
         this.hideModal();
 
