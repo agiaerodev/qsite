@@ -298,8 +298,8 @@ export default function useComments(props: any) {
             active: false,
             loading: false,
             textEdit: "",
-            icon: item.type ? config.data[item.type].icon : 'fa-regular fa-comment',
-            color: item.type ? config.data[item.type].color : 'primary',
+            icon: item.type && config.data[item.type]?.icon ? config.data[item.type]?.icon : 'fa-regular fa-comment',
+            color: item.type && config.data[item.type]?.color ? config.data[item.type]?.color : 'primary',
           }));
           loading.value = false;
         })
