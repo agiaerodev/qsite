@@ -85,9 +85,6 @@
                           <span v-if="item.userProfile && !Boolean(item.internal)" class="tw-font-bold tw-text-gray-800">
                             {{ item.userProfile.fullName }}
                           </span>
-                        <span v-if="item.internal" class="tw-text-xs tw-font-medium tw-px-2 tw-py-0.5 tw-bg-gray-100 tw-text-gray-500 tw-rounded-full">
-                            Sistema
-                          </span>
                         <small class="tw-text-gray-400 tw-font-normal">
                           {{ formatDate(item.updatedAt|| item.createdAt) }}
                         </small>
@@ -119,9 +116,6 @@
                           class="tw-text-gray-700 tw-leading-relaxed tw-text-sm"
                           :class="{'tw-italic tw-text-gray-500': item.internal}"
                         />
-                        <div v-if="!Boolean(item.internal)" class="tw-absolute tw-right-0 tw-top-0 tw-opacity-0 group-hover/content:tw-opacity-100 tw-text-primary tw-text-[10px] tw-font-bold tw-uppercase">
-                          Click para editar
-                        </div>
                       </div>
                     </div>
 
