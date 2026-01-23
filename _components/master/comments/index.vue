@@ -85,7 +85,7 @@
                  <div class="tw-p-4 tw-rounded-md tw-bg-white">
                     <div>
                       <h4
-                      class="tw-text-sm"
+                      class="tw-text-sm tw-space-x-1"
                     >
                       <strong v-if="item.userProfile && !Boolean(item.internal)">
                         {{ item.userProfile.fullName }}
