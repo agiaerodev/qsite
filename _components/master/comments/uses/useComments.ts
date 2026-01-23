@@ -286,6 +286,10 @@ export default function useComments(props: any) {
         filter: {
           commentableType: commentableType.value,
           commentableId,
+          order: {
+            field: 'created_at',
+            way: 'desc',
+          }
         },
         include: "userProfile",
       };

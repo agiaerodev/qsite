@@ -86,9 +86,8 @@
                     <div>
                       <h4
                       class="tw-text-sm"
-                      v-if="item.userProfile"
                     >
-                      <strong v-if="!Boolean(item.internal)">
+                      <strong v-if="item.userProfile && !Boolean(item.internal)">
                         {{ item.userProfile.fullName }}
                       </strong>
                       <small v-if="item.updatedAt || item.createdAt">
@@ -209,6 +208,17 @@ export default defineComponent({
 <style>
 .timeline-ctn .q-timeline__dot:after {
   @apply tw-text-gray-500;
+  width: 1px;
+}
+.list-comments .q-timeline__subtitle,
+.list-comments .q-timeline__title,
+.list-comments .q-btn-dropdown__arrow {
+  display: none !important;
+}
+
+/* Línea del timeline */
+.timeline-ctn .q-timeline__dot::after {
+  background-color: #9ca3af; /* gray-400 */
   width: 1px;
 }
 </style>
