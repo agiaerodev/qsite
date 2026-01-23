@@ -135,6 +135,12 @@ export default function controller(props: any, emit: any) {
       methods.emitValues(true)
     },
 
+    /* stores the options-data from the dynamicField */
+    loadedOptionsCallback(key, options, data){
+      state.loadedOptions[key] = state.loadedOptions[key] ? [...options, ...state.loadedOptions[key], ...data] : [...options, ...data]
+      methods.setReadValues()
+    },
+
     async addLoadedOptionsCallback(){
       Object.keys(state.props.filters).forEach(key => {
         if(state.props.filters[key]?.type == 'select' || state.props.filters[key]?.type == 'treeSelect'){
@@ -143,21 +149,13 @@ export default function controller(props: any, emit: any) {
             const options = state.props.filters[key]?.props?.options || []
             //loadedOptions callback
             state.props.filters[key].loadOptions.loadedOptions = (data) => {
-              //fix setReadValues twice
-              if(!state.loadedOptions[key]){
-               state.loadedOptions[key] = [...options, ...data]
-               methods.setReadValues()
-              }
+             methods.loadedOptionsCallback(key, options, data)
             }
 
             //(hiden) loadedOptions callback for url filters
-             if(state.hidenFields[key]){
+            if(state.hidenFields[key]){
               state.hidenFields[key].loadOptions.loadedOptions = (data) => {
-                //fix setReadValues twice
-                if(!state.loadedOptions[key]){
-                 state.loadedOptions[key] = [...options, ...data]
-                 methods.setReadValues()
-                }
+               methods.loadedOptionsCallback(key, options, data)
               }
             }
           } else {
