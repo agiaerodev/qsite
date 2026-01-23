@@ -337,6 +337,7 @@ export default function useComments(props: any) {
   getCommentsList(props.commentableId);
   // Hook to handle component cleanup and finalize ongoing comment operations
   onBeforeUnmount(async () => {
+    console.log(dataComment.value.close)
     if (dataComment.value.close) {
       if (dataComment.value.edit) {
         await updateComment('edit', dataComment.value.id)

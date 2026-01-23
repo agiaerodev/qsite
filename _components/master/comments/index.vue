@@ -1,169 +1,165 @@
 <template>
-  <div v-if="permisionComments.index">
+  <div v-if="permisionComments.index" class="tw-max-w-4xl tw-mx-auto tw-antialiased">
     <div>
       <q-list dense class="list-comments">
-          <q-item
-            class="tw-my-3"
-            style="padding: 0px !important"
-            v-if="permisionComments.create"
-          >
-            <q-item-section top avatar>
-              <q-avatar size="md" color="grey-4" class="tw-ml-2">
-                <img :src="`${dataBase.avatar}`" />
-              </q-avatar>
-            </q-item-section>
-            <q-item-section
-              v-if="!dataBase.active"
-              class="tw-mr-4 tw-cursor-pointer"
+        <q-item
+          class="tw-mb-8 tw-pb-4 tw-border-b tw-border-gray-100"
+          style="padding: 0px !important"
+          v-if="permisionComments.create"
+        >
+          <q-item-section top avatar>
+            <q-avatar size="42px" class="tw-shadow-sm tw-border-2 tw-border-white">
+              <img :src="`${dataBase.avatar}`" />
+            </q-avatar>
+          </q-item-section>
+
+          <q-item-section v-if="!dataBase.active" class="tw-mr-2">
+            <q-card
+              flat
+              class="tw-rounded-2xl tw-border tw-border-gray-200 tw-bg-white hover:tw-border-primary/50 tw-transition-all tw-duration-300 tw-cursor-pointer group"
+              @click="activeText()"
             >
-              <q-card flat bordered>
-                <q-card-section
-                  class="tw-py-2 tw-cursor-pointer text-grey-6"
-                  v-html="textPlaceholder"
-                  @click="activeText()"
-                  :title="i18n.tr(`isite.cms.label.edit`)"
-                />
-              </q-card>
-            </q-item-section>
-            <q-item-section class="bg-grey-1 shadow-1 tw-p-2" v-else>
-              <div v-if="!loadingComment">
-                  <CKEditor
-                    v-model="dataBase.text"
-                    :config="editorConfig"
-                />
-                <div>
-                  <dynamic-field
-                    :field="files"
-                    class="tw-py-2 tw-hidden"
+              <q-card-section
+                class="tw-py-3 tw-px-4 text-grey-6 tw-flex tw-items-center tw-justify-between"
+                :title="i18n.tr(`isite.cms.label.edit`)"
+              >
+                <div v-html="textPlaceholder" class="tw-text-sm" />
+                <q-icon name="fa-light fa-pen" size="xs" class="group-hover:tw-text-primary tw-opacity-0 group-hover:tw-opacity-100 tw-transition-all" />
+              </q-card-section>
+            </q-card>
+          </q-item-section>
+
+          <q-item-section class="tw-bg-white tw-rounded-2xl tw-shadow-sm tw-border tw-border-gray-100 tw-p-4" v-else>
+            <div v-if="!loadingComment">
+              <CKEditor v-model="dataBase.text" :config="editorConfig" class="modern-editor" />
+              <div>
+                <dynamic-field :field="files" class="tw-py-2 tw-hidden" />
+              </div>
+              <div class="flex justify-between tw-mt-4">
+                <div class="tw-space-x-3">
+                  <q-btn
+                    :loading="dataBase.loading"
+                    :disable="dataBase.text == ''"
+                    @click="addComment()"
+                    unelevated
+                    rounded
+                    size="md"
+                    :label="i18n.tr(`isite.cms.label.save`)"
+                    color="primary"
+                    no-caps
+                    class="tw-px-6"
+                  />
+                  <q-btn
+                    flat
+                    round
+                    size="sm"
+                    @click="cancelText()"
+                    icon="fa fa-close"
+                    color="grey-7"
+                    class="tw-bg-gray-100"
                   />
                 </div>
-                <div class="flex justify-between">
-                  <div class="tw-mt-2 tw-space-x-2">
-                    <q-btn
-                      :loading="dataBase.loading"
-                      :disable="dataBase.text == ''"
-                      @click="addComment()"
-                      rounded
-                      size="md"
-                      :label="i18n.tr(`isite.cms.label.save`)"
-                      color="primary"
-                      no-caps
-                    />
-                    <q-btn
-                      flat
-                      size="md"
-                      @click="cancelText()"
-                      padding="4px 4px"
-                      icon="fa fa-close"
-                      color="primary"
-                    />
-                  </div>
-                </div>
               </div>
-              <div
-                v-if="loadingComment"
-                class="tw-py-8"
+            </div>
+            <div v-if="loadingComment" class="tw-py-12 tw-text-center">
+              <q-spinner color="primary" size="2.5em" :thickness="3" />
+            </div>
+          </q-item-section>
+        </q-item>
+
+        <q-item v-if="permisionComments.index" class="tw-p-0">
+          <q-item-section v-if="!loading">
+            <q-timeline color="primary" class="tw-px-2">
+
+              <q-timeline-entry
+                v-for="(item, index, itemKey) in comments"
+                :key="itemKey"
+                :icon="item.icon ? item.icon : 'fa-regular fa-comment'"
+                :color="item.color || 'primary'"
+                class="tw-pb-6"
               >
-                <q-spinner
-                  color="primary"
-                  size="3em"
-                  :thickness="2"
-                  class="tw-mx-auto"
-                />
-              </div>
-            </q-item-section>
-          </q-item>
-          <q-item v-if="permisionComments.index">
-            <q-item-section v-if="!loading">
-              <q-timeline class="grey-4 timeline-ctn">
-                <q-timeline-entry
-                  v-for="(item, index, itemKey) in comments"
-                  :key="itemKey"
-                  :icon="item.icon ? item.icon : 'fa-regular fa-comment'"
-                  :color="item.color"
-                >
-                 <div class="tw-p-4 tw-rounded-md tw-bg-white">
-                    <div>
-                      <h4
-                      class="tw-text-sm tw-space-x-1"
-                    >
-                      <strong v-if="item.userProfile && !Boolean(item.internal)">
-                        {{ item.userProfile.fullName }}
-                      </strong>
-                      <small v-if="item.updatedAt || item.createdAt">
-                        {{ formatDate(item.updatedAt|| item.createdAt) }}
-                      </small>
-                    </h4>
-                    <CKEditor
-                      v-model="item.comment"
-                      v-if="item.active"
-                    ></CKEditor>
+                <div class="tw-group tw-relative tw-p-4 tw-rounded-2xl tw-bg-white tw-border tw-border-gray-100 tw-shadow-sm hover:tw-shadow-md tw-transition-all tw-duration-300">
+                  <div>
+                    <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
+                      <h4 class="tw-text-sm tw-m-0 tw-flex tw-items-center tw-gap-2">
+                          <span v-if="item.userProfile && !Boolean(item.internal)" class="tw-font-bold tw-text-gray-800">
+                            {{ item.userProfile.fullName }}
+                          </span>
+                        <span v-if="item.internal" class="tw-text-xs tw-font-medium tw-px-2 tw-py-0.5 tw-bg-gray-100 tw-text-gray-500 tw-rounded-full">
+                            Sistema
+                          </span>
+                        <small class="tw-text-gray-400 tw-font-normal">
+                          {{ formatDate(item.updatedAt|| item.createdAt) }}
+                        </small>
+                      </h4>
+
+                      <q-btn
+                        flat
+                        round
+                        v-if="permisionComments.destroy && !Boolean(item.internal)"
+                        class="tw-text-gray-300 hover:tw-text-red-400 tw-transition-colors"
+                        icon="fa-light fa-trash"
+                        size="xs"
+                        @click="deleteComment(item.id)"
+                      >
+                        <q-tooltip class="tw-bg-red-500">{{ i18n.tr(`isite.cms.label.delete`) }}</q-tooltip>
+                      </q-btn>
+                    </div>
+
+                    <CKEditor v-model="item.comment" v-if="item.active" />
+
                     <div v-else>
                       <div
-                       class="tw-flex tw-border tw-p-2"
-                       :class="{'tw-cursor-pointer': !Boolean(item.internal) }"
+                        class="tw-relative"
+                        :class="{'tw-cursor-pointer group/content': !Boolean(item.internal) }"
+                        @click="!Boolean(item.internal) ? activeEdit(item.id): null"
                       >
-                        <div class="tw-w-11/12">
-                          <div
-                            v-html="item.comment"
-                            v-if="permisionComments.index"
-                            @click="!Boolean(item.internal) ? activeEdit(item.id): null"
-                          />
-                        </div>
-                        <div class="tw-text-right tw-text-xs tw-w-1/12">
-                          <q-btn
-                            flat
-                            v-if="permisionComments.destroy && !Boolean(item.internal)"
-                            class="tw-text-gray-500"
-                            icon="fa-light fa-trash"
-                            size="xs"
-                            @click="deleteComment(item.id)"
-                          >
-                            <q-tooltip>{{
-                                i18n.tr(`isite.cms.label.delete`)
-                              }}</q-tooltip>
-                          </q-btn>
+                        <div
+                          v-html="item.comment"
+                          class="tw-text-gray-700 tw-leading-relaxed tw-text-sm"
+                          :class="{'tw-italic tw-text-gray-500': item.internal}"
+                        />
+                        <div v-if="!Boolean(item.internal)" class="tw-absolute tw-right-0 tw-top-0 tw-opacity-0 group-hover/content:tw-opacity-100 tw-text-primary tw-text-[10px] tw-font-bold tw-uppercase">
+                          Click para editar
                         </div>
                       </div>
                     </div>
-                    <div class="flex justify-between" v-if="item.active">
-                      <div class="tw-mt-2 tw-space-x-2">
+
+                    <div class="flex justify-between tw-mt-4" v-if="item.active">
+                      <div class="tw-space-x-2">
                         <q-btn
-                          :disable="
-                            item.comment == '' || item.comment == item.textEdit
-                          "
+                          :disable="item.comment == '' || item.comment == item.textEdit"
                           :loading="item.loading"
                           @click="updateComment('edit', item.id)"
+                          unelevated
                           rounded
-                          size="md"
+                          size="sm"
                           :label="i18n.tr(`isite.cms.label.update`)"
                           color="primary"
                           no-caps
                         />
                         <q-btn
                           flat
-                          size="md"
+                          round
+                          size="xs"
                           @click="updateComment('cancel', item.id)"
-                          padding="4px 4px"
                           icon="fa fa-close"
-                          color="primary"
-                        >
-                          <q-tooltip>{{
-                            i18n.tr(`isite.cms.label.cancel`)
-                          }}</q-tooltip>
-                        </q-btn>
+                          color="grey-6"
+                          class="tw-bg-gray-50"
+                        />
                       </div>
                     </div>
-                    </div>
+                  </div>
                 </div>
-                </q-timeline-entry>
-              </q-timeline>
-            </q-item-section>
-            <div v-if="loading" class="tw-my-10">
-              <inner-loading :visible="loading"/>
-            </div>
-          </q-item>
-        </q-list>
+              </q-timeline-entry>
+            </q-timeline>
+          </q-item-section>
+
+          <div v-if="loading" class="tw-w-full tw-flex tw-justify-center tw-py-12">
+            <q-spinner-dots color="primary" size="3em" />
+          </div>
+        </q-item>
+      </q-list>
     </div>
   </div>
 </template>
