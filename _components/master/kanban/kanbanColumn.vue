@@ -229,6 +229,8 @@
               class="tw-cursor-pointer"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
+              @openModal="runShowModal(element)"
+              @deleteCard="$emit('deleteCard', element)"
             >
               <template #header>
                 <component 
@@ -241,6 +243,7 @@
                 <component 
                   :is="cardComponent"
                   v-bind="{data: element}"
+                  @openModal="runShowModal(element)"
                 />
               </template>
 

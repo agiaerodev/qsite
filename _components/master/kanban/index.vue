@@ -2,16 +2,25 @@
   <div>
     <div>
       <page-actions 
-        title="kanban"
-      />
-    </div>
+        :extra-actions="tableActions"
 
-    <infomation
-      v-show="!loading"
-      ref="kanbanModalInformation"
+        :title="title"
+        @refresh="init"
+      />
+    </div>   
+
+   <dynamicList
+        
+        ref="dynamicList"
+        :listConfig="crudData"
+        @new="() => {console.log('newww')}"
     />
+
     
+    
+    <!--Kanban-->
     <div
+      v-if="iskanbanMode"
       :id="`kanbanCtn${uId}`"
       @mouseover="hoverArrow = true"
       @mouseleave="hoverArrow = false"
@@ -38,11 +47,8 @@
               :columnIndex="index"
               :totalColumns="kanbanColumns.length"
               :ref="`kanbanColumn-${element.id}`"
-              class="
-                  tw-flex-none tw-space-y-0
-                  w-h-auto
-                  tw-bg-gray-100 tw-rounded-lg tw-shadow
-                "
+              @deleteCard="item => deleteKanbanCard(item)"
+              class="tw-flex-none tw-space-y-0 w-h-autotw-bg-gray-100 tw-rounded-lg tw-shadow"
             />
           </div>
         </template>
@@ -108,6 +114,11 @@
         </template>
       </draggable>
     </div>
+
+    <infomation
+      v-show="!loading"
+      ref="kanbanModalInformation"
+    />
     
     <automationRules
       v-if="false"
@@ -232,7 +243,8 @@ export default {
       search: null,
       hoverArrow: false,
       scrollTotal: 0, 
-      loadInformatioModal: false
+      loadInformatioModal: false, 
+      localShowAs: 'kanban'
     };
   },
   mounted() {
@@ -248,6 +260,72 @@ export default {
     });
   },
   computed: {
+
+    title(){
+      return this?.crudData?.title || 'Kanban Component'
+    },     
+    //Validate read show as
+    readShowAs() {
+      return this.crudData?.read?.showAs || 'kanban';
+    },
+    iskanbanMode(){
+      return this.localShowAs == 'kanban'
+
+    },
+
+    //Table actions
+    tableActions() {
+      //Default response
+      let response = [];
+      //adds kanban actions 
+      if(this.readShowAs == 'kanban' ){
+        response.push({
+          label: this.iskanbanMode ? 'Table view' : 'Kanban view',
+          //vIf: !this.isMobile,
+          props: {
+            icon: this.iskanbanMode ? 'fa-light fa-table' : 'fa-light fa-chart-kanban',
+            id: 'switchKanbanButton'
+          },
+          action: () => {
+            if(this.readShowAs == 'kanban'){
+              this.localShowAs = this.localShowAs === 'kanban' ? 'table' : 'kanban';
+              this.init()
+            }
+            
+          }
+        })
+      }
+
+      /*
+      //Add search action
+      if (this.crudData.read.search !== false) response.push('search');
+      //Add create action
+      if (this.crudData.create) {
+        if (this.crudData.create?.actions?.length > 0) {
+          response.push(
+            {
+              props: {
+                label: this.$tr(`isite.cms.label.new`),
+                icon: 'fa-duotone fa-plus',
+              },
+              type: 'btn-dropdown',
+              items: this.crudData.create?.actions || [],
+            })
+        } else {
+          response.push('new')
+        }
+      }
+      // se oculta page action
+      if (this.localShowAs === 'kanban') response = [...response, ...this.$refs.kanban.extraPageActions];
+      // extras for page action
+      if (this.crudData?.extraActions?.length > 0) response.push(...this.crudData.extraActions);
+      */
+      //Response
+      return response.filter((item) => !item.vIfAction);
+    },
+    help() {
+      return this.crudData.read?.help ?? {};
+    },
     
 
     extraPageActions() {

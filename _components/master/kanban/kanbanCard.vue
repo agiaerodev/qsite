@@ -75,14 +75,11 @@
     </section>
 
     <!-- content slot -->
-    <div
-      @click="() => {
-        if(this.cardPermissions.edit){
-          runShowModal(cardData)
-        }
-      }"
-    >
-      <slot name="content" />
+    <div>
+      <slot 
+        @openModal="openModal"
+        name="content"
+      />
     </div>
    
   </div>
@@ -158,48 +155,39 @@ export default {
     kanban(){
       return this.crudData?.kanban || null;
     },
-    cardActions(){
-      console.count('setCardActions')
-      const response = this.crudData.read.kanban?.actions || [];      
-
-      /* Edit card  action */
-        if(this.cardPermissions.edit){
-          response.push(
-          {
-            name: 'viewLead',
-            label: this.$tr('isite.cms.label.information'),
-            icon: 'fas fa-info-circle',
-            action: (item) => {
-              //this.$refs.kanban.showModal(item)
-            }
-          })
+    cardActions(){      
+      const defaultActions = [
+        {
+          vIf: this.cardPermissions.edit,
+          name: 'viewCard',            
+          label: this.$tr('isite.cms.label.information'),
+          icon: 'fas fa-info-circle',
+          action: (item) => {
+            this.openModal()
+          }
+        },
+        {
+          vIf: this.cardPermissions.delete, 
+          name: 'deleteCard',            
+          icon: 'fa-light fa-trash-can',
+          color: 'red',
+          label: this.$tr('isite.cms.label.delete'),
+          action: (item) => {            
+            this.deleteCard()
+          }
         }
-        /* Delete card  action */
-        if(this.cardPermissions.delete){
-          response.push({
-            icon: 'fa-light fa-trash-can',
-            color: 'red',
-            label: this.$tr('isite.cms.label.delete'),
-            action: (item) => {
-              /*
-              this.$refs.kanban.deleteKanbanCard(item).then(() => {
-                this.getDataTable(true)
-              })
-                */
-            }
-          })
-        }
-        return response;
+      ]
 
+      return [...this.crudData.read.kanban?.actions, ...defaultActions]  || defaultActions;
     },
   },
   methods: {
     
     openModal() {
-      if (this.showRequestData) this.showRequestData(this.cardData);
-    },
-    openEdit() {
-      if (this.update) this.update(this.cardData);
+      this.$emit('openModal', this.cardData)
+    },    
+    deleteCard(){
+      this.$emit('deleteCard', this.cardData)
     },
     async runAction(action) {
       //Define action params
