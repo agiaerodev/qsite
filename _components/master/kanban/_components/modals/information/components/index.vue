@@ -158,7 +158,7 @@ export default {
             permission: 'requestable.requestables.see-source',
             props: {
               crudType: 'select',
-              crudData: import('modules/qrequestable/_crud/sources'),
+              //crudData: import('modules/qrequestable/_crud/sources'),
               crudProps: {
                 label: this.$tr('isite.cms.label.source'),
                 rules: [
