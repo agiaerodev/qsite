@@ -222,13 +222,12 @@ export default {
           }
         }
 
-
         //Data response
         let dataResponse = {
           base64: base64,
           size: parseInt((base64).replace(/=/g, "").length * 0.75),
-          height: this.information.cropper.height,
-          width: this.information.cropper.width
+          height: this.information?.cropper?.height ?? 0,
+          width: this.information?.cropper?.width ?? 0
         }
         //Emit value
         this.$emit('cropped', dataResponse)
