@@ -146,12 +146,12 @@ export default {
           {
             popupName: 'width',
             icon: 'fas fa-arrows-alt-h',
-            value: `${this.information ? this.information.cropper.width : ''}px`,
+            value: `${this.information ? this.information?.cropper?.width || 0 : ''}px`,
             label: this.$tr('isite.cms.form.width'),
             action: () => {
               this.$refs.cropper.setData({
-                width: parseInt(this.cropperSize.width),
-                height: parseInt(this.cropperSize.height)
+                width: parseInt(this.cropperSize?.width),
+                height: parseInt(this.cropperSize?.height)
               })
             }
           },
@@ -162,8 +162,8 @@ export default {
             label: this.$tr('isite.cms.form.height'),
             action: () => {
               this.$refs.cropper.setData({
-                width: parseInt(this.cropperSize.width),
-                height: parseInt(this.cropperSize.height)
+                width: parseInt(this.cropperSize?.width),
+                height: parseInt(this.cropperSize?.height)
               })
             }
           },
