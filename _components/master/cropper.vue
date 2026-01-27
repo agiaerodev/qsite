@@ -216,8 +216,8 @@ export default {
 
         /* if didn't crop returns original image */
         if(this.isCompressed) {
-          if( this.information.image.naturalWidth == this.information.cropper.width &&
-            this.information.image.naturalHeight == this.information.cropper.height){
+          if( this.information.image.naturalWidth == this.information?.cropper?.width &&
+            this.information.image.naturalHeight == this.information?.cropper?.height){
             base64 = this.imgSrc
           }
         }
