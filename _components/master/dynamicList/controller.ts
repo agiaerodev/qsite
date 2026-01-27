@@ -136,7 +136,7 @@ export default function controller (props: any, emit: any)
       await methods.setColumns()
       await methods.setRows()
 
-      if (!state.dynamicFilterValues)
+      if(!Object.keys(state.dynamicFilterValues).length)
       {
         methods.getData({pagination: {page: 1}}, true)
       }
