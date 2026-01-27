@@ -2,14 +2,11 @@
   <div
     class="
       tw-bg-white
-      tw-shadow
-      tw-rounded
-      tw-px-3
-      tw-pt-3
-      tw-pb-2
-      tw-border-l-2
-      tw-my-2
-      kb-card
+      tw-drop-shadow-lg
+      tw-rounded-xl
+      tw-p-3
+      tw-border
+      tw-mb-4
       tw-select-none
     "
     :style="{ borderLeftColor: colorColumn }"

@@ -7,16 +7,16 @@
         :title="title"
         @refresh="init"
       />
-    </div>   
+    </div>
 
-   <dynamicList
-        
-        ref="dynamicList"
+    <!-- dynamicList: table mode -->
+    <div>
+      <dynamicList
+        v-if="!iskanbanMode"
+        :loadPageActions="false"
         :listConfig="crudData"
-        @new="() => {console.log('newww')}"
-    />
-
-    
+      />
+    </div>
     
     <!--Kanban-->
     <div
@@ -34,7 +34,7 @@
         drag-class="dragCard"
         filter=".ignoreItem"
         draggable=".notMoveBetweenColumns"
-        :disabled="loading || !dragColumn || kanbanColumns.length === 0"
+        :disabled="!columnPermissions.drag ||loading || kanbanColumns.length === 0"
         class="tw-p-3 tw-h-auto tw-flex tw-space-x-4 tw-overflow-x-auto"
         @change="reorderColumns"
         :item-key="`columnKanban${uId}`"
@@ -47,8 +47,10 @@
               :columnIndex="index"
               :totalColumns="kanbanColumns.length"
               :ref="`kanbanColumn-${element.id}`"
+              :columnPermissions="columnPermissions"
+              :cardPermissions="cardPermissions"
               @deleteCard="item => deleteKanbanCard(item)"
-              class="tw-flex-none tw-space-y-0 w-h-autotw-bg-gray-100 tw-rounded-lg tw-shadow"
+              class="tw-flex-none tw-space-y-0 "
             />
           </div>
         </template>
@@ -150,6 +152,7 @@ import modalAnalytics from './modals/analytics/index.vue';
 import showaAnalytics from './modals/analytics/actions/show.ts';
 import storeAnalytics from './modals/analytics/store/index.ts';
 import infomation from './_components/modals/information/components/index.vue'
+import dynamicList from 'modules/qsite/_components/master/dynamicList';
 
 /* tests */
 import testColumns from './test/columns'
@@ -184,10 +187,6 @@ export default {
     showFunnel: {
       type: Boolean,
       default: () => false
-    },    
-    dragColumn: {
-      type: Boolean,
-      default: () => true
     },
     automation: {
       type: Boolean,
@@ -230,7 +229,8 @@ export default {
     formRules,
     modalStatus,
     modalAnalytics, 
-    infomation
+    infomation, 
+    dynamicList
   },
   data() {
     return {
@@ -271,6 +271,34 @@ export default {
     iskanbanMode(){
       return this.localShowAs == 'kanban'
 
+    },
+
+    kanban(){
+      return this.crudData?.read?.kanban || null;
+    },
+
+    kanbanPermissions(){
+      return this.kanban?.permissions || null
+    },
+    cardPermissions() {
+      const permissions = this.kanbanPermissions?.card || null
+      return {
+        index: permissions?.index || false,
+        create: permissions?.create || false,
+        edit: permissions?.edit || false,
+        delete: permissions?.delete || false, 
+        drag: permissions?.drag || false, 
+      }
+    },
+    columnPermissions() {
+      const permissions = this.kanbanPermissions?.column || null
+      return {
+        index: permissions?.index || false,
+        create: permissions?.create || false,
+        edit: permissions?.edit || false,
+        delete: permissions?.delete || false,
+        drag: permissions?.drag || false,
+      }
     },
 
     //Table actions
@@ -653,6 +681,8 @@ export default {
 </script>
 
 <style lang="scss">
+
+
 .kanbanBtnCtn .q-btn {
   border-radius: 10px;
 }

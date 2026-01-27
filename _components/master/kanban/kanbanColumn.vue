@@ -196,12 +196,14 @@
           <i class="fa-solid fa-plus"></i>
         </q-btn>
       </div>
-      <div class="c-body
-                  tw-shadow
-                  tw-overflow-y-auto
-                  tw-overflow-x-hidden
-                  tw-mb-4 tw-px-2"
-                >
+      <div 
+        class="
+          c-body
+          tw-overflow-y-auto
+          tw-overflow-x-hidden
+          tw-mb-4 tw-pr-2
+        "
+      >
         <draggable
           :id="columnData.id"
           :list="columnData.data"
@@ -253,25 +255,7 @@
 
           </template>
           <template #footer>
-            <div>
-              <div class="tw-text-center tw-h-5 tw-rounded">
-                <q-banner
-                  inline-actions
-                  rounded
-                  class="primary"
-                  v-if="
-                columnData.total !== 0 &&
-                isTotalNumberOfRecords &&
-                !loading &&
-                !columnData.loading
-              "
-                >
-                  <div>
-                    <i class="far fa-grin-beam-sweat tw-text-base" />
-                  </div>
-                  <div class="tw-font-semibold">Ya te dimos todo</div>
-                </q-banner>
-              </div>
+            <div>              
               <div
                 :class="`trigger-${this.uId}${columnData.id}`"
                 class="tw-text-center tw-h-5 tw-flex tw-justify-center"
@@ -309,6 +293,15 @@ export default {
       type: Number,
       default: () => 0,
     },
+    columnPermissions: {
+      type: Object,
+      required: true,
+    }, 
+    cardPermissions: {
+      type: Object,
+      required: true,
+    }
+
   },
   inject: [
     'saveStatusOrdering',
@@ -381,30 +374,7 @@ export default {
     },
     allowCreateCard() {
       return typeof this.columnData.id == 'string' || !this.cardPermissions.create;
-    },
-    kanbanPermissions(){
-      return this.kanban?.permissions || null
-    },
-    cardPermissions() {
-      const permissions = this.kanbanPermissions?.card || null
-      return {
-        index: permissions?.index || false,
-        create: permissions?.create || false,
-        edit: permissions?.edit || false,
-        delete: permissions?.delete || false, 
-        drag: permissions?.drag || false, 
-      }
-    },
-    columnPermissions() {
-      const permissions = this.kanbanPermissions?.column || null
-      return {
-        index: permissions?.index || false,
-        create: permissions?.create || false,
-        edit: permissions?.edit || false,
-        delete: permissions?.delete || false
-        //moveRequestables: this.$hasAccess('requestable.requestables.move')
-      }
-    },
+    },    
     allowCreateColumn() {
       if(this.columnPermissions.create) {
         return this.hover;
@@ -570,12 +540,11 @@ export default {
   transform: rotate(45deg);
 }
 .columnCtn .c-plus {
-    border-left: 1px dashed #bdb9b9;
     padding: 10px;
 }
 .columnCtn .c-body {
-    background: #f3f4f6;
-    border-radius: 10px;
+    background: #ffffff;
+    border-radius: 0px;
 }
 .columnCtn .icon-edit {
   animation-name: slideUpReturn;
