@@ -34,6 +34,7 @@
               tw-text-xs              
               tw-h-7
             "
+            style="color: #AAAAAA"
             icon="fa-light fa-ellipsis-vertical"
             @click.stop
           >          

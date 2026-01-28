@@ -34,13 +34,13 @@
         drag-class="dragCard"
         filter=".ignoreItem"
         draggable=".notMoveBetweenColumns"
-        :disabled="!columnPermissions.drag ||loading || kanbanColumns.length === 0"
+        :disabled="disabledColumn"
         class="tw-p-3 tw-h-auto tw-flex tw-space-x-4 tw-overflow-x-auto"
         @change="reorderColumns"
         :item-key="`columnKanban${uId}`"
       >
         <template #item="{element, index}">
-          <div v-if="!loading" :class="{'notMoveBetweenColumns': element.type !== 1}">
+          <div v-if="!loading" class="notMoveBetweenColumns">
             <kanbanColumn
               :crudData="crudData"
               :column-data="element"
@@ -121,11 +121,7 @@
       v-show="!loading"
       ref="kanbanModalInformation"
     />
-    
-    <automationRules
-      v-if="false"
-      ref="automationRules"
-    />
+        
     <formComponent
       ref="formComponent"
       :filterName="crudData.column ? crudData.column.filter.name : null"
@@ -134,8 +130,7 @@
       ref="formRules"
       :filterName="crudData.column ? crudData.column.filter.name : null"
     />
-    <modalStatus />
-    <modalAnalytics />
+    
 </div>
     
     
@@ -153,6 +148,7 @@ import showaAnalytics from './modals/analytics/actions/show.ts';
 import storeAnalytics from './modals/analytics/store/index.ts';
 import infomation from './_components/modals/information/components/index.vue'
 import dynamicList from 'modules/qsite/_components/master/dynamicList';
+import kanbanStore from 'modules/qsite/_components/master/kanban/store/kanbanStore.js';
 
 /* tests */
 import testColumns from './test/columns'
@@ -300,6 +296,9 @@ export default {
         drag: permissions?.drag || false,
       }
     },
+    disabledColumn(){
+      return !this.columnPermissions.drag || this.loading || this.kanbanColumns.length === 0
+    },
 
     //Table actions
     tableActions() {
@@ -324,11 +323,11 @@ export default {
         })
       }
 
-      /*
+      
       //Add search action
-      if (this.crudData.read.search !== false) response.push('search');
+      if (this.crudData?.read?.search !== false) response.push('search');
       //Add create action
-      if (this.crudData.create) {
+      if (this.crudData?.create) {
         if (this.crudData.create?.actions?.length > 0) {
           response.push(
             {
@@ -342,54 +341,17 @@ export default {
         } else {
           response.push('new')
         }
-      }
-      // se oculta page action
-      if (this.localShowAs === 'kanban') response = [...response, ...this.$refs.kanban.extraPageActions];
+      }           
+      
       // extras for page action
       if (this.crudData?.extraActions?.length > 0) response.push(...this.crudData.extraActions);
-      */
-      //Response
+      
       return response.filter((item) => !item.vIfAction);
     },
     help() {
       return this.crudData.read?.help ?? {};
     },
-    
-
-    extraPageActions() {
-      return [
-        {
-          vIf: this.$hasAccess('requestable.automationrules.manage'),
-          label: this.$tr('requestable.cms.label.analytics'),
-          props: {
-            padding: '3px 15px',
-            icon: 'fa-duotone fa-chart-mixed'
-          },
-          action: this.openAnalytics
-        },
-        {
-          vIf: this.$hasAccess('requestable.automationrules.manage'),
-          label: this.$tr('requestable.cms.label.automationRules'),
-          props: {
-            icon: 'fa-duotone fa-ruler',
-            padding: '3px 15px'
-          },
-          action: this.openAutomationRulesModal
-        },
-        {
-          vIf: this.$hasAccess('requestable.statuses.manage'),
-          label: this.$tr('isite.cms.form.status'),
-          props: {
-            icon: 'fa-duotone fa-swap-arrows',
-            padding: '3px 15px'
-          },
-          action: () => {
-            //kanbanStore().setModalStatus(true);
-          }
-        }];
-    },  
-    
-    
+        
     scroll() {
       return document.getElementById(`columnKanban${this.uId}`);
     }
@@ -626,7 +588,7 @@ export default {
     },
     async openAnalytics() {
       storeAnalytics.showModal = true;
-      storeAnalytics.categoryId = this.funnelSelected;
+      storeAnalytics.categoryId = 8;
       await showaAnalytics();
     },
     openFormComponentModal(statusId, title, id = null) {
