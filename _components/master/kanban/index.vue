@@ -3,7 +3,6 @@
     <div>
       <page-actions 
         :extra-actions="tableActions"
-
         :title="title"
         @refresh="init"
       />
@@ -42,6 +41,9 @@
         <template #item="{element, index}">
           <div v-if="!loading" class="notMoveBetweenColumns">
             <kanbanColumn
+              :cardComponent="cardComponent"
+              :headerComponent="headerComponent"
+              :uId="uId"
               :crudData="crudData"
               :column-data="element"
               :columnIndex="index"
@@ -49,6 +51,10 @@
               :ref="`kanbanColumn-${element.id}`"
               :columnPermissions="columnPermissions"
               :cardPermissions="cardPermissions"
+              :countTotalRecords="countTotalRecords()"
+              @addColumn="addColumn"
+
+              @openModal="(value) => openModal(value)"
               @deleteCard="item => deleteKanbanCard(item)"
               class="tw-flex-none tw-space-y-0 "
             />
@@ -117,39 +123,31 @@
       </draggable>
     </div>
 
-    <infomation
-      v-show="!loading"
-      ref="kanbanModalInformation"
+  <superModal
+    v-model="stateModal.show"
+    v-bind="stateModal.modalProps"
+  >  
+    <component      
+      :is="modalComponent"
+      v-bind="{data: stateModal.data}"
+      @cancel="() => stateModal.show = false"
+      @init="(props) => {
+        stateModal.modalProps = props
+      }"
     />
+  </superModal>
         
-    <formComponent
-      ref="formComponent"
-      :filterName="crudData.column ? crudData.column.filter.name : null"
-    />
-    <formRules
-      ref="formRules"
-      :filterName="crudData.column ? crudData.column.filter.name : null"
-    />
-    
 </div>
     
     
 </template>
 
 <script>
+import { markRaw } from "vue";
 import kanbanColumn from 'modules/qsite/_components/master/kanban/kanbanColumn.vue';
-import automationRules from './automationRules/index.vue';
 import draggable from 'vuedraggable';
-import formComponent from './modals/form.vue';
-import formRules from './modals/formRules';
-import modalStatus from './modals//statusModal/index.vue';
-import modalAnalytics from './modals/analytics/index.vue';
-import showaAnalytics from './modals/analytics/actions/show.ts';
-import storeAnalytics from './modals/analytics/store/index.ts';
-import infomation from './_components/modals/information/components/index.vue'
 import dynamicList from 'modules/qsite/_components/master/dynamicList';
-import kanbanStore from 'modules/qsite/_components/master/kanban/store/kanbanStore.js';
-
+import superModal from 'modules/qsite/_components/master/kanban/_components/modals/superModal'
 /* tests */
 import testColumns from './test/columns'
 import testCards from './test/cards'
@@ -176,57 +174,16 @@ export default {
       type: Object,
       default: () => ({})
     },
-    heightColumn: {
-      type: Number,
-      default: () => 235
-    },
-    showFunnel: {
-      type: Boolean,
-      default: () => false
-    },
-    automation: {
-      type: Boolean,
-      default: () => false
-    },
-    filter: {
-      type: Object,
-      default: () => ({})
-    }
   },
   provide() {
-    return {
-      saveStatusOrdering: this.saveStatusOrdering,
-      addKanbanCard: this.addKanbanCard,
-      deleteColumn: this.deleteColumn,
-      saveColumn: this.saveColumn,
-      updateColumn: this.updateColumn,
-      setPayloadStatus: this.setPayloadStatus,
-      addColumn: this.addColumn,
-      heightColumn: this.heightColumn,
-      uId: this.uId,
-      init: this.init,      
-      
-      automation: this.automation,
-      openFormComponentModal: this.openFormComponentModal,
-      addCard: this.addCard,
-      countTotalRecords: this.countTotalRecords,
-      deleteKanbanCard: this.deleteKanbanCard,
-      updateCardColumn: this.updateCard,
-      getStatus: this.getStatus, 
-      runShowModal: this.showModal,
-    };
+    return {};
   },
   
   components: {
     kanbanColumn,
     draggable,
-    automationRules,
-    formComponent,
-    formRules,
-    modalStatus,
-    modalAnalytics, 
-    infomation, 
-    dynamicList
+    dynamicList, 
+    superModal
   },
   data() {
     return {
@@ -240,7 +197,20 @@ export default {
       hoverArrow: false,
       scrollTotal: 0, 
       loadInformatioModal: false, 
-      localShowAs: 'kanban'
+      localShowAs: 'kanban', 
+
+      cardComponent: null, 
+      headerComponent: null,
+      modalComponent: null, 
+      
+      stateModal: {
+        modalProps: {
+          'custom-position': true,
+          'modalWidthSize': "80%"
+        },
+        data: null, 
+        show: false
+      }
     };
   },
   mounted() {
@@ -358,9 +328,19 @@ export default {
   },
   methods: {
     async init(refresh = false, isModal = false) {
-      this.kanbanColumns = [];      
-      await this.getColumns(refresh, isModal);
+      this.getCardComponent()
+      this.kanbanColumns = [];
+      await this.getColumns(refresh, isModal);      
     },
+
+    getCardComponent(){
+      if(!this.kanban) return
+      this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
+      this.headerComponent = markRaw(this?.kanban?.cardComponent?.header)
+      this.modalComponent = markRaw(this?.kanban?.cardComponent?.modal)
+    },
+
+
     setResetPage() {
       this.kanbanColumns.forEach((item) => {
         item.page = 1;
@@ -376,8 +356,6 @@ export default {
       });
     },
     async getStatus(refresh = false) {
-      
-      
       //const response = await this.$crud.index(route.apiRoute, parameters);
       const response = testColumns.list()
       return response;
@@ -452,10 +430,7 @@ export default {
         column.loading = false;
         console.log(error);
       }
-    },
-    getCardList(response) {
-      
-    },
+    },    
     async addKanbanCard(column, page) {
       const kanbancolumn = this.kanbanColumns.find(
         (item) => item.id === column.id
@@ -502,11 +477,14 @@ export default {
     async saveStatusOrdering() {
       try {
         if (!this.kanban.orderStatus) return;
-        const route = this.kanban.orderStatus;
+        
         const statusId = this.kanbanColumns.map((item) => ({ id: item.id }));
+        console.log('reorder columns')
+        /*
         await this.$crud.create(route.apiRoute, {
           [route.filter.name]: statusId
         });
+        */
       } catch (error) {
         console.log(error);
       }
@@ -547,28 +525,19 @@ export default {
     async saveColumn(data) {
       try {
         if (!this.kanban.column) return;
-        const route = this.kanban.column;
-        const payloadStatus = {};
-        payloadStatus.title = data.title;
-        payloadStatus.color = data.color;
-        payloadStatus[route.filter.name] = this.funnelSelected;
-        payloadStatus.type = data.type;
-        return await this.$crud.create(route.apiRoute, payloadStatus);
+        console.log('save colunm')
+        //return await this.$crud.create(route.apiRoute );
       } catch (error) {
         console.log(error);
-        this.setPayloadStatus();
+        
       }
     },
     async updateColumn(data) {
       try {
         if (!this.kanban.column) return;
-        const route = this.kanban.column;
-        const payloadStatus = {};
-        payloadStatus.id = data.id;
-        payloadStatus.title = data.title;
-        payloadStatus.color = data.color;
-        payloadStatus[route.filter.name] = this.funnelSelected;
-        await this.$crud.update(route.apiRoute, data.id, payloadStatus);
+        console.log('updateColumn')
+        
+        //await this.$crud.update(route.apiRoute, data.id, payloadStatus);
       } catch (error) {
         console.log(error);
         this.setPayloadStatus();
@@ -583,21 +552,6 @@ export default {
         [this.kanban.column.filter.name]: null
       };
     },
-    openAutomationRulesModal() {
-      if (this.$refs.automationRules) this.$refs.automationRules.openModal();
-    },
-    async openAnalytics() {
-      storeAnalytics.showModal = true;
-      storeAnalytics.categoryId = 8;
-      await showaAnalytics();
-    },
-    openFormComponentModal(statusId, title, id = null) {
-      if (this.automation) {
-        if (this.$refs.formRules) this.$refs.formRules.openModal(statusId, title, id);
-      } else {
-        if (this.$refs.formComponent) this.$refs.formComponent.openModal(statusId, title);
-      }
-    },
     countTotalRecords() {
       try {
         this.kanbanColumns.forEach(item => {
@@ -606,8 +560,7 @@ export default {
       } catch (error) {
         console.log(error);
       }
-    },
-    
+    },    
     setSearch(value) {
       this.search = value && value !== '' ? value : null;
     },
@@ -630,14 +583,16 @@ export default {
         }
       });
     },
-    async showModal(requestData) {
-      if(!this.loadInformatioModal){
-        this.loadInformatioModal = true;
-        await this.$refs.kanbanModalInformation.showRequestData(requestData).then(() => {
-          this.loadInformatioModal = false;
-        });        
-      }      
-    },
+    
+
+    openModal({col, card }){
+      if(card?.modalProps){
+        this.stateModal.modalProps = card.modalProps
+      }
+      this.stateModal.data = card
+      this.stateModal.show = true      
+      console.log({col, card })
+    }
   }
 };
 </script>

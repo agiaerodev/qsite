@@ -127,7 +127,7 @@
               padding="5px"
               icon="fa-duotone fa-rotate-right"
               size="6px"
-              @click="addCard(columnData.id)"
+              @click="() => { console.log('add card', columnData.id)}"
             >
               <q-tooltip>
                   {{ $trp('isite.cms.label.refresh') }}
@@ -190,7 +190,9 @@
             tw-w-full
             hover:tw-text-white
             hover:tw-bg-gray-200"
-          @click="openFormComponentModal(columnData.id, columnData.title)"
+          @click=" () => {
+            console.log('open new coumn form', columnData.id, columnData.title)
+          }"
           :disabled="allowCreateCard"
           >
           <i class="fa-solid fa-plus"></i>
@@ -231,21 +233,23 @@
               class="tw-cursor-pointer"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-              @openModal="runShowModal(element)"
+              @openModal="openModal(element)"
               @deleteCard="$emit('deleteCard', element)"
             >
               <template #header>
                 <component 
+                  v-if="headerComponent"
                   :is="headerComponent"
                   v-bind="{data: element}"
-                  @openModal="runShowModal(element)"
+                  @openModal="openModal(element)"
                 />
               </template>
               <template #content>
                 <component 
+                  v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
-                  @openModal="runShowModal(element)"
+                  @openModal="openModal(element)"
                 />
               </template>
 
@@ -271,9 +275,10 @@
 </template>
 
 <script>
-import { markRaw } from "vue";
+
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
+
 
 export default {
   props: {
@@ -300,35 +305,33 @@ export default {
     cardPermissions: {
       type: Object,
       required: true,
+    },
+    uId: {
+      type: String,      
+    }, 
+    countTotalRecords: {      
+      type: Number
+    }, 
+
+    cardComponent: {
+      type: Object,
+    },
+    headerComponent: {
+      type: Object,
     }
 
   },
   inject: [
-    'saveStatusOrdering',
-    'saveColumn',
-    'addKanbanCard',
-    'deleteColumn',
-    'updateColumn',
-    'setPayloadStatus',
-    'addColumn',
-    'heightColumn',
-    'uId',
-    'automation',
-    
-    'openFormComponentModal',
-    'countTotalRecords',
-    'addCard',
-    'updateCardColumn',
-    'runShowModal'
   ],
 
   async beforeMount(){
-    await this.getCardComponent();
+    ///await this.getCardComponent();
   },
   mounted() {
 
     const parent = document.querySelector(`#kanbanCtn${this.uId}`);
-    this.initialheight = `${window.innerHeight - parent.offsetTop - this.heightColumn}px`;
+    this.initialheight = `${window.innerHeight - parent.offsetTop - this.columnHeight}px`;
+    
     window.addEventListener("resize", () => {
       setTimeout(() => {
         this.computedHeight = `${
@@ -354,10 +357,7 @@ export default {
       hover: false,
       arrowKanbanNameHover: false,
       dragColumn: false,
-      dragCursor: false, 
-      headerComponent: null,
-      cardComponent: null,
-      quickActions: null,
+      dragCursor: false,
       cardActions: [],
     };
   },
@@ -408,8 +408,11 @@ export default {
     },
     columnWidth(){      
       return {
-        width: this?.kanban?.columnWidth || '240px'
+        width: `${this?.kanban?.columnWidth}` || '240px'
       }
+    },
+    columnHeight(){      
+      return this?.kanban?.columnHeight || '235'
     }, 
     
   },
@@ -421,7 +424,8 @@ export default {
     },
     
     addColumnKanban() {
-      this.addColumn(this.columnIndex, this.columnData);
+      
+      this.$emit('addColumn', this.columnIndex, this.columnData);
     },
     async columnDeleteMessages() {
       this.$q.dialog({
@@ -430,9 +434,10 @@ export default {
           cancel: true,
           persistent: true
         }).onOk(async() => {
-          await this.deleteColumn(this.columnData.id);
+          ///await this.deleteColumn(this.columnData.id);
           this.$alert.info({ message: this.$tr('isite.cms.message.recordDeleted') });
-          await this.saveStatusOrdering();
+          this.$emit('saveStatusOrdering')
+          //await this.saveStatusOrdering();
         }).onCancel(() => {})
     },
     observerCallback(entries) {
@@ -447,10 +452,12 @@ export default {
           if (!this.columnData.loading && !this.isTotalNumberOfRecords) {
             this.loading = true;
             this.columnData.page = this.columnData.page + 1;
+            /*
             await this.addKanbanCard(
               this.columnData,
               this.columnData.page
             );
+            */
             this.loading = false;
         }
       } catch (error) {
@@ -462,13 +469,17 @@ export default {
       if (this.columnData.title) {
         this.columnData.new = false;
         if(isNaN(this.columnData.id)) {
-          const response = await this.saveColumn(this.columnData)
-          this.columnData.id = response.data.id;
+          console.log('saveColumn => ', this.columnData)
+          //const response = await this.saveColumn(this.columnData)
+          //this.columnData.id = response.data.id;
         } else {
-          await this.updateColumn(this.columnData);
+          console.log('updateColumn => ', this.columnData)
+          ///await this.updateColumn(this.columnData);
         }
-        await this.saveStatusOrdering();
-        this.setPayloadStatus();
+        console.log('saveStatusOrdering')
+        //this.$emit('saveStatusOrdering')
+        //await this.saveStatusOrdering();
+        //this.setPayloadStatus();
       }
     },
     updateCard(data) {
@@ -480,8 +491,15 @@ export default {
     move(elm) {
       if (elm.from.id === elm.to.id) return;
       const data = { id: elm.clone.id, toId: elm.to.id };
-      this.updateCardColumn(Number(elm.to.id));
+      ///this.updateCardColumn(Number(elm.to.id));
       this.updateCard(data);
+    }, 
+    openModal(cardData){
+      console.log('openModal')
+      this.$emit('openModal', {
+        col: this.columnData, 
+        card: cardData
+      })
     }
   },
 };

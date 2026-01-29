@@ -86,35 +86,7 @@
 <script>
 
 export default {
-  inject: {
-    showRequestData: {
-      type: Function,
-      default: () => false,
-    },
-    update: {
-      type: Function,
-      default: () => false,
-    },
-    automation: {
-      type: Boolean,
-      default: () => false,
-    },
-    crudfieldActions: {
-      type: Function,
-      default: () => false,
-    },
-    deleteKanbanCard:  {
-      type: Function,
-      default: () => false,
-    },
-    openFormComponentModal:  {
-      type: Function,
-      default: () => false,
-    },
-    runShowModal: {
-      type: Function,
-      default: () => false,
-    },
+  inject: {    
   },
   props: {    
     cardData: {
