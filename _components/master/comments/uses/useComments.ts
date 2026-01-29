@@ -71,7 +71,6 @@ export default function useComments(props: any) {
     * Activates the comment text input field.
   */
   function activeText(): void {
-    if(!canAddComment.value) return;
     loadingComment.value = true;
     dataBase.value.active = true;
     dataBase.value.text = "";
