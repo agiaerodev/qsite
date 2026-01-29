@@ -37,6 +37,7 @@ export default function useComments(props: any) {
     }
   })
   const loadingComment = ref(false);
+  const canAddComment = computed(() => props.canAddComment);
   const commentableType = computed<string>(() => props.commentableType);
   const commentModel = ref<CommentModelContract>({ ...commentModelConst });
   const route = computed<string>(() => props.apiRoute);
@@ -70,6 +71,7 @@ export default function useComments(props: any) {
     * Activates the comment text input field.
   */
   function activeText(): void {
+    if(!canAddComment.value) return;
     loadingComment.value = true;
     dataBase.value.active = true;
     dataBase.value.text = "";
@@ -366,6 +368,7 @@ export default function useComments(props: any) {
     mainImage,
     loadingComment,
     files,
-    i18n
+    i18n,
+    canAddComment
   };
 }

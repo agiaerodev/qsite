@@ -82,7 +82,7 @@
                   <div>
                     <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
                       <h4 class="tw-text-sm tw-m-0 tw-flex tw-items-center tw-gap-2">
-                          <span v-if="item.userProfile && !Boolean(item.internal)" class="tw-font-bold tw-text-gray-800">
+                          <span v-if="item.userProfile && !Boolean(item.internal || item.isInternal)" class="tw-font-bold tw-text-gray-800">
                             {{ item.userProfile.fullName }}
                           </span>
                         <small class="tw-text-gray-400 tw-font-normal">
@@ -93,7 +93,7 @@
                       <q-btn
                         flat
                         round
-                        v-if="permisionComments.destroy && !Boolean(item.internal)"
+                        v-if="permisionComments.destroy && !Boolean(item.internal || item.isInternal)"
                         class="tw-text-gray-300 hover:tw-text-red-400 tw-transition-colors"
                         icon="fa-light fa-trash"
                         size="xs"
@@ -108,13 +108,13 @@
                     <div v-else>
                       <div
                         class="tw-relative"
-                        :class="{'tw-cursor-pointer group/content': !Boolean(item.internal) }"
-                        @click="!Boolean(item.internal) ? activeEdit(item.id): null"
+                        :class="{'tw-cursor-pointer group/content': !Boolean(item.internal || item.isInternal) }"
+                        @click="!Boolean(item.internal || item.isInternal) ? activeEdit(item.id): null"
                       >
                         <div
                           v-html="item.comment"
                           class="tw-text-gray-700 tw-leading-relaxed tw-text-sm"
-                          :class="{'tw-italic tw-text-gray-500': item.internal}"
+                          :class="{'tw-italic tw-text-gray-500': item.internal || item.isInternal}"
                         />
                       </div>
                     </div>
