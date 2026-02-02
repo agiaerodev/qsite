@@ -29,6 +29,7 @@ export default {
     modelValue: {default: ''},
     name: {default: null},
     disk: { default: null },
+    toolbarFilters: { type: Array, default: () => [] }
   },
   emits: ['update:modelValue'],
   components: {ckEditor: CKEditor.component},
@@ -52,14 +53,6 @@ export default {
     return {
       responseValue: '',
       loading: false,
-      configEditor: {
-        allowedContent: true,
-        filebrowserBrowseUrl: this.configModules('main.qmedia.moduleName') ? this.$router.resolve({name: 'app.media.select'}).href : null,
-        extraPlugins: 'colorbutton,colordialog,justify,collapsibleItem,font,btgrid,simplebox,ckeditorfa',
-        embed_provider: '//iframe.ly/api/oembed?url={url}&callback={callback}&api_key=7e0aa12b0cd2c01651346b',
-        contentsCss: 'https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css',
-        fontSize_sizes: fontSizes.join('')
-      }
     }
   },
   computed: {
@@ -69,7 +62,41 @@ export default {
     //default disk
     mediaDisk() {
       return this.disk || this.$getSetting('media::filesystem');
-    }
+    },
+    configEditor() {
+      return  {
+        allowedContent: true,
+        filebrowserBrowseUrl: this.configModules('main.qmedia.moduleName') ? this.$router.resolve({name: 'app.media.select'}).href : null,
+        extraPlugins: 'colorbutton,colordialog,justify,collapsibleItem,font,btgrid,simplebox,ckeditorfa',
+        embed_provider: '//iframe.ly/api/oembed?url={url}&callback={callback}&api_key=7e0aa12b0cd2c01651346b',
+        contentsCss: 'https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css',
+        fontSize_sizes: fontSizes.join(''),
+        toolbar: this.fullToolbar
+      }
+    },
+    fullToolbar() {
+      const masterToolbar = [
+        { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+        { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'] },
+        { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+        { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Iframe', 'btgrid', 'collapsibleItem'] },
+        { name: 'tools', items: ['Maximize', 'ShowBlocks', 'Source'] },
+        { name: 'basicstyles', items: ['Bold', 'Italic', 'Strike', 'RemoveFormat'] },
+        { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+        { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+        { name: 'colors', items: ['TextColor', 'BGColor'] },
+        { name: 'custom', items: ['ckeditorfa'] }
+      ];
+
+      if (!this.toolbarFilters || this.toolbarFilters.length === 0) {
+        return masterToolbar;
+      }
+
+      return masterToolbar.filter(group => {
+        if (typeof group === 'string') return false;
+        return this.toolbarFilters.includes(group.name);
+      });
+    },
   },
   methods: {
     init() {
@@ -86,7 +113,7 @@ export default {
       //events
       CKEDITOR.on('instanceReady', (event) => {
         this.onPaste(event, CKEDITOR)
-      });      
+      });
     },
     configModules(name) {
       if (!name) return;
@@ -94,14 +121,14 @@ export default {
     },
     onPaste(event, ckEditor){
       const editor = event.editor;
-      
+
       const notification = new ckEditor.plugins.notification( editor, {
         message: this.$tr('isite.cms.label.loading'),
         type: 'info'
       } );
 
       editor.on('paste', (event) => {
-        const value = event.data.dataValue        
+        const value = event.data.dataValue
         if(value.includes('img') && value.includes('data:image')){
 
           const element = ckEditor.dom.element.createFromHtml(value) //ckeditor element to get the src
@@ -119,31 +146,31 @@ export default {
 
         }
       })
-    },   
+    },
     //upload image
     async uploadImage(data, notification) {
-      /* create a file from base64 data and adds to form*/      
-      return new Promise((resolve, reject) => {        
+      /* create a file from base64 data and adds to form*/
+      return new Promise((resolve, reject) => {
         this.cropper(data).then((response) => {
-          //this.loading = true          
+          //this.loading = true
           if(response){
             notification.show();
 
-            fetch(response.base64) //get blob file from cropper base64 
+            fetch(response.base64) //get blob file from cropper base64
               .then(res => res.blob())
               .then(blob => {
-                
+
                 let fileData = new FormData();
                 fileData.append('parent_id', 0);
                 fileData.append('disk', this.mediaDisk);
                 //create a file from blob data to be append
-                const file = new File([blob], "ckeditor.png", { type: 'image/png' });        
+                const file = new File([blob], "ckeditor.png", { type: 'image/png' });
                 fileData.append('file', file)
 
                 this.$crud.post('apiRoutes.qmedia.files', fileData).then(response => {
                   this.loading = false
-                  resolve(response.data)                  
-                
+                  resolve(response.data)
+
                 }).catch((error) => {
                   console.log(error)
                   notification.hide();
@@ -154,23 +181,23 @@ export default {
           } else {
             //canceled
             resolve(false)
-          }              
+          }
         })
       })
     },
 
-    cropper(base64){      
+    cropper(base64){
       return new Promise((resolve, reject) => {
         eventBus.emit('master.cropper.image', {
           src: base64,
           type: 'image/png',
           ratio: 'free',
-          callBack: async (fileCropped) => {            
+          callBack: async (fileCropped) => {
             resolve(fileCropped)
           }
         })
       })
-    }  
+    }
   }
 }
 </script>

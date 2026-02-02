@@ -1,38 +1,40 @@
 <template>
   <div class="dashboard">
     <template v-for="quickCard in views">
-      <component 
-        :is="quickCard.component" 
-        v-bind="quickCard"
-      />
+      <component :is="quickCard.component" v-bind="quickCard" />
     </template>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import controller from './controller'
+import { defineComponent } from 'vue';
+import controller from './controller';
 
 export default defineComponent({
   props: {
     configName: {
       type: String,
-      default: null
+      default: null,
     },
     dynamicFilterValues: {
       required: false,
       type: Object,
-      default: () => ({})
+      default: () => ({}),
+    },
+    quickCards: {
+      required: false,
+      type: Object,
+      default: () => ({}),
     },
     baseFilters: {
       required: false,
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
-  setup(props, {emit}) {
-    return controller(props, emit)
-  }
-})
+  setup(props, { emit }) {
+    return controller(props, emit);
+  },
+});
 </script>
 <style lang="scss">
 .dashboard {

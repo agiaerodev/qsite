@@ -36,7 +36,9 @@ export default function useComments(props: any) {
       maxFiles: 3,
     }
   })
+  const toolbarFiltersCkEditor = computed(() => props.toolbarFiltersCkEditor);
   const loadingComment = ref(false);
+  const canAddComment = computed(() => props.canAddComment);
   const commentableType = computed<string>(() => props.commentableType);
   const commentModel = ref<CommentModelContract>({ ...commentModelConst });
   const route = computed<string>(() => props.apiRoute);
@@ -53,7 +55,7 @@ export default function useComments(props: any) {
     destroy: hasAccess(`${props.permisionComments}.destroy`),
   }));
   const dataBase = ref<any>({ ...commentModel.value });
-  const textPlaceholder = ref<string>(i18n.tr(`requestable.cms.message.writeComment`));
+  const textPlaceholder = computed<string>(() => i18n.tr('isite.cms.messages.writeComment'));
   const editorConfig = ref<EditorConfigContract>({
     height: 100,
   });
@@ -86,7 +88,7 @@ export default function useComments(props: any) {
       $q
         .dialog({
           ok: "Si",
-          message: i18n.tr(`requestable.cms.message.undoComment`),
+          message: i18n.tr(`isite.cms.messages.undoComment`),
           cancel: "No",
           persistent: true,
         })
@@ -134,7 +136,7 @@ export default function useComments(props: any) {
       $q
         .dialog({
           ok: i18n.tr('isite.cms.label.yes'),
-          message: i18n.tr(`requestable.cms.message.undoComment`),
+          message: i18n.tr(`isite.cms.messages.undoComment`),
           cancel: i18n.tr('isite.cms.label.no'),
           persistent: true,
         })
@@ -175,14 +177,14 @@ export default function useComments(props: any) {
           comment.active = false;
           comment.edit = false;
           alert.info({
-            message: i18n.tr(`requestable.cms.message.updateComment`),
+            message: i18n.tr(`isite.cms.messages.updateComment`),
           });
         })
         .catch((error) => {
           comment.loading = false;
           console.log(error);
           alert.error({
-            message: i18n.tr(`requestable.cms.message.updateNoComment`),
+            message: i18n.tr(`isite.cms.messages.updateNoComment`),
           });
         });
       dataComment.value.close = false;
@@ -232,13 +234,13 @@ export default function useComments(props: any) {
       await getCommentsList(props.commentableId);
       dataBase.value = { ...commentModel.value };
       alert.info({
-        message: i18n.tr(`requestable.cms.message.savedComment`),
+        message: i18n.tr(`isite.cms.messages.savedComment`),
       });
     } catch (error) {
       console.log(error);
       dataBase.value.loading = false;
       alert.error({
-        message: i18n.tr(`requestable.cms.message.savedNoComment`),
+        message: i18n.tr(`isite.cms.messages.savedNoComment`),
       });
     }
   }
@@ -250,7 +252,7 @@ export default function useComments(props: any) {
     $q
       .dialog({
         ok: i18n.tr("isite.cms.label.delete"),
-        message: i18n.tr("isite.cms.message.deleteRecord"),
+        message: i18n.tr("isite.cms.messages.deleteRecord"),
         cancel: true,
         persistent: true,
       })
@@ -286,6 +288,10 @@ export default function useComments(props: any) {
         filter: {
           commentableType: commentableType.value,
           commentableId,
+          order: {
+            field: 'created_at',
+            way: 'desc',
+          }
         },
         include: "userProfile",
       };
@@ -298,8 +304,8 @@ export default function useComments(props: any) {
             active: false,
             loading: false,
             textEdit: "",
-            icon: item.type ? config.data[item.type].icon : 'fa-regular fa-comment',
-            color: item.type ? config.data[item.type].color : 'primary',
+            icon: item.type && config.data[item.type]?.icon ? config.data[item.type]?.icon : 'fa-regular fa-comment',
+            color: item.type && config.data[item.type]?.color ? config.data[item.type]?.color : 'primary',
           }));
           loading.value = false;
         })
@@ -333,6 +339,7 @@ export default function useComments(props: any) {
   getCommentsList(props.commentableId);
   // Hook to handle component cleanup and finalize ongoing comment operations
   onBeforeUnmount(async () => {
+    console.log(dataComment.value.close)
     if (dataComment.value.close) {
       if (dataComment.value.edit) {
         await updateComment('edit', dataComment.value.id)
@@ -361,6 +368,8 @@ export default function useComments(props: any) {
     mainImage,
     loadingComment,
     files,
-    i18n
+    i18n,
+    canAddComment,
+    toolbarFiltersCkEditor
   };
 }

@@ -1687,12 +1687,11 @@ export default {
           let fieldSelect = { label: 'title', id: 'id' };
 
           //enable cache by isite setting
-          let enableCache = this.$getSetting('isite::enableDynamicFieldsCache');
+          let enableCache = this.$getSetting('isite::enableDynamicFieldsCache')
           //enable cache by params
           if (this.enableCache) enableCache = 1;
-
           let params = {//Params to request
-            refresh: enableCache == '1' ? false : true,
+            refresh: loadOptions?.refresh ? loadOptions?.refresh : (enableCache == '1' ? false : true),
             params: loadOptions.requestParams || {}
           };
 

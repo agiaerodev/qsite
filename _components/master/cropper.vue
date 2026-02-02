@@ -64,6 +64,7 @@ export default {
       imgType: false,
       callBack: false,
       aspectRatio: NaN,
+      isCompressed: true,
     }
   },
   computed: {
@@ -145,12 +146,12 @@ export default {
           {
             popupName: 'width',
             icon: 'fas fa-arrows-alt-h',
-            value: `${this.information ? this.information.cropper.width : ''}px`,
+            value: `${this.information ? this.information?.cropper?.width || 0 : ''}px`,
             label: this.$tr('isite.cms.form.width'),
             action: () => {
               this.$refs.cropper.setData({
-                width: parseInt(this.cropperSize.width),
-                height: parseInt(this.cropperSize.height)
+                width: parseInt(this.cropperSize?.width),
+                height: parseInt(this.cropperSize?.height)
               })
             }
           },
@@ -161,8 +162,8 @@ export default {
             label: this.$tr('isite.cms.form.height'),
             action: () => {
               this.$refs.cropper.setData({
-                width: parseInt(this.cropperSize.width),
-                height: parseInt(this.cropperSize.height)
+                width: parseInt(this.cropperSize?.width),
+                height: parseInt(this.cropperSize?.height)
               })
             }
           },
@@ -181,6 +182,9 @@ export default {
         if (params.type) this.imgType = this.$clone(params.type)
         if (params.callBack) this.callBack = params.callBack
         if (params.ratio) this.aspectRatio = this.parseRatio(params.ratio)
+        if (params?.isCompressed !== undefined) {
+          this.isCompressed = params.isCompressed
+        }
       })
     },
     //Open crop
@@ -192,14 +196,14 @@ export default {
     getCropperData() {
       //Get all information
       this.information = {
-        cropper: this.$refs.cropper.getData(true),
-        container: this.$refs.cropper.getContainerData(),
-        image: this.$refs.cropper.getImageData()
+        cropper: this.$refs?.cropper?.getData(true),
+        container: this.$refs?.cropper?.getContainerData(),
+        image: this.$refs?.cropper?.getImageData()
       }
       //Set cropper size information
       this.cropperSize = {
-        width: parseInt(this.information.cropper.width),
-        height: parseInt(this.information.cropper.height)
+        width: parseInt(this.information?.cropper?.width),
+        height: parseInt(this.information?.cropper?.height)
       }
     },
     //Crop Image
@@ -211,17 +215,19 @@ export default {
         let base64 = this.$refs.cropper.getCroppedCanvas().toDataURL(this.imgType)
 
         /* if didn't crop returns original image */
-        if( this.information.image.naturalWidth == this.information.cropper.width &&
-          this.information.image.naturalHeight == this.information.cropper.height){
-          base64 = this.imgSrc
+        if(this.isCompressed) {
+          if( this.information.image.naturalWidth == this.information?.cropper?.width &&
+            this.information.image.naturalHeight == this.information?.cropper?.height){
+            base64 = this.imgSrc
+          }
         }
 
         //Data response
         let dataResponse = {
           base64: base64,
           size: parseInt((base64).replace(/=/g, "").length * 0.75),
-          height: this.information.cropper.height,
-          width: this.information.cropper.width
+          height: this.information?.cropper?.height ?? 0,
+          width: this.information?.cropper?.width ?? 0
         }
         //Emit value
         this.$emit('cropped', dataResponse)
