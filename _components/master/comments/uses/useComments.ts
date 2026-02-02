@@ -36,6 +36,7 @@ export default function useComments(props: any) {
       maxFiles: 3,
     }
   })
+  const toolbarFiltersCkEditor = computed(() => props.toolbarFiltersCkEditor);
   const loadingComment = ref(false);
   const canAddComment = computed(() => props.canAddComment);
   const commentableType = computed<string>(() => props.commentableType);
@@ -368,6 +369,7 @@ export default function useComments(props: any) {
     loadingComment,
     files,
     i18n,
-    canAddComment
+    canAddComment,
+    toolbarFiltersCkEditor
   };
 }

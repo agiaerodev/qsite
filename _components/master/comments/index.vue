@@ -31,7 +31,12 @@
 
           <q-item-section class="tw-bg-white tw-rounded-2xl tw-shadow-sm tw-border tw-border-gray-100 tw-p-4" v-else>
             <div v-if="!loadingComment">
-              <CKEditor v-model="dataBase.text" :config="editorConfig" class="modern-editor" />
+              <CKEditor
+                v-model="dataBase.text"
+                :config="editorConfig"
+                class="modern-editor"
+                :toolbarFilters="toolbarFiltersCkEditor"
+              />
               <div>
                 <dynamic-field :field="files" class="tw-py-2 tw-hidden" />
               </div>
@@ -102,8 +107,11 @@
                         <q-tooltip class="tw-bg-red-500">{{ i18n.tr(`isite.cms.label.delete`) }}</q-tooltip>
                       </q-btn>
                     </div>
-
-                    <CKEditor v-model="item.comment" v-if="item.active" />
+                    <CKEditor
+                      v-model="item.comment"
+                      v-if="item.active"
+                      :toolbarFilters="toolbarFiltersCkEditor"
+                    />
 
                     <div v-else>
                       <div
@@ -187,6 +195,10 @@ export default defineComponent({
     permisionComments: {
       type: String,
       default: () => permissionsCommentsDefault,
+    },
+    toolbarFiltersCkEditor: {
+      type: Array,
+      default: () => [],
     }
   },
   setup(props) {
