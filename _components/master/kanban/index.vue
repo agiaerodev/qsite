@@ -3,8 +3,21 @@
     <div>
       <page-actions 
         :extra-actions="tableActions"
+        :excludeActions="excludeActions"
+        :searchAction="crudData.read?.searchAction"
         :title="title"
+        @search="val => search(val)"
+        @new="openModal({col: null, data: null})"
         @refresh="init"
+        ref="pageActionRef"
+        :tour-name="tourName"
+        :help="help"
+        :expires-in="expiresIn"
+        @activateTour="$tour.start(tourName)"
+        :systemName="systemName"
+        :dynamicFilter="dynamicFilter"
+        :speech="crudData.read?.speech"
+        @updateDynamicFilterValues="filters => updateDynamicFilterValues(filters)"
       />
     </div>
 
@@ -12,6 +25,7 @@
     <div>
       <dynamicList
         v-if="!iskanbanMode"
+        ref="dynamicListRef"
         :loadPageActions="false"
         :listConfig="crudData"
       />
@@ -193,11 +207,14 @@ export default {
       loading: false,
       payloadStatus: { ...modelPayload },
       uId: this.$uid(),
-      search: null,
+      
       hoverArrow: false,
       scrollTotal: 0, 
       loadInformatioModal: false, 
       localShowAs: 'kanban', 
+      expiresIn: null,
+      tourName: 'admin_crud_index_tour',
+      dynamicFilterValues: {},
 
       cardComponent: null, 
       headerComponent: null,
@@ -318,8 +335,29 @@ export default {
       
       return response.filter((item) => !item.vIfAction);
     },
+    //Exclude actions
+    excludeActions() {
+      let response = this.crudData.read?.excludeActions || [];
+      if (this.crudData?.read?.noFilter) response.push('filter');
+      return response;
+    },
     help() {
       return this.crudData.read?.help ?? {};
+    },
+    systemName() {
+      return this.crudData.read?.systemName || this.crudData?.permission || this.crudData?.entityName;
+    },
+    dynamicFilter() {
+      if (this.isAppOffline) return false;
+      if (this.crudData.read?.filters) {
+        if (Object.keys(this.crudData.read?.filters).length > 0) {
+          return this.crudData.read?.filters;
+        }
+      }
+      return {};
+    },
+    isAppOffline() {
+      return this.$store.state.qofflineMaster.isAppOffline;
     },
         
     scroll() {
@@ -589,10 +627,35 @@ export default {
       if(card?.modalProps){
         this.stateModal.modalProps = card.modalProps
       }
+      
       this.stateModal.data = card
       this.stateModal.show = true      
-      console.log({col, card })
-    }
+      //console.log({col, card })
+    }, 
+    search(val){
+      console.log(val)
+      if(this.iskanbanMode){
+        //kanban search        
+      } else {        
+        this.$refs.dynamicListRef.search(val)        
+      }
+    },
+    //Hanlder method create
+    handlerActionCreate() {
+      //Redirect to vue route
+      if (this.crudData.create.to) return this.$router.push(this.crudData.create.to);
+      //Redirect esternal URL
+      if (this.crudData.create.toExternalUrl) return this.$helper.openExternalURL(this.crudData.create.toExternalUrl, false);
+      //Call a method to dispatch this action
+      if (this.crudData.create.method) return this.crudData.create.method();
+      //Emit event create
+      this.$emit('create');
+    },
+    updateDynamicFilterValues(filters) {
+      this.dynamicFilterValues = filters;
+      ///this.table.filter = filters;
+      //this.getDataTable(true, filters, { page: 1 });
+    },
   }
 };
 </script>

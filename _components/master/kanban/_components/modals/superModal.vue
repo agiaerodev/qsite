@@ -158,7 +158,7 @@ export default defineComponent({
     &__header {
       padding: 16px;
       font-size: 16px;
-      background: white;
+      background: #eef2f4;
     }
 
     &__body {
