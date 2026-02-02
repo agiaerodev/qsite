@@ -24,7 +24,7 @@
               <div class="text-subtitle2 text-weight-light tw-truncate" :class="{'q-py-xs': element.subTitle}">
                 {{ element.title }}
                 <span v-if="!!element.subTitle" class="block text-caption text-grey-8">
-                {{ element.subTitle }}
+                <span v-html="element.subTitle"/>
               </span>
               </div>
             </div>
