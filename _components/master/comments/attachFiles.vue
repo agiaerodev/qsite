@@ -181,6 +181,7 @@ function buildFilePreview(file) {
     previewUrl: metadata.isImage ? URL.createObjectURL(file) : null,
     icon: metadata.icon,
     color: metadata.color,
+    rawFile: file,
   };
 }
 

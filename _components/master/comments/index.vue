@@ -126,29 +126,35 @@
                       </div>
                     </div>
 
-                    <div class="flex justify-between tw-mt-4" v-if="item.active">
-                      <div class="tw-space-x-2">
+                    <div v-if="item.active" class="tw-mt-4 tw-flex tw-items-start tw-justify-between">
+
+                      <div class="tw-flex tw-items-start tw-space-x-3">
                         <q-btn
-                          :disable="item.comment == '' || item.comment == item.textEdit"
                           :loading="item.loading"
-                          @click="updateComment('edit', item.id)"
+                          :disable="!item.comment || item.comment === item.textEdit"
+                          :label="i18n.tr('isite.cms.label.update')"
+                          color="primary"
                           unelevated
                           rounded
-                          size="sm"
-                          :label="i18n.tr(`isite.cms.label.update`)"
-                          color="primary"
                           no-caps
+                          size="md"
+                          class="tw-mt-1"
+                          @click="updateComment('edit', item.id)"
                         />
-                        <q-btn
-                          flat
-                          round
-                          size="xs"
-                          @click="updateComment('cancel', item.id)"
-                          icon="fa fa-close"
-                          color="grey-6"
-                          class="tw-bg-gray-50"
-                        />
+
+                        <attach-files v-model="item.files" />
                       </div>
+
+                      <q-btn
+                        flat
+                        round
+                        icon="fa fa-close"
+                        color="grey-6"
+                        size="sm"
+                        class="tw-bg-gray-50 tw-mt-2"
+                        @click="updateComment('cancel', item.id)"
+                      />
+
                     </div>
                   </div>
                 </div>

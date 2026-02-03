@@ -135,12 +135,14 @@ export default function useComments(props: any) {
         .onOk(async () => {
           comment.comment = comment.textEdit;
           comment.active = false;
+          comment.files = [];
           dataComment.value.close = false;
         })
         .onCancel(() => { });
     } else {
       comment.active = false;
       dataComment.value.close = false;
+      comment.files = [];
     }
   }
   /**
@@ -159,6 +161,7 @@ export default function useComments(props: any) {
         userId: comment.userId,
         is_internal: comment.is_internal,
         options: comment.options,
+        attachFields: files.value.length > 0 ? files.value : null,
       };
       crud
         .update(route.value, id, { ...params })
@@ -168,9 +171,11 @@ export default function useComments(props: any) {
           comment.loading = false;
           comment.active = false;
           comment.edit = false;
+          comment.files = [];
           alert.info({
             message: i18n.tr(`isite.cms.messages.updateComment`),
           });
+
         })
         .catch((error) => {
           comment.loading = false;
@@ -221,10 +226,12 @@ export default function useComments(props: any) {
         userId: userId,
         is_internal: false,
         options: null,
+        attachFields: files.value.length > 0 ? files.value : null,
       };
       await crud.create(route.value, params);
       await getCommentsList(props.commentableId);
       dataBase.value = { ...commentModel.value };
+      files.value = [];
       alert.info({
         message: i18n.tr(`isite.cms.messages.savedComment`),
       });
@@ -298,6 +305,7 @@ export default function useComments(props: any) {
             textEdit: "",
             icon: item.type && config.data[item.type]?.icon ? config.data[item.type]?.icon : 'fa-regular fa-comment',
             color: item.type && config.data[item.type]?.color ? config.data[item.type]?.color : 'primary',
+            files: item.files ?? [],
           }));
           loading.value = false;
         })
