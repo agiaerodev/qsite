@@ -37,33 +37,33 @@
                 class="modern-editor"
                 :toolbarFilters="toolbarFiltersCkEditor"
               />
-              <div>
-                <dynamic-field :field="files" class="tw-py-2 tw-hidden" />
-              </div>
-              <div class="flex justify-between tw-mt-4">
-                <div class="tw-space-x-3">
+              <div class="tw-mt-4 tw-flex tw-items-start tw-justify-between">
+                <div class="tw-flex tw-items-start tw-space-x-3">
                   <q-btn
-                    :loading="dataBase.loading"
-                    :disable="dataBase.text == ''"
-                    @click="addComment()"
+                    v-model:loading="dataBase.loading"
+                    :disable="!dataBase.text"
+                    :label="i18n.tr('isite.cms.label.save')"
+                    color="primary"
                     unelevated
                     rounded
-                    size="md"
-                    :label="i18n.tr(`isite.cms.label.save`)"
-                    color="primary"
                     no-caps
-                    class="tw-px-6"
+                    size="md"
+                    class="tw-px-6 tw-mt-1"
+                    @click="addComment()"
                   />
-                  <q-btn
-                    flat
-                    round
-                    size="sm"
-                    @click="cancelText()"
-                    icon="fa fa-close"
-                    color="grey-7"
-                    class="tw-bg-gray-100"
-                  />
+
+                  <attach-files />
                 </div>
+
+                <q-btn
+                  flat
+                  round
+                  icon="fa fa-close"
+                  color="grey-7"
+                  size="sm"
+                  class="tw-bg-gray-100 tw-mt-2"
+                  @click="cancelText()"
+                />
               </div>
             </div>
             <div v-if="loadingComment" class="tw-py-12 tw-text-center">
@@ -177,8 +177,9 @@ import {
   permissionsCommentsDefault,
 } from "modules/qsite/_components/master/comments/contracts/comments";
 import useComments from './uses/useComments'
+import attachFiles from './attachFiles.vue'
 export default defineComponent({
-   components: { CKEditor },
+   components: { CKEditor, attachFiles },
    props: {
     commentableId: {
       type: Number,
