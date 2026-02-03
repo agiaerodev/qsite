@@ -93,6 +93,7 @@ export default function useComments(props: any) {
     } else {
       dataBase.value.active = false;
       dataComment.value.close = false;
+      files.value = []
     }
   }
   /**
