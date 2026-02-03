@@ -14,9 +14,10 @@
       <!--Header-->
       <div :class="`master-dialog__header text-${color} row justify-between items-center`">
         <!--Title-->
-        <div class="master-dialog__header-title row items-center">
-          <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />
-          <b>{{ title }}</b>
+        <div class="tw-flex tw-flex-col tw-gap-1">
+          <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />          
+          <h1 class="tw-text-base tw-font-bold">{{ title }}</h1>
+          <p v-if="subtitle" class="tw-text-sm tw-text-gray-500">{{ subtitle }}</p>
         </div>
         <!--Close Button-->
         <div
@@ -78,6 +79,7 @@
 </template>
 
 <script lang="ts">
+
 import {
   ref,
   watch,
@@ -96,6 +98,7 @@ export default defineComponent({
     color: { type: String, default: 'blue-grey' },
     width: { type: String, default: '400px' },
     title: { type: String },
+    subtitle: { type: String },
     icon: { type: String },
     actions: { type: Array },
     id: { type: String },
