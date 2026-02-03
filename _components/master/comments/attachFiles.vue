@@ -91,17 +91,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
 import { alert } from "../../../../../plugins/utils";
 
 /* ---------------------------------------------
  * Props
  --------------------------------------------- */
 const props = defineProps({
+  modelValue: {
+    type: Array,
+    default: () => [],
+  },
+
   acceptedExtensions: {
     type: String,
     default: ".jpeg,.jpg,.png,.docx,.xlsx,.pdf",
   },
+
   maxFiles: {
     type: Number,
     default: 20,
@@ -109,12 +115,20 @@ const props = defineProps({
 });
 
 /* ---------------------------------------------
- * State
+ * Emits
  --------------------------------------------- */
-const selectedFiles = ref([]);
+const emit = defineEmits(["update:modelValue"]);
 
 /* ---------------------------------------------
- * Event Handlers
+ * Computed v-model Proxy
+ --------------------------------------------- */
+const selectedFiles = computed({
+  get: () => props.modelValue,
+  set: (val) => emit("update:modelValue", val),
+});
+
+/* ---------------------------------------------
+ * Upload Handler
  --------------------------------------------- */
 function onFileChange(event) {
   const uploadedFiles = Array.from(event.target.files);
@@ -127,7 +141,6 @@ function onFileChange(event) {
     selectedFiles.value.push(buildFilePreview(file));
   });
 
-  // Reset input
   event.target.value = "";
 }
 
@@ -191,9 +204,10 @@ function resolveFileMetadata(file) {
 }
 
 /* ---------------------------------------------
- * Actions
+ * Remove File
  --------------------------------------------- */
 function removeFile(index) {
-  selectedFiles.value.splice(index, 1);
+  selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index);
 }
 </script>
+

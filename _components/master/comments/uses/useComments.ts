@@ -27,15 +27,7 @@ export default function useComments(props: any) {
     id: null,
     close: false,
   })
-  const files = ref({
-    value: null,
-    type: 'uploader',
-    props: {
-      title: i18n.trp('isite.cms.label.file'),
-      gridColClass: 'col-3 col-md-3 col-lg-4',
-      maxFiles: 3,
-    }
-  })
+  const files = ref([]);
   const toolbarFiltersCkEditor = computed(() => props.toolbarFiltersCkEditor);
   const loadingComment = ref(false);
   const canAddComment = computed(() => props.canAddComment);

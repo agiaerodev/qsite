@@ -51,8 +51,7 @@
                     class="tw-px-6 tw-mt-1"
                     @click="addComment()"
                   />
-
-                  <attach-files />
+                  <attach-files v-model="files" />
                 </div>
 
                 <q-btn
