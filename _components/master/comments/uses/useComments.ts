@@ -226,7 +226,7 @@ export default function useComments(props: any) {
         userId: userId,
         is_internal: false,
         options: null,
-        attachFields: files.value.length > 0 ? files.value : null,
+        attachFields: files.value.length > 0 ? files.value.map(item => item.rawFile) : null,
       };
       await crud.create(route.value, params);
       await getCommentsList(props.commentableId);
