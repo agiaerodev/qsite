@@ -59,6 +59,8 @@
             </div>
           </q-td>
         </q-tr>
+
+        <slot name="after-rows" v-if="props.rowIndex === rows.length - 1"/>
       </template>
       <!-- pagination -->
       <template #bottom="props">
@@ -71,8 +73,12 @@
           :isLastPage="props.isLastPage"
           @update:modelValue="(val) => $emit('onPagination', val)"
         />
-
       </template>
+
+      <template #pagination="props">
+        <p>bottom table</p>
+      </template>
+
     </q-table>
   </div>
 </template>
@@ -95,8 +101,9 @@ export default defineComponent({
     actions: { default: [] },
     pagination: { default: [] },
     beforeUpdate: {
-      type: Function,
-      default: false
+        type: Function as PropType<() => void | null | boolean>,
+        required: false,
+        default: null,
     },
     visibleColumns: { default: [] }
   },

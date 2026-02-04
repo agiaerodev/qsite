@@ -33,7 +33,7 @@ export default function controller(props, emit) {
   const methods = {
     // methodKey: () => {}   
     init(){
-      state.paginationModel = props.pagination
+      if(props?.pagination) state.paginationModel = props.pagination
     },
     isColActions(col){
       return col.name == 'actions'

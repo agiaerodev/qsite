@@ -61,6 +61,7 @@ export default function controller (props: any, emit: any)
   const computeds = {
     // key: computed(() => {})
     hasTopTableSlot: computed(() => !!slots['top-table']),
+    hasBottomTableSlot: computed(() => !!slots['bottom-table']),
     hasPermission: computed(() =>
     {
       //Default permission
