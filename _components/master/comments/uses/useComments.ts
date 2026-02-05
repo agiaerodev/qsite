@@ -4,16 +4,13 @@ import
 import {
   CommentModelContract,
   EditorConfigContract,
-  apiRouteDefault,
   commentModelConst,
   commentsContract,
-  commentableTypeDefault,
-  permissionsCommentsDefault,
 } from "modules/qsite/_components/master/comments/contracts/comments";
 import crud from 'modules/qcrud/_services/baseService'
 import { store, i18n, moment, alert, helper, router } from 'src/plugins/utils'
 import { useQuasar } from 'quasar';
-
+import _ from 'lodash';
 /**
  * A Vue Composition API function for managing comments functionality.
  * @param {object} props - The properties received by the component.
@@ -27,6 +24,7 @@ export default function useComments(props: any) {
     id: null,
     close: false,
   })
+  const fieldData = ref([]);
   const files = ref([]);
   const toolbarFiltersCkEditor = computed(() => props.toolbarFiltersCkEditor);
   const loadingComment = ref(false);
@@ -110,11 +108,7 @@ export default function useComments(props: any) {
           cancelComment(comment);
         }
         if (type == "edit") {
-          if (comment.comment !== comment.textEdit) {
-            editComment(id, comment);
-          } else {
-            cancelComment(comment);
-          }
+          editComment(id, comment);
         }
       }
     } catch (error) {
@@ -137,15 +131,12 @@ export default function useComments(props: any) {
         .onOk(async () => {
           comment.comment = comment.textEdit;
           comment.active = false;
-          comment.files = [];
           dataComment.value.close = false;
-          comment.files = [];
         })
         .onCancel(() => { });
     } else {
       comment.active = false;
       dataComment.value.close = false;
-      comment.files = [];
     }
   }
   /**
@@ -167,17 +158,16 @@ export default function useComments(props: any) {
       };
       crud
         .update(route.value, id, { ...params })
-        .then((response) => {
+        .then(async (response) => {
           const commentUpdate = response.data;
           comment.updatedAt = commentUpdate.updatedAt;
           comment.loading = false;
           comment.active = false;
           comment.edit = false;
-          comment.files = [];
+          await getCommentsList(props.commentableId);
           alert.info({
             message: i18n.tr(`isite.cms.messages.updateComment`),
           });
-
         })
         .catch((error) => {
           comment.loading = false;
@@ -227,7 +217,7 @@ export default function useComments(props: any) {
         comment: dataBase.value.text,
         userId: userId,
         is_internal: false,
-        options: { "attachments": files.value.length > 0 ? files.value.map(item => item.id) : null },
+        options: { "attachments": files.value.length > 0 ? files.value : null },
       };
       await crud.create(route.value, params);
       await getCommentsList(props.commentableId);
@@ -297,17 +287,27 @@ export default function useComments(props: any) {
       };
       crud
         .get(route.value, params)
-        .then((response) => {
+        .then(async (response) => {
           const data = response.data;
-          comments.value = data.map((item) => ({
-            ...item,
-            active: false,
-            loading: false,
-            textEdit: "",
-            icon: item.type && config.data[item.type]?.icon ? config.data[item.type]?.icon : 'fa-regular fa-comment',
-            color: item.type && config.data[item.type]?.color ? config.data[item.type]?.color : 'primary',
-            files: item.files ?? [],
-          }));
+          const filesMap = await getAllFilesByAttachments(data);
+          comments.value = await Promise.all(
+            data.map(async (item) => ({
+              ...item,
+              active: false,
+              loading: false,
+              textEdit: "",
+              icon: item.type && config.data[item.type]?.icon
+                ? config.data[item.type]?.icon
+                : "fa-regular fa-comment",
+              color: item.type && config.data[item.type]?.color
+                ? config.data[item.type]?.color
+                : "primary",
+              files: (item?.options?.attachments || [])
+                .map((id: number) => filesMap[id])
+                .filter(Boolean),
+            }))
+          );
+          console.log(comments.value);
           loading.value = false;
         })
         .catch((error) => {
@@ -340,7 +340,6 @@ export default function useComments(props: any) {
   getCommentsList(props.commentableId);
   // Hook to handle component cleanup and finalize ongoing comment operations
   onBeforeUnmount(async () => {
-    console.log(dataComment.value.close)
     if (dataComment.value.close) {
       if (dataComment.value.edit) {
         await updateComment('edit', dataComment.value.id)
@@ -349,6 +348,70 @@ export default function useComments(props: any) {
       }
     }
   })
+  async function getAllFilesByAttachments(comments: any[]) {
+    const attachmentIds = _.uniq(
+      _.compact(
+        _.flatMap(comments, c => c?.options?.attachments)
+      )
+    );
+
+    if (attachmentIds.length === 0) return {};
+
+    const response = await crud.index('apiRoutes.qsite.files', {
+      refresh: true,
+      params: {
+        filter: { id: attachmentIds }
+      }
+    });
+
+    return _.keyBy(
+      (response.data || []).map((item: any) => ({
+        id: item.id,
+        path: item.path,
+        name: item.name
+      })),
+      'id'
+    );
+  }
+
+  function getFileName(path: string): string {
+    return path.split('/').pop() || path;
+  }
+
+  function getExtension(path: string): string {
+    return path.split('.').pop()?.toLowerCase() || '';
+  }
+
+  function isPreviewable(file: any): boolean {
+    const ext = getExtension(file.path);
+    return ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext);
+  }
+
+  function getFileIcon(path: string): string {
+    const ext = getExtension(path);
+    console.log(ext)
+    const map: Record<string, string> = {
+      pdf: 'fa-solid fa-file-pdf tw-text-red-500',
+      doc: 'fa-solid fa-file-word tw-text-blue-600',
+      docx: 'fa-solid fa-file-word tw-text-blue-600',
+      xls: 'fa-solid fa-file-excel tw-text-green-600',
+      xlsx: 'fa-solid fa-file-excel tw-text-green-600',
+      csv: 'fa-solid fa-file-csv tw-text-green-500',
+      ppt: 'fa-solid fa-file-powerpoint tw-text-orange-500',
+      pptx: 'fa-solid fa-file-powerpoint tw-text-orange-500',
+      png: 'fa-solid fa-file-image tw-text-purple-500',
+      jpg: 'fa-solid fa-file-image tw-text-purple-500',
+      jpeg: 'fa-solid fa-file-image tw-text-purple-500',
+      gif: 'fa-solid fa-file-image tw-text-purple-500',
+      zip: 'fa-solid fa-file-zipper tw-text-gray-600',
+      rar: 'fa-solid fa-file-zipper tw-text-gray-600',
+      txt: 'fa-solid fa-file-lines tw-text-gray-500'
+    };
+    console.log(map[ext])
+    return map[ext] || 'fa-solid fa-file tw-text-gray-400';
+  }
+
+
   return {
     permisionComments,
     dataBase,
@@ -371,6 +434,10 @@ export default function useComments(props: any) {
     files,
     i18n,
     canAddComment,
-    toolbarFiltersCkEditor
+    toolbarFiltersCkEditor,
+    getExtension,
+    isPreviewable,
+    getFileIcon,
+    getFileName
   };
 }

@@ -93,7 +93,6 @@
                           {{ formatDate(item.updatedAt|| item.createdAt) }}
                         </small>
                       </h4>
-
                       <q-btn
                         flat
                         round
@@ -120,9 +119,64 @@
                       >
                         <div
                           v-html="item.comment"
-                          class="tw-text-gray-700 tw-leading-relaxed tw-text-sm"
+                          class="tw-text-gray-700 tw-leading-relaxed tw-text-sm tw-mb-4"
                           :class="{'tw-italic tw-text-gray-500': item.internal || item.isInternal}"
                         />
+                      </div>
+                      <div class="tw-mt-4" v-if="item.files.length > 0">
+                        <div class="tw-flex tw-items-center tw-gap-2 tw-mb-3 tw-text-gray-500 tw-font-bold tw-text-xs tw-uppercase tw-tracking-wider">
+                          <i class="fa-light fa-paperclip"></i>
+                          <span>ATTACHMENTS ({{ item.files.length }})</span>
+                        </div>
+
+                        <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4">
+                          <div
+                            v-for="file in item.files"
+                            :key="file.path"
+                            class="tw-flex tw-items-center tw-gap-3 tw-bg-white tw-border tw-border-gray-100 tw-rounded-xl tw-p-3 tw-shadow-sm"
+                          >
+                            <div class="tw-w-12 tw-h-12 tw-flex-shrink-0 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-bg-gray-50">
+                              <i :class="[getFileIcon(file.name), 'tw-text-xl ']"/>
+                            </div>
+
+                            <div class="tw-flex-1 tw-min-w-0 tw-flex tw-items-center tw-justify-between">
+
+                              <div class="tw-truncate">
+                                <template v-if="isPreviewable(file)">
+                                  <a
+                                    :href="file.path"
+                                    target="_blank"
+                                    class="tw-block tw-truncate tw-text-[13px] tw-font-bold tw-text-gray-700 tw-no-underline hover:tw-text-primary"
+                                  >
+                                    {{ getFileName(file.path) }}
+                                  </a>
+                                </template>
+                                <template v-else>
+                                  <span
+                                    class="tw-block tw-truncate tw-text-[13px] tw-font-bold tw-text-gray-700 tw-no-underline hover:tw-text-primary"
+                                  >
+                                    {{ file.name }}
+                                  </span>
+                                </template>
+                              </div>
+
+                              <q-btn
+                                tag="a"
+                                :href="file.path"
+                                download
+                                flat
+                                round
+                                dense
+                                color="grey-7"
+                                icon="fa-light fa-download"
+                                size="sm"
+                                class="tw-flex-shrink-0"
+                              >
+                                <q-tooltip>Download</q-tooltip>
+                              </q-btn>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -131,7 +185,6 @@
                       <div class="tw-flex tw-items-start tw-space-x-3">
                         <q-btn
                           :loading="item.loading"
-                          :disable="!item.comment || item.comment === item.textEdit"
                           :label="i18n.tr('isite.cms.label.update')"
                           color="primary"
                           unelevated
@@ -141,8 +194,7 @@
                           class="tw-mt-1"
                           @click="updateComment('edit', item.id)"
                         />
-
-                        <attach-files v-model="item.files" />
+                        <attach-files v-model="item.options.attachments" />
                       </div>
 
                       <q-btn
