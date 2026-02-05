@@ -1,7 +1,7 @@
 const moduleName = 'isite';
 const moduleVersion = 'v1';
 const urlBase = `/${moduleName}/${moduleVersion}`
-
+const urlBaseMedia = `/media/${moduleVersion}`;
 export default {
   urlBase: urlBase,
   version: moduleVersion,
@@ -25,4 +25,6 @@ export default {
   sync: `${urlBase}/synchronizables/sync`,
   bulkActions: `${urlBase}/bulk-actions`,
   favourites: `${urlBase}/favourites`,
+  filesUploadWithDetails: `${urlBaseMedia}/files/upload-with-details`,
+  files: `${urlBaseMedia}/files`,
 }

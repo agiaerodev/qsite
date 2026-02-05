@@ -182,9 +182,9 @@ import {
   permissionsCommentsDefault,
 } from "modules/qsite/_components/master/comments/contracts/comments";
 import useComments from './uses/useComments'
-import attachFiles from './attachFiles.vue'
+import Index from '../attachField/index.vue'
 export default defineComponent({
-   components: { CKEditor, attachFiles },
+   components: { CKEditor, attachFiles: Index },
    props: {
     commentableId: {
       type: Number,

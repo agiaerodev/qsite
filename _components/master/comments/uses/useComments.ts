@@ -88,6 +88,7 @@ export default function useComments(props: any) {
           dataBase.value.active = false;
           dataBase.value.text = "";
           dataComment.value.close = false;
+          files.value = []
         })
         .onCancel(() => { });
     } else {
@@ -138,6 +139,7 @@ export default function useComments(props: any) {
           comment.active = false;
           comment.files = [];
           dataComment.value.close = false;
+          comment.files = [];
         })
         .onCancel(() => { });
     } else {
@@ -162,7 +164,6 @@ export default function useComments(props: any) {
         userId: comment.userId,
         is_internal: comment.is_internal,
         options: comment.options,
-        attachFields: files.value.length > 0 ? files.value : null,
       };
       crud
         .update(route.value, id, { ...params })
@@ -226,8 +227,7 @@ export default function useComments(props: any) {
         comment: dataBase.value.text,
         userId: userId,
         is_internal: false,
-        options: null,
-        attachFields: files.value.length > 0 ? files.value.map(item => item.rawFile) : null,
+        options: { "attachments": files.value.length > 0 ? files.value.map(item => item.id) : null },
       };
       await crud.create(route.value, params);
       await getCommentsList(props.commentableId);
