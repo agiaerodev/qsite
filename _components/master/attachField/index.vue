@@ -79,61 +79,10 @@
     </div>
 
     <!-- Modal Preview -->
-    <div
-      v-if="showModal"
-      class="tw-fixed tw-inset-0 tw-z-[999] tw-flex tw-items-center tw-justify-center
-             tw-bg-black/70 tw-p-4"
-      @click.self="closePreview"
-    >
-      <div
-        class="tw-bg-white tw-rounded-xl tw-w-full tw-max-w-5xl tw-h-[90vh]
-               tw-flex tw-flex-col tw-overflow-hidden shadow-2xl"
-      >
-        <div class="tw-flex tw-justify-between tw-items-center tw-p-4 tw-border-b">
-          <span class="tw-font-bold tw-text-gray-700">
-            {{ activeFile?.name }}
-          </span>
-
-          <button @click="closePreview">
-            <i class="fa-solid fa-circle-xmark tw-text-xl tw-text-gray-400"></i>
-          </button>
-        </div>
-
-        <div class="tw-flex-1 tw-overflow-auto tw-bg-gray-50 tw-p-4">
-
-          <!-- Image Preview -->
-          <div
-            v-if="activeFile?.isImage"
-            class="tw-h-full tw-flex tw-items-center tw-justify-center"
-          >
-            <img
-              :src="activeFile.previewUrl"
-              class="tw-max-w-full tw-max-h-full tw-object-contain shadow-md"
-            />
-          </div>
-
-          <!-- PDF Preview -->
-          <iframe
-            v-else-if="isPdf"
-            :src="activeFile.previewUrl"
-            class="tw-w-full tw-h-full tw-border-none"
-          ></iframe>
-
-          <!-- Word Preview -->
-          <div
-            v-else-if="isWord"
-            ref="wordPreviewContainer"
-            class="tw-bg-white tw-shadow-sm tw-mx-auto tw-p-2 tw-min-h-full"
-          ></div>
-
-          <!-- Excel Preview -->
-          <div v-else-if="isExcel" class="tw-bg-white tw-overflow-auto tw-max-w-full">
-            <table v-html="excelHtml" class="excel-table tw-w-full tw-text-xs"></table>
-          </div>
-
-        </div>
-      </div>
-    </div>
+    <filePreviewModal
+      v-model="showModal"
+      :file="activeFile"
+    />
   </div>
 </template>
 
@@ -143,6 +92,7 @@ import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import baseService from 'modules/qcrud/_services/baseService.js';
 import { eventBus, helper, alert } from '../../../../../plugins/utils';
+import filePreviewModal from '../filePreviewModal'
 
 /* ---------------------------------------------
  * Props & Emits

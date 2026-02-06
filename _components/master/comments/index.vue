@@ -135,7 +135,19 @@
                             :key="file.path"
                             class="tw-flex tw-items-center tw-gap-3 tw-bg-white tw-border tw-border-gray-100 tw-rounded-xl tw-p-3 tw-shadow-sm"
                           >
-                            <div class="tw-w-12 tw-h-12 tw-flex-shrink-0 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-bg-gray-50">
+                            <div
+                              class="
+                                tw-w-12
+                                tw-h-12
+                                tw-flex-shrink-0
+                                tw-rounded-lg
+                                tw-flex
+                                tw-items-center
+                                tw-justify-center
+                                tw-cursor-pointer
+                                tw-bg-gray-50"
+                              @click="openPreview(file)"
+                            >
                               <i :class="[getFileIcon(file.name), 'tw-text-xl ']"/>
                             </div>
 
@@ -143,17 +155,30 @@
 
                               <div class="tw-truncate">
                                 <template v-if="isPreviewable(file)">
-                                  <a
-                                    :href="file.path"
-                                    target="_blank"
-                                    class="tw-block tw-truncate tw-text-[13px] tw-font-bold tw-text-gray-700 tw-no-underline hover:tw-text-primary"
+                                  <span
+                                    class="
+                                      tw-block
+                                      tw-truncate
+                                      tw-text-[13px]
+                                      tw-font-bold
+                                      tw-text-gray-700
+                                      tw-no-underline
+                                      hover:tw-text-primary
+                                      "
                                   >
                                     {{ getFileName(file.path) }}
-                                  </a>
+                                  </span>
                                 </template>
                                 <template v-else>
                                   <span
-                                    class="tw-block tw-truncate tw-text-[13px] tw-font-bold tw-text-gray-700 tw-no-underline hover:tw-text-primary"
+                                    class="
+                                      tw-block
+                                      tw-truncate
+                                      tw-text-[13px]
+                                      tw-font-bold
+                                      tw-text-gray-700
+                                      tw-no-underline
+                                      hover:tw-text-primary"
                                   >
                                     {{ file.name }}
                                   </span>
@@ -221,6 +246,10 @@
       </q-list>
     </div>
   </div>
+  <filePreviewModal
+    v-model="showPreview"
+    :file="activeFile"
+  />
 </template>
 
 <script lang="ts">
@@ -235,8 +264,9 @@ import {
 } from "modules/qsite/_components/master/comments/contracts/comments";
 import useComments from './uses/useComments'
 import Index from '../attachField/index.vue'
+import filePreviewModal from '../filePreviewModal/index.vue'
 export default defineComponent({
-   components: { CKEditor, attachFiles: Index },
+   components: { CKEditor, attachFiles: Index, filePreviewModal },
    props: {
     commentableId: {
       type: Number,

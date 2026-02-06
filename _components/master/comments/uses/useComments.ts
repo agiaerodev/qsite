@@ -24,6 +24,8 @@ export default function useComments(props: any) {
     id: null,
     close: false,
   })
+  const showPreview = ref(false)
+  const activeFile = ref(null)
   const fieldData = ref([]);
   const files = ref([]);
   const toolbarFiltersCkEditor = computed(() => props.toolbarFiltersCkEditor);
@@ -159,12 +161,16 @@ export default function useComments(props: any) {
       crud
         .update(route.value, id, { ...params })
         .then(async (response) => {
+          const filesMap = await getAllFilesByAttachments([response.data]);
           const commentUpdate = response.data;
           comment.updatedAt = commentUpdate.updatedAt;
+          comment.options.attachments = commentUpdate?.options?.attachments;
+          comment.files = (commentUpdate?.options?.attachments || [])
+            .map((id: number) => filesMap[id])
+            .filter(Boolean)
           comment.loading = false;
           comment.active = false;
           comment.edit = false;
-          await getCommentsList(props.commentableId);
           alert.info({
             message: i18n.tr(`isite.cms.messages.updateComment`),
           });
@@ -307,7 +313,6 @@ export default function useComments(props: any) {
                 .filter(Boolean),
             }))
           );
-          console.log(comments.value);
           loading.value = false;
         })
         .catch((error) => {
@@ -389,7 +394,6 @@ export default function useComments(props: any) {
 
   function getFileIcon(path: string): string {
     const ext = getExtension(path);
-    console.log(ext)
     const map: Record<string, string> = {
       pdf: 'fa-solid fa-file-pdf tw-text-red-500',
       doc: 'fa-solid fa-file-word tw-text-blue-600',
@@ -407,10 +411,17 @@ export default function useComments(props: any) {
       rar: 'fa-solid fa-file-zipper tw-text-gray-600',
       txt: 'fa-solid fa-file-lines tw-text-gray-500'
     };
-    console.log(map[ext])
     return map[ext] || 'fa-solid fa-file tw-text-gray-400';
   }
 
+  function openPreview(file) {
+    activeFile.value = {
+      ...file,
+      previewUrl: file.path,
+      rawFile: null
+    }
+    showPreview.value = true
+  }
 
   return {
     permisionComments,
@@ -438,6 +449,9 @@ export default function useComments(props: any) {
     getExtension,
     isPreviewable,
     getFileIcon,
-    getFileName
+    getFileName,
+    openPreview,
+    showPreview,
+    activeFile
   };
 }
