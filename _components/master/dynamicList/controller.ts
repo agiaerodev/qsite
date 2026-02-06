@@ -61,6 +61,7 @@ export default function controller (props: any, emit: any)
   const computeds = {
     // key: computed(() => {})
     hasTopTableSlot: computed(() => !!slots['top-table']),
+    hasBottomTableSlot: computed(() => !!slots['bottom-table']),
     hasPermission: computed(() =>
     {
       //Default permission
@@ -136,7 +137,7 @@ export default function controller (props: any, emit: any)
       await methods.setColumns()
       await methods.setRows()
 
-      if (!state.dynamicFilterValues)
+      if(!Object.keys(state.dynamicFilterValues).length)
       {
         methods.getData({pagination: {page: 1}}, true)
       }

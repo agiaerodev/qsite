@@ -14,6 +14,25 @@
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />
       </template>
+     <template v-slot:header="props" v-if="hasBeforeRowsSlot">
+        <q-tr>
+          <q-th
+            key="beforeRows"
+            :colspan="props.cols.length - 1"
+          >
+            <slot name="before-rows" />
+          </q-th>
+        </q-tr>
+        <q-tr>
+          <q-th
+            v-for="col in props.cols"
+            :key="col.name"
+            :props="props"
+          >
+            {{ col.label }}
+          </q-th>
+        </q-tr>
+      </template>
       <template v-slot:body="props">
         <q-tr :props="props">
           <!---right click --->
@@ -59,6 +78,7 @@
             </div>
           </q-td>
         </q-tr>
+        <slot name="after-rows" v-if="hasAfterRowsSlot && (props.rowIndex === rows.length - 1)"/>
       </template>
       <!-- pagination -->
       <template #bottom="props">
@@ -71,8 +91,12 @@
           :isLastPage="props.isLastPage"
           @update:modelValue="(val) => $emit('onPagination', val)"
         />
-
       </template>
+
+      <template #pagination="props">
+        <p>bottom table</p>
+      </template>
+
     </q-table>
   </div>
 </template>
@@ -95,8 +119,9 @@ export default defineComponent({
     actions: { default: [] },
     pagination: { default: [] },
     beforeUpdate: {
-      type: Function,
-      default: false
+        type: Function as PropType<() => void | null | boolean>,
+        required: false,
+        default: null,
     },
     visibleColumns: { default: [] }
   },

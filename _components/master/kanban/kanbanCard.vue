@@ -2,48 +2,42 @@
   <div
     class="
       tw-bg-white
-      tw-shadow
-      tw-rounded
-      tw-px-3
-      tw-pt-3
-      tw-pb-2
-      tw-border-l-2
-      tw-my-2
-      kb-card
+      tw-drop-shadow-lg
+      tw-rounded-xl
+      tw-p-3
+      tw-border
+      tw-mb-4
+      tw-select-none
     "
     :style="{ borderLeftColor: colorColumn }"
+    
   >
     <section class="tw-flex tw-justify-between">
       <div class="tw-w-full">
         <div class="tw-flex">
-          <span
-            class="
-              tw-text-gray-700
-              tw-font-semibold
-              tw-font-sans
-              tw-tracking-wide
-              tw-text-sm
-              tw-w-full
-            "
-          >
-            {{ cardData.title }}
-          </span>
+          <div class="tw-w-full">
+            <!-- header slot -->
+            <slot name="header">
+            </slot>
+          </div>
+          
           <q-btn-dropdown
             round
             color="gray-4"
             flat
-            size="10px"
-            padding="5px 5px"
+            size="12px"
+            padding="2px 4px"
             class="
               kd-without-arrow
               tw-float-right
               tw-cursor-pointer
-              tw-text-xs
-              tw-bg-gray-100
+              tw-text-xs              
               tw-h-7
             "
-            icon="fa-solid fa-ellipsis"
-          >
+            style="color: #AAAAAA"
+            icon="fa-light fa-ellipsis-vertical"
+            @click.stop
+          >          
             <q-list
               dense
               class="
@@ -52,7 +46,7 @@
                 tw-text-xs"
             >
               <template
-                v-for="(action, keyAction) in actionsAutomations"
+                v-for="(action, keyAction) in cardActions"
                 :key="keyAction"
               >
               <q-item
@@ -64,7 +58,7 @@
               >
                   <q-item-section>
                     <div class="tw-flex tw-space-x-2 tw-py-2">
-                      <q-icon :name="action.icon" color="primary" size="20px"/>
+                      <q-icon v-if="action?.icon" :name="action.icon" color="primary" size="20px"/>
                       <div class="tw-mt-0.5 tw-font-semibold">
                         {{ action.label || action.tooltip }}
                       </div>
@@ -77,126 +71,35 @@
         </div>
       </div>
     </section>
-    <div
-      v-if="cardData.type"
-      class="
-        tw-flex
-        tw-mt-1
-        tw-justify-between
-        tw-items-center
-      "
-    >
-      <span
-        class="
-          tw-mt-4
-          tw-text-xs
-          tw-text-gray-600
-        "
-      >
-        <b>Tipo * </b> {{ cardData.type }}
-      </span>
-    </div>
-    <div
-      class="
-        tw-flex
-        tw-mt-1
-        tw-justify-between
-        tw-items-center
-      "
-      v-for="field in cardData.fields"
-      :key="field.id"
-    >
-      <span
-        class="
-          tw-text-xs
-          tw-text-gray-600
-          tw-truncate
-        "
-        v-if="field.name && typeof field.value !== 'object'"
-      >
-        <b>{{ field.label || field.name }} *</b>
-        <span class="tw-lowercase">{{ field.value }}</span>
-      </span>
-    </div>
 
-    <div
-      class="
-        tw-flex
-        tw-mt-4
-        tw-justify-between
-        tw-items-center
-      ">
-      <span
-        class="
-          tw-text-xs
-          tw-text-gray-600
-        ">
-          <b>{{ $tr('isite.cms.label.date') }} *</b> {{ cardData.createdAt }}
-      </span>
-    </div>
-    <figure
-      class="
-        tw-flex
-        tw-mt-4
-        tw-cursor-pointer
-      "
-      v-if="fullName"
-    >
-      <img
-        class="
-          tw-w-5
-          tw-h-5
-          tw-rounded-md
-        "
-        :src="urlAvatar"
+    <!-- content slot -->
+    <div>
+      <slot 
+        @openModal="openModal"
+        name="content"
       />
-      <q-tooltip
-        anchor="top left"
-        self="bottom left"
-        :offset="[10, 10]"
-        :delay="100"
-      >
-        <p>
-          {{ fullName.firstName + ' ' + fullName.lastName }}
-        </p>
-      </q-tooltip>
-    </figure>
+    </div>
+   
   </div>
 </template>
 
 <script>
 
 export default {
-  inject: {
-    showRequestData: {
-      type: Function,
-      default: () => false,
-    },
-    update: {
-      type: Function,
-      default: () => false,
-    },
-    automation: {
-      type: Boolean,
-      default: () => false,
-    },
-    crudfieldActions: {
-      type: Function,
-      default: () => false,
-    },
-    deleteKanbanCard:  {
-      type: Function,
-      default: () => false,
-    },
-    openFormComponentModal:  {
-      type: Function,
-      default: () => false,
-    },
+  inject: {    
   },
-  props: {
+  props: {    
     cardData: {
       type: Object,
       default: () => this.cardDataDefault,
+    },
+    cardPermissions: {
+      type: Object,
+      default: () => ({}),
+    },
+    crudData: {
+      type: Object,
+      default: () => ({}),
     },
     colorColumn: {
       type: String,
@@ -219,73 +122,42 @@ export default {
     };
   },
   computed: {
-    quserState() {
-      return this.$store.state.quserAuth
+    kanban(){
+      return this.crudData?.kanban || null;
     },
-    actions() {
-      return this.crudfieldActions(this.cardData);
-    },
-    fullName() {
-      const firstName = this.cardData?.responsible?.firstName || ''
-      const lastName = this.cardData?.responsible?.lastName || ''
-      return { firstName, lastName }
-    },
-    urlAvatar() {
-      return  this.cardData?.responsible?.mediaFiles?.profile?.largeThumb ||
-              this.quserState?.userData?.mainImage
-    },
-    actionsAutomations() {
-      let response = [
-       //Delete action
+    cardActions(){      
+      const defaultActions = [
         {
-          icon: 'fa-light fa-trash-can',
-          color: 'red',
-          label: this.$tr('isite.cms.label.delete'),
+          vIf: this.cardPermissions.edit,
+          name: 'viewCard',            
+          label: this.$tr('isite.cms.label.information'),
+          icon: 'fas fa-info-circle',
           action: (item) => {
-            if(this.deleteKanbanCard) this.deleteKanbanCard(item);
+            this.openModal()
           }
         },
         {
-          icon: 'fa-light fa-pencil',
+          vIf: this.cardPermissions.delete, 
+          name: 'deleteCard',            
+          icon: 'fa-light fa-trash-can',
           color: 'red',
-          label: this.$tr('isite.cms.label.edit'),
-          action: (item) => {
-            if(this.openFormComponentModal) this.openFormComponentModal(item.statusId, item.title, item.id);
+          label: this.$tr('isite.cms.label.delete'),
+          action: (item) => {            
+            this.deleteCard()
           }
         }
-      ];
-      return this.automation ?  response : this.actionsData;
-    },
-    actionsData() {
-      return this.actions.map((item) => {
-        //Instance item props
-        item.props = { tag: "a", key: this.$uid(), clickable: true };
+      ]
 
-        //Define external redirect
-        if (item.toRoute) item.props.href = item.toRoute;
-
-        //Instance vue route redirect
-        if (item.route)
-          item.props.to = {
-            name: item.route,
-            params: this.$clone(this.cardData || {}),
-          };
-
-        // Formatting all instances
-        if (item.format)
-          item = { ...item, ...(item.format(this.cardData) || {}) };
-
-        //Return item
-        return item;
-      });
+      return [...this.crudData.read.kanban?.actions, ...defaultActions]  || defaultActions;
     },
   },
   methods: {
+    
     openModal() {
-      if (this.showRequestData) this.showRequestData(this.cardData);
-    },
-    openEdit() {
-      if (this.update) this.update(this.cardData);
+      this.$emit('openModal', this.cardData)
+    },    
+    deleteCard(){
+      this.$emit('deleteCard', this.cardData)
     },
     async runAction(action) {
       //Define action params

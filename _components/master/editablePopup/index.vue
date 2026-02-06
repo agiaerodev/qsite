@@ -38,7 +38,7 @@ export default defineComponent({
     row: { type: Object, default: null },
     col: { type: Object, default: null },
     beforeUpdate: {
-      type: Function as PropType<() => void>,
+      type: Function as PropType<() => void | null>,
       required: false,
       default: null
     }

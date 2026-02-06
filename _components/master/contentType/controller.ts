@@ -52,7 +52,7 @@ export default function controller(props, emit) {
     },
 
     getTooltip(){
-      return props.col?.tooltip ? props.col?.tooltip : helper.deleteHtml(props.val)
+      return props.col?.tooltip || null
     }
   }
 
