@@ -133,12 +133,12 @@
                           <div
                             v-for="file in item.files"
                             :key="file.path"
-                            class="tw-flex tw-items-center tw-gap-3 tw-bg-white tw-border tw-border-gray-100 tw-rounded-xl tw-p-3 tw-shadow-sm"
+                            class="tw-flex tw-items-center tw-gap-3 tw-bg-white tw-border tw-border-gray-100 tw-rounded-xl tw-p-2 tw-shadow-sm"
                           >
                             <div
                               class="
-                                tw-w-12
-                                tw-h-12
+                                tw-w-8
+                                tw-h-8
                                 tw-flex-shrink-0
                                 tw-rounded-lg
                                 tw-flex
