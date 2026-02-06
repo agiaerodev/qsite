@@ -51,7 +51,10 @@
                     class="tw-px-6 tw-mt-1"
                     @click="addComment()"
                   />
-                  <attach-files v-model="files" />
+                  <attach-files
+                    v-model="files"
+                    :maxFiles="maxFiles"
+                  />
                 </div>
 
                 <q-btn
@@ -126,7 +129,7 @@
                       <div class="tw-mt-4" v-if="item.files.length > 0">
                         <div class="tw-flex tw-items-center tw-gap-2 tw-mb-3 tw-text-gray-500 tw-font-bold tw-text-xs tw-uppercase tw-tracking-wider">
                           <i class="fa-light fa-paperclip"></i>
-                          <span>ATTACHMENTS ({{ item.files.length }})</span>
+                          <span>ATTACHMENTS ({{ item.files.length }}/{{maxFiles}})</span>
                         </div>
 
                         <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4">
@@ -219,7 +222,10 @@
                           class="tw-mt-1"
                           @click="updateComment('edit', item.id)"
                         />
-                        <attach-files v-model="item.options.attachments" />
+                        <attach-files
+                          v-model="item.options.attachments"
+                          :maxFiles="maxFiles"
+                        />
                       </div>
 
                       <q-btn
@@ -298,7 +304,8 @@ export default defineComponent({
     toolbarFiltersCkEditor: {
       type: Array,
       default: () => [],
-    }
+    },
+    maxFiles: { type: Number, default: 20 }
   },
   setup(props) {
     return {...useComments(props)}

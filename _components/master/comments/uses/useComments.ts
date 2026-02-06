@@ -24,6 +24,7 @@ export default function useComments(props: any) {
     id: null,
     close: false,
   })
+  const maxFiles = computed(() => props.maxFiles);
   const page = ref(1);
   const perPage = ref(10);
   const total = ref(0);
@@ -483,6 +484,7 @@ export default function useComments(props: any) {
     hasNextPage,
     hasPreviousPage,
     maxPages,
-    onChangePage
+    onChangePage,
+    maxFiles
   };
 }
