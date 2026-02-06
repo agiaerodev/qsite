@@ -324,6 +324,7 @@ export default function useComments(props: any) {
           ...item,
           active: false,
           loading: false,
+          uploading: false,
           textEdit: "",
           icon: item.type && config.data[item.type]?.icon
             ? config.data[item.type]?.icon

@@ -224,6 +224,7 @@
                       <div class="tw-flex tw-items-start tw-space-x-3">
                         <q-btn
                           :loading="item.loading"
+                          :disable="item.uploading"
                           :label="i18n.tr('isite.cms.label.update')"
                           color="primary"
                           unelevated
@@ -236,6 +237,7 @@
                         <attach-files
                           v-model="item.options.attachments"
                           :maxFiles="maxFiles"
+                          @uploading="val => item.uploading = val"
                         />
                       </div>
 

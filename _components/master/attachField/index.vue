@@ -106,8 +106,8 @@ const props = defineProps({
   maxFiles: { type: Number, default: 20 }
 });
 
-const emit = defineEmits(['update:modelValue']);
-
+const emit = defineEmits(['update:modelValue', 'uploading'])
+const uploading = ref(false)
 const localFields = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
@@ -196,7 +196,6 @@ function closePreview() {
 async function onFileChange(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   if (selectedFiles.value.length >= props.maxFiles) {
     alert.warning(`You can only upload a maximum of ${props.maxFiles} files.`);
     event.target.value = '';
@@ -241,6 +240,8 @@ async function onFileChange(event) {
   const index = selectedFiles.value.length - 1;
 
   try {
+    uploading.value = true
+    emit('uploading', true)
     const form = new FormData();
     form.append('file', finalFile);
 
@@ -256,6 +257,8 @@ async function onFileChange(event) {
     };
 
     localFields.value = selectedFiles.value.map(f => f.id);
+    uploading.value = false
+    emit('uploading', false)
   } catch (e) {
     selectedFiles.value.splice(index, 1);
     alert.error(e);
