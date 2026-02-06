@@ -65,7 +65,7 @@ export default defineComponent({
         help: {default: {}}
       },
       beforeUpdate: {        
-        type: Function as PropType<() => void>,
+        type: Function as PropType<() => void | null | boolean>,
         required: false,
         default: null,
       },

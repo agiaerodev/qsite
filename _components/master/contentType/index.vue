@@ -13,7 +13,7 @@
     <div v-if="!isComponent" v-show="!isLoading" class="ellipsis tw-flex-1 tw-min-w-1">
       <label v-html="val" :class="{ 'content-type-onclick':  isClickeable, 'cursor-pointer': isEditable }"></label>
       <!-- help tootlipt -->
-      <q-tooltip>
+      <q-tooltip v-if="getTooltip()">
         <div v-html="getTooltip()" />
         <label v-if="isClickeable" class="text-weight-bold">
           {{ $tr('isite.cms.label.clickToAction') }}
