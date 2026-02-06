@@ -41,7 +41,7 @@
                 <div class="tw-flex tw-items-start tw-space-x-3">
                   <q-btn
                     v-model:loading="dataBase.loading"
-                    :disable="!dataBase.text"
+                    :disable="!dataBase.text || uploadFile"
                     :label="i18n.tr('isite.cms.label.save')"
                     color="primary"
                     unelevated
@@ -54,6 +54,7 @@
                   <attach-files
                     v-model="files"
                     :maxFiles="maxFiles"
+                    @uploading="val => uploadFile = val"
                   />
                 </div>
 
