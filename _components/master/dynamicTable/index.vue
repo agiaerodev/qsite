@@ -17,11 +17,11 @@
      <template v-slot:header="props">
         <q-tr>
           <q-th
-            auto-width
             key="beforeRows"
+            :colspan="props.cols.length - 1"
           >
-          <slot name="before-rows" />
-        </q-th>
+            <slot name="before-rows" />
+          </q-th>
         </q-tr>
         <q-tr>
           <q-th
@@ -31,7 +31,7 @@
           >
             {{ col.label }}
           </q-th>
-      </q-tr>
+        </q-tr>
       </template>
       <template v-slot:body="props">
         <q-tr :props="props">
