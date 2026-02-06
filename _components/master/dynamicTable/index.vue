@@ -14,6 +14,25 @@
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />
       </template>
+     <template v-slot:header="props">
+        <q-tr>
+          <q-th
+            auto-width
+            key="beforeRows"
+          >
+          <slot name="before-rows" />
+        </q-th>
+        </q-tr>
+        <q-tr>
+          <q-th
+            v-for="col in props.cols"
+            :key="col.name"
+            :props="props"
+          >
+            {{ col.label }}
+          </q-th>
+      </q-tr>
+      </template>
       <template v-slot:body="props">
         <q-tr :props="props">
           <!---right click --->
