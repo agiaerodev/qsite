@@ -16,7 +16,16 @@
           <q-item-section v-if="!dataBase.active" class="tw-mr-2">
             <q-card
               flat
-              class="tw-rounded-2xl tw-border tw-border-gray-200 tw-bg-white hover:tw-border-primary/50 tw-transition-all tw-duration-300 tw-cursor-pointer group"
+              class="
+                tw-rounded-2xl
+                tw-border
+                tw-border-gray-200
+                tw-bg-white
+                hover:tw-border-primary/50
+                tw-transition-all
+                tw-duration-300
+                tw-cursor-pointer
+                group"
               @click="activeText()"
             >
               <q-card-section
@@ -24,12 +33,28 @@
                 :title="i18n.tr(`isite.cms.label.edit`)"
               >
                 <div v-html="textPlaceholder" class="tw-text-sm" />
-                <q-icon name="fa-light fa-pen" size="xs" class="group-hover:tw-text-primary tw-opacity-0 group-hover:tw-opacity-100 tw-transition-all" />
+                <q-icon
+                  name="fa-light fa-pen"
+                  size="xs"
+                  class="
+                    group-hover:tw-text-primary
+                    tw-opacity-0
+                    group-hover:tw-opacity-100
+                    tw-transition-all"
+                />
               </q-card-section>
             </q-card>
           </q-item-section>
 
-          <q-item-section class="tw-bg-white tw-rounded-2xl tw-shadow-sm tw-border tw-border-gray-100 tw-p-4" v-else>
+          <q-item-section
+            class="
+              tw-bg-white
+              tw-rounded-2xl
+              tw-shadow-sm
+              tw-border
+              tw-border-gray-100
+              tw-p-4"
+            v-else>
             <div v-if="!loadingComment">
               <CKEditor
                 v-model="dataBase.text"
@@ -86,7 +111,20 @@
                 :color="item.color || 'primary'"
                 class="tw-pb-6"
               >
-                <div class="tw-group tw-relative tw-p-4 tw-rounded-2xl tw-bg-white tw-border tw-border-gray-100 tw-shadow-sm hover:tw-shadow-md tw-transition-all tw-duration-300">
+                <div
+                  class="
+                    tw-group
+                    tw-relative
+                    tw-p-4
+                    tw-rounded-2xl
+                    tw-bg-white
+                    tw-border
+                    tw-border-gray-100
+                    tw-shadow-sm
+                    hover:tw-shadow-md
+                    tw-transition-all
+                    tw-duration-300"
+                >
                   <div>
                     <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
                       <h4 class="tw-text-sm tw-m-0 tw-flex tw-items-center tw-gap-2">
@@ -128,7 +166,18 @@
                         />
                       </div>
                       <div class="tw-mt-4" v-if="item.files.length > 0">
-                        <div class="tw-flex tw-items-center tw-gap-2 tw-mb-3 tw-text-gray-500 tw-font-bold tw-text-xs tw-uppercase tw-tracking-wider">
+                        <div
+                          class="
+                            tw-flex
+                            tw-items-center
+                            tw-gap-2
+                            tw-mb-3
+                            tw-text-gray-500
+                            tw-font-bold
+                            tw-text-xs
+                            tw-uppercase
+                            tw-tracking-wider"
+                        >
                           <i class="fa-light fa-paperclip"></i>
                           <span>ATTACHMENTS ({{ item.files.length }}/{{maxFiles}})</span>
                         </div>
@@ -144,7 +193,16 @@
                           <div
                             v-for="file in item.files"
                             :key="file.path"
-                            class="tw-flex tw-items-center tw-gap-3 tw-bg-white tw-border tw-border-gray-100 tw-rounded-xl tw-p-2 tw-shadow-sm"
+                            class="
+                              tw-flex
+                              tw-items-center
+                              tw-gap-3
+                              tw-bg-white
+                              tw-border
+                              tw-border-gray-100
+                              tw-rounded-xl
+                              tw-p-2
+                              tw-shadow-sm"
                           >
                             <div
                               class="
