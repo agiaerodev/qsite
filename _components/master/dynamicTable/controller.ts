@@ -1,9 +1,11 @@
-import {computed, reactive, ref, onMounted, toRefs, watch, getCurrentInstance, markRaw} from "vue";
+import {computed, reactive, ref, onMounted, toRefs, watch, getCurrentInstance, markRaw, useSlots} from "vue";
 import { i18n, clone } from 'src/plugins/utils'
 
 
 export default function controller(props, emit) {
   const proxy = getCurrentInstance()!.appContext.config.globalProperties
+
+  const slots = useSlots()
 
   // Refs
   const refs = {
@@ -25,7 +27,9 @@ export default function controller(props, emit) {
 
   // Computed
   const computeds = {
-    // key: computed(() => {})    
+    // key: computed(() => {})   
+    hasBeforeRowsSlot: computed(() => !!slots['before-rows']),
+    hasAfterRowsSlot: computed(() => !!slots['after-rows']), 
   }
   
 

@@ -14,7 +14,7 @@
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />
       </template>
-     <template v-slot:header="props">
+     <template v-slot:header="props" v-if="hasBeforeRowsSlot">
         <q-tr>
           <q-th
             key="beforeRows"
@@ -78,8 +78,7 @@
             </div>
           </q-td>
         </q-tr>
-
-        <slot name="after-rows" v-if="props.rowIndex === rows.length - 1"/>
+        <slot name="after-rows" v-if="hasAfterRowsSlot && (props.rowIndex === rows.length - 1)"/>
       </template>
       <!-- pagination -->
       <template #bottom="props">
