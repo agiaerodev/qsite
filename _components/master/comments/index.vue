@@ -132,7 +132,14 @@
                           <span>ATTACHMENTS ({{ item.files.length }}/{{maxFiles}})</span>
                         </div>
 
-                        <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4">
+                        <div
+                          class="
+                           tw-grid
+                           tw-grid-cols-1
+                           sm:tw-grid-cols-2
+                           lg:tw-grid-cols-3
+                           tw-gap-4"
+                        >
                           <div
                             v-for="file in item.files"
                             :key="file.path"
@@ -159,6 +166,7 @@
                               <div class="tw-truncate">
                                 <template v-if="isPreviewable(file)">
                                   <span
+                                    @click="openPreview(file)"
                                     class="
                                       tw-block
                                       tw-truncate
@@ -167,6 +175,7 @@
                                       tw-text-gray-700
                                       tw-no-underline
                                       hover:tw-text-primary
+                                      tw-cursor-pointer
                                       "
                                   >
                                     {{ getFileName(file.path) }}
@@ -174,6 +183,7 @@
                                 </template>
                                 <template v-else>
                                   <span
+                                    @click="openPreview(file)"
                                     class="
                                       tw-block
                                       tw-truncate
@@ -181,7 +191,8 @@
                                       tw-font-bold
                                       tw-text-gray-700
                                       tw-no-underline
-                                      hover:tw-text-primary"
+                                      hover:tw-text-primary
+                                      tw-cursor-pointer"
                                   >
                                     {{ file.name }}
                                   </span>
