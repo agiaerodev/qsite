@@ -24,6 +24,14 @@ export default function useComments(props: any) {
     id: null,
     close: false,
   })
+  const page = ref(1);
+  const perPage = ref(10);
+  const total = ref(0);
+  const hasNextPage = ref(false);
+  const hasPreviousPage = ref(false);
+  const maxPages = computed(() => {
+    return Math.ceil(total.value / perPage.value);
+  });
   const showPreview = ref(false)
   const activeFile = ref(null)
   const fieldData = ref([]);
@@ -280,6 +288,7 @@ export default function useComments(props: any) {
     try {
       const config = await configComment();
       loading.value = true;
+
       const params = {
         filter: {
           commentableType: commentableType.value,
@@ -290,40 +299,50 @@ export default function useComments(props: any) {
           }
         },
         include: "userProfile",
+        page: page.value,
+        take: perPage.value
       };
-      crud
-        .get(route.value, params)
-        .then(async (response) => {
-          const data = response.data;
-          const filesMap = await getAllFilesByAttachments(data);
-          comments.value = await Promise.all(
-            data.map(async (item) => ({
-              ...item,
-              active: false,
-              loading: false,
-              textEdit: "",
-              icon: item.type && config.data[item.type]?.icon
-                ? config.data[item.type]?.icon
-                : "fa-regular fa-comment",
-              color: item.type && config.data[item.type]?.color
-                ? config.data[item.type]?.color
-                : "primary",
-              files: (item?.options?.attachments || [])
-                .map((id: number) => filesMap[id])
-                .filter(Boolean),
-            }))
-          );
-          loading.value = false;
-        })
-        .catch((error) => {
-          loading.value = false;
-          alert.error({ message: error });
-          console.log(error);
-        });
+
+      const response = await crud.index(route.value, { refresh: true, params });
+
+      const data = response.data;
+      const meta = response.meta?.page;
+
+      if (meta) {
+        total.value = meta.total;
+        page.value = meta.currentPage;
+        perPage.value = meta.perPage;
+        hasNextPage.value = meta.hasNextPage;
+        hasPreviousPage.value = meta.hasPreviousPage;
+      }
+
+      const filesMap = await getAllFilesByAttachments(data);
+
+      comments.value = await Promise.all(
+        data.map(async (item) => ({
+          ...item,
+          active: false,
+          loading: false,
+          textEdit: "",
+          icon: item.type && config.data[item.type]?.icon
+            ? config.data[item.type]?.icon
+            : "fa-regular fa-comment",
+          color: item.type && config.data[item.type]?.color
+            ? config.data[item.type]?.color
+            : "primary",
+          files: (item?.options?.attachments || [])
+            .map((id: number) => filesMap[id])
+            .filter(Boolean),
+        }))
+      );
+
+      loading.value = false;
     } catch (error) {
+      loading.value = false;
       console.log(error);
     }
   }
+
   /**
    * Retrieves the comment configuration from the server.
    */
@@ -423,6 +442,11 @@ export default function useComments(props: any) {
     showPreview.value = true
   }
 
+  async function onChangePage(val: number) {
+    page.value = val;
+    await getCommentsList(props.commentableId);
+  }
+
   return {
     permisionComments,
     dataBase,
@@ -452,6 +476,13 @@ export default function useComments(props: any) {
     getFileName,
     openPreview,
     showPreview,
-    activeFile
+    activeFile,
+    page,
+    perPage,
+    total,
+    hasNextPage,
+    hasPreviousPage,
+    maxPages,
+    onChangePage
   };
 }

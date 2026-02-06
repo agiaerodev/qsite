@@ -244,6 +244,17 @@
           </div>
         </q-item>
       </q-list>
+      <div v-if="!loading && permisionComments.index && (total > perPage)" class="tw-flex tw-justify-center tw-mt-6">
+        <q-pagination
+          v-model="page"
+          :max="maxPages"
+          max-pages="7"
+          boundary-numbers
+          direction-links
+          color="primary"
+          @update:model-value="onChangePage"
+        />
+      </div>
     </div>
   </div>
   <filePreviewModal
