@@ -4,16 +4,13 @@ import
 import {
   CommentModelContract,
   EditorConfigContract,
-  apiRouteDefault,
   commentModelConst,
   commentsContract,
-  commentableTypeDefault,
-  permissionsCommentsDefault,
 } from "modules/qsite/_components/master/comments/contracts/comments";
 import crud from 'modules/qcrud/_services/baseService'
 import { store, i18n, moment, alert, helper, router } from 'src/plugins/utils'
 import { useQuasar } from 'quasar';
-
+import _ from 'lodash';
 /**
  * A Vue Composition API function for managing comments functionality.
  * @param {object} props - The properties received by the component.
@@ -27,15 +24,20 @@ export default function useComments(props: any) {
     id: null,
     close: false,
   })
-  const files = ref({
-    value: null,
-    type: 'uploader',
-    props: {
-      title: i18n.trp('isite.cms.label.file'),
-      gridColClass: 'col-3 col-md-3 col-lg-4',
-      maxFiles: 3,
-    }
-  })
+  const uploadFile = ref(false);
+  const maxFiles = computed(() => props.maxFiles);
+  const page = ref(1);
+  const perPage = ref(10);
+  const total = ref(0);
+  const hasNextPage = ref(false);
+  const hasPreviousPage = ref(false);
+  const maxPages = computed(() => {
+    return Math.ceil(total.value / perPage.value);
+  });
+  const showPreview = ref(false)
+  const activeFile = ref(null)
+  const fieldData = ref([]);
+  const files = ref([]);
   const toolbarFiltersCkEditor = computed(() => props.toolbarFiltersCkEditor);
   const loadingComment = ref(false);
   const canAddComment = computed(() => props.canAddComment);
@@ -96,11 +98,13 @@ export default function useComments(props: any) {
           dataBase.value.active = false;
           dataBase.value.text = "";
           dataComment.value.close = false;
+          files.value = []
         })
         .onCancel(() => { });
     } else {
       dataBase.value.active = false;
       dataComment.value.close = false;
+      files.value = []
     }
   }
   /**
@@ -116,11 +120,7 @@ export default function useComments(props: any) {
           cancelComment(comment);
         }
         if (type == "edit") {
-          if (comment.comment !== comment.textEdit) {
-            editComment(id, comment);
-          } else {
-            cancelComment(comment);
-          }
+          editComment(id, comment);
         }
       }
     } catch (error) {
@@ -170,9 +170,14 @@ export default function useComments(props: any) {
       };
       crud
         .update(route.value, id, { ...params })
-        .then((response) => {
+        .then(async (response) => {
+          const filesMap = await getAllFilesByAttachments([response.data]);
           const commentUpdate = response.data;
           comment.updatedAt = commentUpdate.updatedAt;
+          comment.options.attachments = commentUpdate?.options?.attachments;
+          comment.files = (commentUpdate?.options?.attachments || [])
+            .map((id: number) => filesMap[id])
+            .filter(Boolean)
           comment.loading = false;
           comment.active = false;
           comment.edit = false;
@@ -228,11 +233,12 @@ export default function useComments(props: any) {
         comment: dataBase.value.text,
         userId: userId,
         is_internal: false,
-        options: null,
+        options: { "attachments": files.value.length > 0 ? files.value : null },
       };
       await crud.create(route.value, params);
       await getCommentsList(props.commentableId);
       dataBase.value = { ...commentModel.value };
+      files.value = [];
       alert.info({
         message: i18n.tr(`isite.cms.messages.savedComment`),
       });
@@ -284,6 +290,7 @@ export default function useComments(props: any) {
     try {
       const config = await configComment();
       loading.value = true;
+
       const params = {
         filter: {
           commentableType: commentableType.value,
@@ -294,30 +301,51 @@ export default function useComments(props: any) {
           }
         },
         include: "userProfile",
+        page: page.value,
+        take: perPage.value
       };
-      crud
-        .get(route.value, params)
-        .then((response) => {
-          const data = response.data;
-          comments.value = data.map((item) => ({
-            ...item,
-            active: false,
-            loading: false,
-            textEdit: "",
-            icon: item.type && config.data[item.type]?.icon ? config.data[item.type]?.icon : 'fa-regular fa-comment',
-            color: item.type && config.data[item.type]?.color ? config.data[item.type]?.color : 'primary',
-          }));
-          loading.value = false;
-        })
-        .catch((error) => {
-          loading.value = false;
-          alert.error({ message: error });
-          console.log(error);
-        });
+
+      const response = await crud.index(route.value, { refresh: true, params });
+
+      const data = response.data;
+      const meta = response.meta?.page;
+
+      if (meta) {
+        total.value = meta.total;
+        page.value = meta.currentPage;
+        perPage.value = meta.perPage;
+        hasNextPage.value = meta.hasNextPage;
+        hasPreviousPage.value = meta.hasPreviousPage;
+      }
+
+      const filesMap = await getAllFilesByAttachments(data);
+
+      comments.value = await Promise.all(
+        data.map(async (item) => ({
+          ...item,
+          active: false,
+          loading: false,
+          uploading: false,
+          textEdit: "",
+          icon: item.type && config.data[item.type]?.icon
+            ? config.data[item.type]?.icon
+            : "fa-regular fa-comment",
+          color: item.type && config.data[item.type]?.color
+            ? config.data[item.type]?.color
+            : "primary",
+          files: (item?.options?.attachments || [])
+            .map((id: number) => filesMap[id])
+            .filter(Boolean),
+        }))
+      );
+
+      loading.value = false;
     } catch (error) {
+      loading.value = false;
       console.log(error);
     }
   }
+
   /**
    * Retrieves the comment configuration from the server.
    */
@@ -339,7 +367,6 @@ export default function useComments(props: any) {
   getCommentsList(props.commentableId);
   // Hook to handle component cleanup and finalize ongoing comment operations
   onBeforeUnmount(async () => {
-    console.log(dataComment.value.close)
     if (dataComment.value.close) {
       if (dataComment.value.edit) {
         await updateComment('edit', dataComment.value.id)
@@ -348,6 +375,81 @@ export default function useComments(props: any) {
       }
     }
   })
+  async function getAllFilesByAttachments(comments: any[]) {
+    const attachmentIds = _.uniq(
+      _.compact(
+        _.flatMap(comments, c => c?.options?.attachments)
+      )
+    );
+
+    if (attachmentIds.length === 0) return {};
+
+    const response = await crud.index('apiRoutes.qsite.files', {
+      refresh: true,
+      params: {
+        filter: { id: attachmentIds }
+      }
+    });
+
+    return _.keyBy(
+      (response.data || []).map((item: any) => ({
+        id: item.id,
+        path: item.path,
+        name: item.name
+      })),
+      'id'
+    );
+  }
+
+  function getFileName(path: string): string {
+    return path.split('/').pop() || path;
+  }
+
+  function getExtension(path: string): string {
+    return path.split('.').pop()?.toLowerCase() || '';
+  }
+
+  function isPreviewable(file: any): boolean {
+    const ext = getExtension(file.path);
+    return ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext);
+  }
+
+  function getFileIcon(path: string): string {
+    const ext = getExtension(path);
+    const map: Record<string, string> = {
+      pdf: 'fa-solid fa-file-pdf tw-text-red-500',
+      doc: 'fa-solid fa-file-word tw-text-blue-600',
+      docx: 'fa-solid fa-file-word tw-text-blue-600',
+      xls: 'fa-solid fa-file-excel tw-text-green-600',
+      xlsx: 'fa-solid fa-file-excel tw-text-green-600',
+      csv: 'fa-solid fa-file-csv tw-text-green-500',
+      ppt: 'fa-solid fa-file-powerpoint tw-text-orange-500',
+      pptx: 'fa-solid fa-file-powerpoint tw-text-orange-500',
+      png: 'fa-solid fa-file-image tw-text-purple-500',
+      jpg: 'fa-solid fa-file-image tw-text-purple-500',
+      jpeg: 'fa-solid fa-file-image tw-text-purple-500',
+      gif: 'fa-solid fa-file-image tw-text-purple-500',
+      zip: 'fa-solid fa-file-zipper tw-text-gray-600',
+      rar: 'fa-solid fa-file-zipper tw-text-gray-600',
+      txt: 'fa-solid fa-file-lines tw-text-gray-500'
+    };
+    return map[ext] || 'fa-solid fa-file tw-text-gray-400';
+  }
+
+  function openPreview(file) {
+    activeFile.value = {
+      ...file,
+      previewUrl: file.path,
+      rawFile: null
+    }
+    showPreview.value = true
+  }
+
+  async function onChangePage(val: number) {
+    page.value = val;
+    await getCommentsList(props.commentableId);
+  }
+
   return {
     permisionComments,
     dataBase,
@@ -370,6 +472,22 @@ export default function useComments(props: any) {
     files,
     i18n,
     canAddComment,
-    toolbarFiltersCkEditor
+    toolbarFiltersCkEditor,
+    getExtension,
+    isPreviewable,
+    getFileIcon,
+    getFileName,
+    openPreview,
+    showPreview,
+    activeFile,
+    page,
+    perPage,
+    total,
+    hasNextPage,
+    hasPreviousPage,
+    maxPages,
+    onChangePage,
+    maxFiles,
+    uploadFile
   };
 }

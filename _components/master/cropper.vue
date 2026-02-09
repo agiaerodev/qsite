@@ -158,7 +158,7 @@ export default {
           {
             popupName: 'height',
             icon: 'fas fa-arrows-alt-v',
-            value: `${this.information ? this.information.cropper.height : ''}px`,
+            value: `${this.information ? this.information?.cropper?.height : ''}px`,
             label: this.$tr('isite.cms.form.height'),
             action: () => {
               this.$refs.cropper.setData({

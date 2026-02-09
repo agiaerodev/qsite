@@ -49,6 +49,8 @@ export interface commentsContract {
     loading: boolean;
     textEdit: string | null;
     edit: boolean;
+    files?: any;
+    uploading?: boolean;
 }
 
 export interface UserProfileContract {
