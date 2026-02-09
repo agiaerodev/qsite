@@ -235,9 +235,13 @@
                                       tw-no-underline
                                       hover:tw-text-primary
                                       tw-cursor-pointer
-                                      "
+                                    "
                                   >
                                     {{ getFileName(file.path) }}
+
+                                    <q-tooltip anchor="top middle" self="bottom middle">
+                                      {{ getFileName(file.path) }}
+                                    </q-tooltip>
                                   </span>
                                 </template>
                                 <template v-else>
@@ -251,11 +255,17 @@
                                       tw-text-gray-700
                                       tw-no-underline
                                       hover:tw-text-primary
-                                      tw-cursor-pointer"
+                                      tw-cursor-pointer
+                                    "
                                   >
                                     {{ file.name }}
+
+                                    <q-tooltip anchor="top middle" self="bottom middle">
+                                      {{ file.name }}
+                                    </q-tooltip>
                                   </span>
                                 </template>
+
                               </div>
 
                               <q-btn
