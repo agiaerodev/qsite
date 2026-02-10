@@ -76,140 +76,24 @@
 
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
-import { renderAsync } from 'docx-preview';
-import * as XLSX from 'xlsx';
+import useFilePreviewController from './controller';
 
-const modelValue = defineModel({ type: Boolean });
-
+const modelValue = defineModel({ type: Boolean, default: false });
 const props = defineProps({
   file: { type: Object, default: null }
 });
 
-const wordPreviewContainer = ref(null);
-const excelHtml = ref('');
-const loading = ref(true);
-const previewUrl = ref(null);
-
-/* ---------------------------------------------
- * File detection
- --------------------------------------------- */
-const filename = computed(() =>
-  props.file?.name?.toLowerCase() || ''
-);
-
-const isImage = computed(() =>
-  ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'].some(ext =>
-    filename.value.endsWith(ext)
-  )
-);
-
-const isPdf = computed(() => filename.value.endsWith('.pdf'));
-const isWord = computed(() => filename.value.endsWith('.docx'));
-const isExcel = computed(() => filename.value.endsWith('.xlsx'));
-
-/* ---------------------------------------------
- * Watch preview
- --------------------------------------------- */
-watch(() => props.file, async (file) => {
-  if (!file) return;
-
-  loading.value = true;
-  excelHtml.value = '';
-  previewUrl.value && URL.revokeObjectURL(previewUrl.value);
-  previewUrl.value = null;
-
-  await nextTick();
-
-  try {
-    // ---------- IMAGE & PDF ----------
-    if (isImage.value || isPdf.value) {
-      let blob;
-
-      if (file.rawFile) {
-        blob = file.rawFile;
-      } else {
-        blob = await fetchFileAsBlob(file.path);
-      }
-
-      previewUrl.value = URL.createObjectURL(blob);
-      loading.value = false;
-      return;
-    }
-
-    // ---------- WORD ----------
-    if (isWord.value) {
-      let buffer;
-
-      if (file.rawFile) {
-        buffer = await file.rawFile.arrayBuffer();
-      } else {
-        const blob = await fetchFileAsBlob(file.path);
-        buffer = await blob.arrayBuffer();
-      }
-
-      await renderAsync(buffer, wordPreviewContainer.value);
-      loading.value = false;
-      return;
-    }
-
-    // ---------- EXCEL ----------
-    if (isExcel.value) {
-      let buffer;
-
-      if (file.rawFile) {
-        buffer = await file.rawFile.arrayBuffer();
-      } else {
-        const blob = await fetchFileAsBlob(file.path);
-        buffer = await blob.arrayBuffer();
-      }
-
-      const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-      const rawHtml = XLSX.utils.sheet_to_html(sheet, {
-        id: 'excel-preview-table'
-      });
-
-      excelHtml.value = `
-        <div class="tw-overflow-auto tw-max-w-full">
-          ${rawHtml}
-        </div>
-      `;
-
-      loading.value = false;
-      return;
-    }
-
-  } catch (e) {
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}, { immediate: true });
-
-/* ---------------------------------------------
- * Helpers
- --------------------------------------------- */
-function close() {
-  modelValue.value = false;
-}
-
-async function fetchFileAsBlob(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Error downloading file');
-  return await response.blob();
-}
-
-/* ---------------------------------------------
- * Memory cleanup
- --------------------------------------------- */
-watch(modelValue, (val) => {
-  if (!val && previewUrl.value) {
-    URL.revokeObjectURL(previewUrl.value);
-    previewUrl.value = null;
-  }
-});
+const {
+  wordPreviewContainer,
+  excelHtml,
+  loading,
+  previewUrl,
+  isImage,
+  isPdf,
+  isWord,
+  isExcel,
+  close
+} = useFilePreviewController(props, modelValue);
 </script>
 
 <style>
