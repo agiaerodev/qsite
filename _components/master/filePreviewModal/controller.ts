@@ -27,10 +27,6 @@ export default function useFilePreviewController(props, modelValue) {
   const isExcel = computed(() => filename.value.endsWith('.xlsx'));
 
   /* ---------------------------------------------
-   * Watch preview
-   --------------------------------------------- */
-
-  /* ---------------------------------------------
    * Helpers
    --------------------------------------------- */
   function close() {
