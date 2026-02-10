@@ -75,7 +75,7 @@
     <!-- content slot -->
     <div>
       <slot 
-        @openModal="openModal"
+        @openModal="value => openModal(value)"
         name="content"
       />
     </div>
@@ -153,8 +153,8 @@ export default {
   },
   methods: {
     
-    openModal() {
-      this.$emit('openModal', this.cardData)
+    openModal(value) {
+      this.$emit('openModal', value)
     },    
     deleteCard(){
       this.$emit('deleteCard', this.cardData)
