@@ -1,82 +1,70 @@
-// controller.ts
-import { ref, computed, nextTick, type Ref } from 'vue';
+import { ref, computed, nextTick, onMounted } from 'vue';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import baseService from 'modules/qcrud/_services/baseService.js';
 import { eventBus, helper, alert } from '../../../../../plugins/utils';
 
-/* ---------------------------------------------
- * Types
- --------------------------------------------- */
-export interface UploadedFile {
-  name: string;
-  isImage: boolean;
-  previewUrl: string | null;
-  icon: string;
-  color: string;
-  rawFile: File;
-  uploading: boolean;
-  id: number | null;
-}
-
-export interface ControllerProps {
-  modelValue: UploadedFile[];
-  acceptedExtensions: string;
-  maxFiles: number;
-}
-
-/* ---------------------------------------------
- * Controller
- --------------------------------------------- */
-export function useFileController(
-  props: ControllerProps,
-  emit: (event: 'update:modelValue', value: UploadedFile[]) => void
-) {
+export function useFileUploadController(props, emit) {
   /* ---------------------------------------------
    * State
    --------------------------------------------- */
+  const uploading = ref(false);
+  const selectedFiles = ref([]);
   const showModal = ref(false);
-  const activeFile = ref<UploadedFile | null>(null);
-  const wordPreviewContainer = ref<HTMLElement | null>(null);
+  const activeFile = ref(null);
+  const wordPreviewContainer = ref(null);
   const excelHtml = ref('');
 
   /* ---------------------------------------------
    * Computed
    --------------------------------------------- */
-  const selectedFiles = computed<UploadedFile[]>({
+  const localFields = computed({
     get: () => props.modelValue,
-    set: (val) => emit('update:modelValue', val)
+    set: val => emit('update:modelValue', val)
   });
 
-  const isPdf = computed(
-    () => activeFile.value?.name.toLowerCase().endsWith('.pdf') ?? false
-  );
-
-  const isWord = computed(
-    () => activeFile.value?.name.toLowerCase().endsWith('.docx') ?? false
-  );
-
-  const isExcel = computed(
-    () => activeFile.value?.name.toLowerCase().endsWith('.xlsx') ?? false
-  );
+  const isPdf = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.pdf'));
+  const isWord = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.docx'));
+  const isExcel = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.xlsx'));
 
   /* ---------------------------------------------
    * Preview Logic
    --------------------------------------------- */
-  async function openPreview(file: UploadedFile) {
+  async function openPreview(file) {
     activeFile.value = file;
     showModal.value = true;
     excelHtml.value = '';
 
     await nextTick();
 
-    if (isWord.value && wordPreviewContainer.value) {
-      await renderAsync(file.rawFile, wordPreviewContainer.value);
+    if (isPdf.value) {
+      if (!file.rawFile) {
+        const blob = await fetchFileAsBlob(file.previewUrl);
+        file.previewUrl = URL.createObjectURL(blob);
+      }
+      return;
+    }
+
+    if (isWord.value) {
+      let source = file.rawFile;
+      if (!source) {
+        const blob = await fetchFileAsBlob(file.previewUrl || file.path);
+        source = await blob.arrayBuffer();
+      }
+      await renderAsync(source, wordPreviewContainer.value);
       return;
     }
 
     if (isExcel.value) {
-      renderExcel(file.rawFile);
+      let buffer;
+      if (file.rawFile) buffer = await file.rawFile.arrayBuffer();
+      else {
+        const blob = await fetchFileAsBlob(file.previewUrl || file.path);
+        buffer = await blob.arrayBuffer();
+      }
+      const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      excelHtml.value = XLSX.utils.sheet_to_html(sheet);
     }
   }
 
@@ -85,38 +73,21 @@ export function useFileController(
     activeFile.value = null;
   }
 
-  function renderExcel(file: File) {
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-
-      excelHtml.value = XLSX.utils.sheet_to_html(worksheet);
-    };
-
-    reader.readAsArrayBuffer(file);
-  }
-
   /* ---------------------------------------------
    * Upload Logic
    --------------------------------------------- */
-  async function onFileChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  async function onFileChange(event) {
+    const file = event.target.files[0];
     if (!file) return;
 
     if (selectedFiles.value.length >= props.maxFiles) {
       alert.warning(`You can only upload a maximum of ${props.maxFiles} files.`);
-      input.value = '';
+      event.target.value = '';
       return;
     }
 
     if (!validateExtension(file)) {
-      input.value = '';
+      event.target.value = '';
       return;
     }
 
@@ -135,7 +106,7 @@ export function useFileController(
 
     const metadata = resolveFileMetadata(finalFile);
 
-    const tempFile: UploadedFile = {
+    const tempFile = {
       name: finalFile.name,
       isImage: metadata.isImage,
       previewUrl:
@@ -153,130 +124,158 @@ export function useFileController(
     const index = selectedFiles.value.length - 1;
 
     try {
-      const formData = new FormData();
-      formData.append('file', finalFile);
+      uploading.value = true;
+      emit('uploading', true);
 
-      const response = await baseService.post(
-        'apiRoutes.qsite.files',
-        formData
-      );
+      const form = new FormData();
+      form.append('file', finalFile);
 
-      selectedFiles.value[index] = {
-        ...tempFile,
-        uploading: false,
-        id: response?.data?.id ?? null
-      };
-    } catch (error) {
-      alert.error(error);
+      const response = await baseService.post('apiRoutes.qsite.filesUploadWithDetails', form);
+
+      selectedFiles.value[index] = { ...tempFile, uploading: false, id: response?.id ?? null };
+
+      localFields.value = selectedFiles.value.map(f => f.id);
+      uploading.value = false;
+      emit('uploading', false);
+    } catch (e) {
       selectedFiles.value.splice(index, 1);
+      alert.error(e);
     }
 
-    input.value = '';
+    event.target.value = '';
+  }
+
+  /* ---------------------------------------------
+   * Backend Sync
+   --------------------------------------------- */
+  async function getFields() {
+    if (!localFields.value?.length) {
+      selectedFiles.value = [];
+      return;
+    }
+
+    const response = await baseService.index('apiRoutes.qsite.files', {
+      refresh: true,
+      params: { filter: { id: localFields.value } }
+    });
+
+    selectedFiles.value = response.data.map(file => {
+      const ext = file.extension?.toLowerCase() || '';
+      const isImage = ['.png', '.jpg', '.jpeg'].includes(ext);
+
+      return {
+        name: file.name,
+        isImage,
+        previewUrl: isImage || ext === '.pdf' ? file.path : null,
+        icon: resolveIconByExtension(ext),
+        color: resolveColorByExtension(ext),
+        rawFile: null,
+        uploading: false,
+        id: file.id,
+        path: file.path
+      };
+    });
   }
 
   /* ---------------------------------------------
    * Helpers
    --------------------------------------------- */
-  function removeFile(index: number) {
-    selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index);
-  }
-
-  function validateExtension(file: File): boolean {
-    const extension = '.' + file.name.split('.').pop()?.toLowerCase();
-
-    if (!extension || !props.acceptedExtensions.includes(extension)) {
+  function validateExtension(file) {
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!props.acceptedExtensions.includes(ext)) {
       alert.warning(`File not allowed: ${file.name}`);
       return false;
     }
-
     return true;
   }
 
-  function base64ToFile(base64: string, filename: string): File {
-    if (!base64.startsWith('data:')) {
-      base64 = 'data:image/png;base64,' + base64;
-    }
-
-    const [header, data] = base64.split(',');
-    const mime =
-      header.match(/data:(.*?);base64/)?.[1] ?? 'image/png';
-
-    const bytes = atob(data);
-    const buffer = new Uint8Array(bytes.length);
-
-    for (let i = 0; i < bytes.length; i++) {
-      buffer[i] = bytes.charCodeAt(i);
-    }
-
-    return new File([buffer], filename, { type: mime });
+  async function fetchFileAsBlob(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Error downloading file');
+    return await response.blob();
   }
 
-  function cropper(base64: string): Promise<{ base64: string }> {
-    return new Promise((resolve) => {
+  function resolveFileMetadata(file) {
+    const n = file.name.toLowerCase();
+    if (file.type.startsWith('image/')) return { isImage: true, icon: 'fa-solid fa-file-image', color: '#7e57c2' };
+    if (n.endsWith('.pdf')) return { isImage: false, icon: 'fa-solid fa-file-pdf', color: '#ff5252' };
+    if (n.endsWith('.xls') || n.endsWith('.xlsx')) return {
+      isImage: false,
+      icon: 'fa-solid fa-file-excel',
+      color: '#2ecc71'
+    };
+    if (n.endsWith('.doc') || n.endsWith('.docx')) return {
+      isImage: false,
+      icon: 'fa-solid fa-file-word',
+      color: '#3498db'
+    };
+    return { isImage: false, icon: 'fa-solid fa-file', color: '#5c6bc0' };
+  }
+
+  function resolveIconByExtension(ext) {
+    if (['.png', '.jpg', '.jpeg'].includes(ext)) return 'fa-solid fa-file-image';
+    if (ext === '.pdf') return 'fa-solid fa-file-pdf';
+    if (ext === '.xls' || ext === '.xlsx') return 'fa-solid fa-file-excel';
+    if (ext === '.doc' || ext === '.docx') return 'fa-solid fa-file-word';
+    return 'fa-solid fa-file';
+  }
+
+  function resolveColorByExtension(ext) {
+    if (ext === '.pdf') return '#ff5252';
+    if (ext === '.xls' || ext === '.xlsx') return '#2ecc71';
+    if (ext === '.doc' || ext === '.docx') return '#3498db';
+    if (['.png', '.jpg', '.jpeg'].includes(ext)) return '#7e57c2';
+    return '#5c6bc0';
+  }
+
+  function base64ToFile(base64, filename) {
+    const [header, data] = base64.split(',');
+    const mime = header.match(/:(.*?);/)?.[1] || 'image/png';
+    const bytes = atob(data);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new File([arr], filename, { type: mime });
+  }
+
+  function cropper(base64) {
+    return new Promise(resolve => {
       eventBus.emit('master.cropper.image', {
         src: base64,
-        type: 'image/png',
         ratio: 'free',
         callBack: resolve
       });
     });
   }
 
-  function resolveFileMetadata(file: File) {
-    if (file.type.startsWith('image/')) {
-      return { isImage: true, icon: '', color: '' };
+  async function removeFile(index) {
+    try {
+      const id = selectedFiles.value[index]?.id;
+      selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index);
+      localFields.value = selectedFiles.value.map(f => f.id);
+      await baseService.delete('apiRoutes.qsite.files', id);
+      alert.success('File removed successfully.');
+    } catch (e) {
+      alert.error(e);
     }
-
-    const name = file.name.toLowerCase();
-
-    if (name.endsWith('.pdf'))
-      return {
-        isImage: false,
-        icon: 'fa-solid fa-file-pdf',
-        color: '#ff5252'
-      };
-
-    if (name.endsWith('.xls') || name.endsWith('.xlsx'))
-      return {
-        isImage: false,
-        icon: 'fa-solid fa-file-excel',
-        color: '#2ecc71'
-      };
-
-    if (name.endsWith('.doc') || name.endsWith('.docx'))
-      return {
-        isImage: false,
-        icon: 'fa-solid fa-file-word',
-        color: '#3498db'
-      };
-
-    return {
-      isImage: false,
-      icon: 'fa-solid fa-file',
-      color: '#5c6bc0'
-    };
   }
 
-  /* ---------------------------------------------
-   * Expose API
-   --------------------------------------------- */
+  onMounted(async () => {
+    await getFields();
+  });
   return {
-    // state
+    uploading,
+    selectedFiles,
     showModal,
     activeFile,
     wordPreviewContainer,
     excelHtml,
-
-    // computed
-    selectedFiles,
     isPdf,
     isWord,
     isExcel,
-
-    // actions
     openPreview,
     closePreview,
     onFileChange,
+    getFields,
     removeFile
   };
 }
