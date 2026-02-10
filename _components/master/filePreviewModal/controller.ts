@@ -136,7 +136,6 @@ export default function useFilePreviewController(props, modelValue) {
         URL.revokeObjectURL(previewUrl.value);
         previewUrl.value = null;
       }
-      console.log(val);
     } catch (e) {
       console.log(e);
     }
