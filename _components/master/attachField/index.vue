@@ -1,11 +1,14 @@
 <template>
-  <div class="tw-flex tw-flex-wrap tw-items-start tw-gap-2">
-
+  <div
+    class="tw-flex tw-flex-wrap tw-items-start tw-gap-2"
+    v-if="permissionMedia.index"
+  >
     <!-- Upload Button -->
     <label
       class="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-h-10 tw-bg-[#f0f4ff]
              tw-border tw-border-[#e0e7ff] tw-rounded-full tw-cursor-pointer
              hover:tw-bg-white tw-transition-all tw-group shadow-sm"
+      v-if="permissionMedia.create"
     >
       <i class="fa-solid fa-paperclip tw-text-[#5c6bc0] tw-text-sm tw-ml-2"></i>
       <span class="tw-text-sm tw-font-semibold tw-text-[#5c6bc0]">
@@ -21,7 +24,10 @@
     </label>
 
     <!-- Preview Thumbnails -->
-    <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+    <div
+      class="tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+      v-if="permissionMedia.index"
+    >
       <div
         v-for="(file, index) in selectedFiles"
         :key="index"
@@ -67,7 +73,7 @@
 
         <!-- ❌ Remove disabled while uploading -->
         <button
-          v-if="!file.uploading"
+          v-if="!file.uploading && permissionMedia.destroy"
           @click.stop="removeFile(index)"
           class="tw-absolute -tw-top-0.5 -tw-right-0.5 tw-w-4 tw-h-4 tw-bg-white
                  tw-rounded-full tw-shadow-sm tw-flex tw-items-center tw-justify-center
@@ -106,7 +112,8 @@ const {
   activeFile,
   openPreview,
   onFileChange,
-  removeFile
+  removeFile,
+  permissionMedia
 } = useFileUploadController(props, emit);
 
 </script>

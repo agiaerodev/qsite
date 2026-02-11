@@ -56,6 +56,13 @@ export default function useComments(props: any) {
     index: hasAccess(`${props.permisionComments}.index`),
     destroy: hasAccess(`${props.permisionComments}.destroy`),
   }));
+
+  const permissionMedia = computed(() => ({
+    create: hasAccess(`media.files.create`),
+    edit: hasAccess(`media.files.edit`),
+    index: hasAccess(`media.files.index`),
+    destroy: hasAccess(`media.files.destroy`),
+  }));
   const dataBase = ref<any>({ ...commentModel.value });
   const textPlaceholder = computed<string>(() => i18n.tr('isite.cms.messages.writeComment'));
   const editorConfig = ref<EditorConfigContract>({
@@ -488,6 +495,7 @@ export default function useComments(props: any) {
     maxPages,
     onChangePage,
     maxFiles,
-    uploadFile
+    uploadFile,
+    permissionMedia
   };
 }

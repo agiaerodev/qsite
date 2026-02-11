@@ -2,12 +2,14 @@ import { ref, computed, nextTick, onMounted } from 'vue';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import baseService from 'modules/qcrud/_services/baseService.js';
-import { eventBus, helper, alert } from '../../../../../plugins/utils';
+import { eventBus, helper, alert, store } from '../../../../../plugins/utils';
+
 
 export function useFileUploadController(props, emit) {
   /* ---------------------------------------------
    * State
    --------------------------------------------- */
+  const { hasAccess } = store
   const uploading = ref(false);
   const selectedFiles = ref([]);
   const showModal = ref(false);
@@ -27,10 +29,21 @@ export function useFileUploadController(props, emit) {
   const isWord = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.docx'));
   const isExcel = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.xlsx'));
 
+  const permissionMedia = computed(() => ({
+    create: hasAccess(`media.files.create`),
+    edit: hasAccess(`media.files.edit`),
+    index: hasAccess(`media.files.index`),
+    destroy: hasAccess(`media.files.destroy`),
+  }));
+
   /* ---------------------------------------------
    * Preview Logic
    --------------------------------------------- */
   async function openPreview(file) {
+    if (!permissionMedia.value.index) {
+      alert.warning('You do not have permission to view files.');
+      return;
+    }
     activeFile.value = file;
     showModal.value = true;
     excelHtml.value = '';
@@ -77,6 +90,11 @@ export function useFileUploadController(props, emit) {
    * Upload Logic
    --------------------------------------------- */
   async function onFileChange(event) {
+    if(!permissionMedia.value.create) {
+      alert.warning('You do not have permission to upload files.');
+      event.target.value = '';
+      return;
+    }
     const file = event.target.files[0];
     if (!file) return;
 
@@ -249,6 +267,10 @@ export function useFileUploadController(props, emit) {
 
   async function removeFile(index) {
     try {
+      if(!permissionMedia.value.destroy) {
+        alert.warning('You do not have permission to delete files.');
+        return;
+      }
       const id = selectedFiles.value[index]?.id;
       selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index);
       localFields.value = selectedFiles.value.map(f => f.id);
@@ -276,6 +298,7 @@ export function useFileUploadController(props, emit) {
     closePreview,
     onFileChange,
     getFields,
-    removeFile
+    removeFile,
+    permissionMedia
   };
 }

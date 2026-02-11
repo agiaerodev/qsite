@@ -77,6 +77,7 @@
                     @click="addComment()"
                   />
                   <attach-files
+                    v-if="permissionMedia.index"
                     v-model="files"
                     :maxFiles="maxFiles"
                     @uploading="val => uploadFile = val"
@@ -165,7 +166,7 @@
                           :class="{'tw-italic tw-text-gray-500': item.internal || item.isInternal}"
                         />
                       </div>
-                      <div class="tw-mt-4" v-if="item.files.length > 0">
+                      <div class="tw-mt-4" v-if="item.files.length > 0 && permissionMedia.index">
                         <div
                           class="
                             tw-flex
@@ -189,6 +190,7 @@
                            sm:tw-grid-cols-2
                            lg:tw-grid-cols-3
                            tw-gap-4"
+                          v-if="permissionMedia.index"
                         >
                           <div
                             v-for="file in item.files"
@@ -304,6 +306,7 @@
                           @click="updateComment('edit', item.id)"
                         />
                         <attach-files
+                          v-if="permissionMedia.edit"
                           v-model="item.options.attachments"
                           :maxFiles="maxFiles"
                           @uploading="val => item.uploading = val"
