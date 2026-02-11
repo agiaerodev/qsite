@@ -495,7 +495,6 @@ export default {
       this.updateCard(data);
     }, 
     openModal(cardData){
-      console.log('openModal')
       this.$emit('openModal', {
         col: this.columnData, 
         card: cardData

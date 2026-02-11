@@ -56,7 +56,7 @@
         <slot />
       </div>
       <!--Actions Content-->
-      <div class="tw-bg-white tw-p-2" v-if="actions && actions.length">
+      <div class="tw-bg-white tw-p-4" v-if="actions && actions.length">
         <div class="row justify-end  tw-gap-x-2">
           <template
             v-for="(btn, keyBtn) in actions"
@@ -152,6 +152,16 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+
+.master-dialog-custom .master-dialog__body {
+  height: calc(100vh - 196px) !important;
+} 
+
+.master-dialog .master-dialog__body {
+  height: calc(100vh - 186px) !important;
+} 
+
+
 .master-super-ctn {
   .master-dialog {
     &__content {
