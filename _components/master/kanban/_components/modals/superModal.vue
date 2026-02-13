@@ -15,7 +15,7 @@
       <div :class="`master-dialog__header text-${color} row justify-between items-center`">
         <!--Title-->
         <div class="tw-flex tw-flex-col tw-gap-1">
-          <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />          
+          <q-icon v-if="icon" :name="icon" class="q-mr-sm" size="20px" />
           <h1 class="tw-text-base tw-font-bold">{{ title }}</h1>
           <p v-if="subtitle" class="tw-text-sm tw-text-gray-500">{{ subtitle }}</p>
         </div>
@@ -155,12 +155,7 @@ export default defineComponent({
 
 .master-dialog-custom .master-dialog__body {
   height: calc(100vh - 196px) !important;
-} 
-
-.master-dialog .master-dialog__body {
-  height: calc(100vh - 186px) !important;
-} 
-
+}
 
 .master-super-ctn {
   .master-dialog {
