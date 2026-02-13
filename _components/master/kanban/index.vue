@@ -146,7 +146,7 @@
     <component
       :is="modalComponent"
       v-bind="{
-        data: stateModal.data,
+        row: stateModal.data,
         col: stateModal.col
       }"
       @cancel="() => stateModal.show = false"
