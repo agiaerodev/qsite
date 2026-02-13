@@ -146,10 +146,11 @@
     <component
       :is="modalComponent"
       v-bind="{
-        row: stateModal.data,
+        row: stateModal.row,
         col: stateModal.col
       }"
-      @cancel="() => stateModal.show = false"
+      @cancel="() => closeModal"
+      @close="() => closeModal"      
       @init="(props) => {
         stateModal.modalProps = props
       }"
@@ -233,8 +234,8 @@ export default {
           'custom-position': true,
           'modalWidthSize': "80%"
         },
-        col: null,
-        data: null,
+        col: {},
+        data: {},
         tab: null,
         show: false
       }
@@ -672,14 +673,14 @@ export default {
         this.stateModal.modalProps = card.modalProps
       }
       this.stateModal.col = col
-      this.stateModal.data = card
+      this.stateModal.row = card
       this.stateModal.tab = tab
       this.stateModal.show = true
       //console.log({col, card })
     },
     closeModal(){
-      this.stateModal.col = null
-      this.stateModal.data = null
+      this.stateModal.col = {}
+      this.stateModal.row = {}
       this.stateModal.show = false
     },
     search(val){
