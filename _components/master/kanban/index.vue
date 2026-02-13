@@ -235,6 +235,7 @@ export default {
         },
         col: null,
         data: null,
+        tab: null,
         show: false
       }
     };
@@ -480,28 +481,29 @@ export default {
       try {
         const search = this.search ? { search: this.search } : {};
 
-        const parameters = {
-          params :{
-            filter: {
-              'statusId': column.id,
-              ...search,
-              order: { way: 'desc' }
-            },
-          },
+        const params = {
+          filter: {
+            'statusId': column.id,
+            ...search,
+            order: { way: 'desc' }
+          },          
           page: page,
           take: 10,
         };
 
-        let response = await services.getCards(this.kanban.cards.apiRoute, parameters, refresh)
-        //response = testCards.findByStatusId(column.id, page);
+       let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)        
 
         return {
-          total: response.meta.page.total,
-          data: response.data
+          total: response?.meta?.page?.total || 0,
+          data: response?.data || []
         };
-      } catch (error) {
+      } catch (error) {        
         column.loading = false;
         console.log(error);
+        return {
+          total: 0,
+          data: []
+        }
       }
     },
     //for in infiniteHandler
@@ -665,12 +667,13 @@ export default {
     },
 
 
-    openModal({col, card }){
+    openModal({col, card, tab = null }){
       if(card?.modalProps){
         this.stateModal.modalProps = card.modalProps
       }
       this.stateModal.col = col
       this.stateModal.data = card
+      this.stateModal.tab = tab
       this.stateModal.show = true
       //console.log({col, card })
     },
