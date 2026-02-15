@@ -150,8 +150,8 @@
         row: stateModal.row,
         col: stateModal.col
       }"
-      @cancel="() => closeModal"
-      @close="() => closeModal"
+      @cancel="() => closeModal()"
+      @close="() => closeModal()"
       @init="(props) => {
         stateModal.modalProps = props
       }"

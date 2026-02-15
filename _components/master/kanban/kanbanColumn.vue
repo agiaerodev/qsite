@@ -1,6 +1,8 @@
 <template>
-  <div class="columnCtn tw-relative bg-white no-shadow"
-      :style="columnWidth"
+  <div 
+    @contextmenu.prevent
+    class="columnCtn tw-relative bg-white no-shadow"
+    :style="columnWidth"
     >
     <div
       class="tw-h-auto"
@@ -221,6 +223,8 @@
           @unchoose="dragCursor = false"
           item-key="id"
           :disabled="!cardPermissions.drag"
+          :delay="100"
+          :delay-on-touch-only="true"
         >
           <template #item="{ element }">
             <kanbanCard

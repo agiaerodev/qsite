@@ -1,5 +1,6 @@
 <template>
   <div
+    @contextmenu.prevent
     class="
       tw-bg-white
       tw-drop-shadow-lg
@@ -10,7 +11,6 @@
       tw-select-none
     "
     :style="{ borderLeftColor: colorColumn }"
-    
   >
     <section class="tw-flex tw-justify-between">
       <div class="tw-w-full">
