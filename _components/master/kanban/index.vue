@@ -72,6 +72,7 @@
               @openModal="(value) => openModal(value)"
               @deleteColumn="value => deleteColumn(value)"
               @deleteCard="item => deleteKanbanCard(item)"
+              @updateCardColumn="column => updateCardColumn(column)"
               class="tw-flex-none tw-space-y-0 "
             />
           </div>
@@ -150,7 +151,7 @@
         col: stateModal.col
       }"
       @cancel="() => closeModal"
-      @close="() => closeModal"      
+      @close="() => closeModal"
       @init="(props) => {
         stateModal.modalProps = props
       }"
@@ -487,18 +488,18 @@ export default {
             'statusId': column.id,
             ...search,
             order: { way: 'desc' }
-          },          
+          },
           page: page,
           take: 10,
         };
 
-       let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)        
+       let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
 
         return {
           total: response?.meta?.page?.total || 0,
           data: response?.data || []
         };
-      } catch (error) {        
+      } catch (error) {
         column.loading = false;
         console.log(error);
         return {
@@ -657,7 +658,7 @@ export default {
       content.scrollLeft += 400;
       this.scrollTotal = content.scrollLeft;
     },
-    updateCard(columId) {
+    updateCardColumn(columId) {
       this.kanbanColumns.forEach(item => {
         if (item.id == columId) {
           item.data.forEach(card => {

@@ -478,7 +478,6 @@ export default {
           color: this.columnData.color
         }
 
-
         this.columnData.new = false;
         if(isNaN(this.columnData.id)) {
           const response = await services.createColumn(this.kanban.columns.apiRoute, payload)
@@ -491,17 +490,12 @@ export default {
         //this.setPayloadStatus();
       }
     },
-    updateCard(data) {
-      this.$crud.update('', data.id, data).then(response => {
-      }).catch(error => {
-        console.log(error);
-      })
-    },
-    move(elm) {
+      
+    async move(elm) {      
       if (elm.from.id === elm.to.id) return;
-      const data = { id: elm.clone.id, toId: elm.to.id };
-      ///this.updateCardColumn(Number(elm.to.id));
-      this.updateCard(data);
+      const data = { id: elm.clone.id, statusId: elm.to.id };      
+      await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
+      this.$emit('updateCardColumn', Number(elm.to.id));
     },
     openModal(cardData){
       this.$emit('openModal', {
