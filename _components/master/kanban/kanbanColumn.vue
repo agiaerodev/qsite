@@ -1,7 +1,8 @@
 <template>
   <div class="columnCtn tw-relative bg-white no-shadow"
-      :style="columnWidth"
-    >
+    :class="columnClass"
+  >
+  
     <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
@@ -201,7 +202,6 @@
           c-body
           tw-overflow-y-auto
           tw-overflow-x-hidden
-          tw-mb-4 tw-pr-2
         "
       >
         <draggable
@@ -228,30 +228,30 @@
               :cardData="element"
               :cardPermissions
               :colorColumn="element.color"
-              class="tw-cursor-pointer"
+              class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
               @openModal="openModal(element)"
               @deleteCard="$emit('deleteCard', element)"
             >
-              <template #header>
-                <component
-                  v-if="headerComponent"
-                  :is="headerComponent"
-                  v-bind="{data: element}"
-                  @openModal="openModal(element)"
-                />
-              </template>
-              <template #content>
+              
                 <component
                   v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
                   @openModal="openModal(element)"
-                />
-              </template>
-
-
+                  @deleteCard="$emit('deleteCard', element)"
+                >
+                  <template #kanban-actions>
+                    <kanbanActions
+                      :crudData="crudData"
+                      :cardPermissions="cardPermissions"
+                      :cardData="element"
+                      @openModal="openModal(element)"
+                      @deleteCard="$emit('deleteCard', element)"
+                    />
+                  </template>
+                </component>
             </kanbanCard>
 
 
@@ -276,6 +276,7 @@
 
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
+import kanbanActions from 'modules/qsite/_components/master/kanban/kanbanActions.vue';
 import services from 'modules/qsite/_components/master/kanban/services'
 
 
@@ -319,10 +320,7 @@ export default {
       type: Object,
     }
 
-  },
-  inject: [
-  ],
-
+  },  
   async beforeMount(){
     ///await this.getCardComponent();
   },
@@ -363,6 +361,7 @@ export default {
   components: {
     draggable,
     kanbanCard,
+    kanbanActions
   },
   computed: {
     kanban(){
@@ -405,10 +404,9 @@ export default {
     isTotalNumberOfRecords() {
       return this.columnData.total === this.columnData.data.length;
     },
-    columnWidth(){
-      return {
-        width: `${this?.kanban?.columnWidth}` || '240px'
-      }
+    columnClass(){
+      return this?.kanban?.columnClass || 'tw-w-[222px]'
+      
     },
     columnHeight(){
       return this?.kanban?.columnHeight || '235'
@@ -419,7 +417,7 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-      this.headerComponent =  markRaw(this?.kanban?.cardComponent?.header)
+      ///this.headerComponent =  markRaw(this?.kanban?.cardComponent?.header)
     },
 
     addColumnKanban() {

@@ -48,7 +48,7 @@
         filter=".ignoreItem"
         draggable=".notMoveBetweenColumns"
         :disabled="disabledColumn"
-        class="tw-p-3 tw-h-auto tw-flex tw-space-x-4 tw-overflow-x-auto"
+        class="tw-p-3 tw-h-auto tw-flex tw-space-x-2 tw-overflow-x-auto"
         @change="reorderColumns"
         :item-key="`columnKanban${uId}`"
       >
@@ -56,7 +56,7 @@
           <div v-if="!loading" class="notMoveBetweenColumns">
             <kanbanColumn
               :cardComponent="cardComponent"
-              :headerComponent="headerComponent"
+              
               :uId="uId"
               :crudData="crudData"
               :column-data="element"
@@ -227,7 +227,6 @@ export default {
       dynamicFilterValues: {},
 
       cardComponent: null,
-      headerComponent: null,
       modalComponent: null,
 
       stateModal: {
@@ -386,7 +385,7 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-      this.headerComponent = markRaw(this?.kanban?.cardComponent?.header)
+      
       this.modalComponent = markRaw(this?.kanban?.cardComponent?.modal)
     },
 
