@@ -231,7 +231,7 @@
               class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-              @openModal="openModal(element)"
+              @openModal="openModal"
               @deleteCard="$emit('deleteCard', element)"
             >
               
@@ -239,7 +239,7 @@
                   v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
-                  @openModal="openModal(element)"
+                  @openModal="openModal"
                   @deleteCard="$emit('deleteCard', element)"
                 >
                   <template #kanban-actions>
@@ -247,7 +247,7 @@
                       :crudData="crudData"
                       :cardPermissions="cardPermissions"
                       :cardData="element"
-                      @openModal="openModal(element)"
+                      @openModal="openModal"
                       @deleteCard="$emit('deleteCard', element)"
                     />
                   </template>
@@ -495,7 +495,8 @@ export default {
       await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
       this.$emit('updateCardColumn', Number(elm.to.id));
     },
-    openModal(cardData){
+    openModal(cardData){      
+      console.log(cardData)
       this.$emit('openModal', {
         col: this.columnData,
         card: cardData

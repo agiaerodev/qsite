@@ -55,8 +55,7 @@
         <template #item="{element, index}">
           <div v-if="!loading" class="notMoveBetweenColumns">
             <kanbanColumn
-              :cardComponent="cardComponent"
-              
+              :cardComponent="cardComponent"              
               :uId="uId"
               :crudData="crudData"
               :column-data="element"
@@ -143,12 +142,13 @@
   <superModal
     v-model="stateModal.show"
     v-bind="stateModal.modalProps"
-  >
+  >  
     <component
       :is="modalComponent"
       v-bind="{
         row: stateModal.row,
-        col: stateModal.col
+        col: stateModal.col, 
+        tab: stateModal.tab        
       }"
       @cancel="() => closeModal"
       @close="() => closeModal"
@@ -236,14 +236,14 @@ export default {
         },
         col: {},
         data: {},
-        tab: null,
+        tab: 'rr',
         show: false
       }
     };
   },
   mounted() {
     this.$nextTick(async function() {
-      await this.init();
+      //await this.init();
         const elementColumnKanban = document.getElementById(`columnKanban${this.uId}`);
         if (elementColumnKanban) {
           elementColumnKanban.addEventListener('scroll', evt =>
@@ -306,7 +306,7 @@ export default {
       if(this.readShowAs == 'kanban' ){
         response.push({
           label: this.iskanbanMode ? 'Table view' : 'Kanban view',
-          //vIf: !this.isMobile,
+          vIf: false,
           props: {
             icon: this.iskanbanMode ? 'fa-light fa-table' : 'fa-light fa-chart-kanban',
             id: 'switchKanbanButton'
@@ -482,7 +482,7 @@ export default {
       try {
         const search = this.search ? { search: this.search } : {};
 
-        const params = {
+        let params = {
           filter: {
             'statusId': column.id,
             ...search,
@@ -491,6 +491,8 @@ export default {
           page: page,
           take: 10,
         };
+        if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
+        if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}        
 
        let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
 
@@ -596,8 +598,7 @@ export default {
         const kanbanColumn = this.kanbanColumns.filter(
           (item) => item.id !== columnId
         );
-        this.kanbanColumns = kanbanColumn;
-        console.log(columnId)
+        this.kanbanColumns = kanbanColumn;        
         if (!isNaN(columnId)) {
           await services.deleteColumn(this.kanban.columns.apiRoute, columnId)
         }
@@ -668,23 +669,21 @@ export default {
     },
 
 
-    openModal({col, card, tab = null }){
+    openModal({col, card }){
       if(card?.modalProps){
         this.stateModal.modalProps = card.modalProps
-      }
+      }      
       this.stateModal.col = col
       this.stateModal.row = card
-      this.stateModal.tab = tab
+      this.stateModal.tab = card?.selectedTab || ''
       this.stateModal.show = true
-      //console.log({col, card })
     },
     closeModal(){
       this.stateModal.col = {}
       this.stateModal.row = {}
       this.stateModal.show = false
     },
-    search(val){
-      console.log(val)
+    search(val){      
       if(this.iskanbanMode){
         //kanban search
       } else {
@@ -704,6 +703,7 @@ export default {
     },
     updateDynamicFilterValues(filters) {
       this.dynamicFilterValues = filters;
+      this.init()
       ///this.table.filter = filters;
       //this.getDataTable(true, filters, { page: 1 });
     },
