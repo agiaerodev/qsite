@@ -55,7 +55,7 @@
         <template #item="{element, index}">
           <div v-if="!loading" class="notMoveBetweenColumns">
             <kanbanColumn
-              :cardComponent="cardComponent"              
+              :cardComponent="cardComponent"
               :uId="uId"
               :crudData="crudData"
               :column-data="element"
@@ -72,6 +72,7 @@
               @deleteColumn="value => deleteColumn(value)"
               @deleteCard="item => deleteKanbanCard(item)"
               @updateCardColumn="column => updateCardColumn(column)"
+              @reorderColumns="reorderColumns"
               class="tw-flex-none tw-space-y-0 "
             />
           </div>
@@ -142,13 +143,13 @@
   <superModal
     v-model="stateModal.show"
     v-bind="stateModal.modalProps"
-  >  
+  >
     <component
       :is="modalComponent"
       v-bind="{
         row: stateModal.row,
-        col: stateModal.col, 
-        tab: stateModal.tab        
+        col: stateModal.col,
+        tab: stateModal.tab
       }"
       @cancel="() => closeModal"
       @close="() => closeModal"
@@ -385,7 +386,7 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-      
+
       this.modalComponent = markRaw(this?.kanban?.cardComponent?.modal)
     },
 
@@ -495,7 +496,7 @@ export default {
           take: 10,
         };
         if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
-        if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}        
+        if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
 
        let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
 
@@ -541,7 +542,7 @@ export default {
                 await services.deleteCard(this.kanban.cards.apiRoute, item.id).then( async (response) => {
                   await this.addCard(column.id)
                   column.loading = false
-                })               
+                })
               }
             }
           ]
@@ -557,7 +558,7 @@ export default {
           return obj;
         }, {});
         services.orderColumns(this.kanban?.columns?.orderApiRoute, payload)
-        
+
       } catch (error) {
         console.log(error);
       }
@@ -586,7 +587,7 @@ export default {
         const kanbanColumn = this.kanbanColumns.filter(
           (item) => item.id !== columnId
         );
-        this.kanbanColumns = kanbanColumn;        
+        this.kanbanColumns = kanbanColumn;
         if (!isNaN(columnId)) {
           await services.deleteColumn(this.kanban.columns.apiRoute, columnId)
         }
@@ -660,7 +661,7 @@ export default {
     openModal({col, card }){
       if(card?.modalProps){
         this.stateModal.modalProps = card.modalProps
-      }      
+      }
       this.stateModal.col = col
       this.stateModal.row = card
       this.stateModal.tab = card?.selectedTab || ''
@@ -671,7 +672,7 @@ export default {
       this.stateModal.row = {}
       this.stateModal.show = false
     },
-    search(val){      
+    search(val){
       if(this.iskanbanMode){
         //kanban search
       } else {

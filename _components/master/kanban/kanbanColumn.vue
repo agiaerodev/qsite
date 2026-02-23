@@ -483,9 +483,8 @@ export default {
         } else {
           await services.updateColumn(this.kanban.columns.apiRoute, this.columnData.id, payload);
         }
-        this.$emit('saveStatusOrdering')
-        //await this.saveStatusOrdering();
-        //this.setPayloadStatus();
+        this.$emit('reorderColumns')
+        
       }
     },
       

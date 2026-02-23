@@ -40,9 +40,13 @@ export default {
   },
 
   orderColumns(apiRoute = '', data = {}): Promise<any> {    
+
     return new Promise((resolve, reject) => {      
       //Request
-      baseService.put(apiRoute, data).then(response => {
+      const body = {
+        attributes: data
+      }
+      baseService.put(apiRoute, body).then(response => {
         resolve(response)
       }).catch(error => reject(error))
     })
