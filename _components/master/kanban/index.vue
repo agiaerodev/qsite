@@ -396,7 +396,10 @@ export default {
       });
     },
     async reorderColumns() {
-      this.reorder('kanbanColumns');
+
+      this.kanbanColumns.forEach((item, index) => {
+        item.position = index;
+      });
       await this.saveStatusOrdering();
     },
     reorder(type) {
@@ -538,19 +541,7 @@ export default {
                 await services.deleteCard(this.kanban.cards.apiRoute, item.id).then( async (response) => {
                   await this.addCard(column.id)
                   column.loading = false
-                })
-
-                /*
-                const kanbanCard = await this.getKanbanCard(this.automation ? column : item.status, 1, true);
-                if (column) {
-                  column.data = kanbanCard.data || [];
-                  setTimeout(() => {
-                    column.loading = false;
-                  }, 1000);
-                  column.total = kanbanCard.total || 0;
-                }
-                  */
-
+                })               
               }
             }
           ]
@@ -561,15 +552,12 @@ export default {
     },
     async saveStatusOrdering() {
       try {
-        if (!this.kanban.orderStatus) return;
-
-        const statusId = this.kanbanColumns.map((item) => ({ id: item.id }));
-        console.log('reorder columns')
-        /*
-        await this.$crud.create(route.apiRoute, {
-          [route.filter.name]: statusId
-        });
-        */
+        const payload = this.kanbanColumns.reduce((obj, item) => {
+          obj[item.position] = item.id;
+          return obj;
+        }, {});
+        services.orderColumns(this.kanban?.columns?.orderApiRoute, payload)
+        
       } catch (error) {
         console.log(error);
       }

@@ -495,8 +495,7 @@ export default {
       await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
       this.$emit('updateCardColumn', Number(elm.to.id));
     },
-    openModal(cardData){      
-      console.log(cardData)
+    openModal(cardData){
       this.$emit('openModal', {
         col: this.columnData,
         card: cardData

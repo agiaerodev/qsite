@@ -39,6 +39,16 @@ export default {
     })
   },
 
+  orderColumns(apiRoute = '', data = {}): Promise<any> {    
+    return new Promise((resolve, reject) => {      
+      //Request
+      baseService.put(apiRoute, data).then(response => {
+        resolve(response)
+      }).catch(error => reject(error))
+    })
+  }, 
+
+
   /* cards */
   getCards(apiRoute = '', params = {}, refresh = false): Promise<any> {    
     return new Promise((resolve, reject) => {
