@@ -191,7 +191,7 @@
             tw-w-full
             hover:tw-text-white
             hover:tw-bg-gray-200"
-          @click=" () => openModal({})"
+          @click=" () => openModal()"
           :disabled="allowCreateCard"
           >
           <i class="fa-solid fa-plus"></i>
@@ -221,6 +221,7 @@
           @unchoose="dragCursor = false"
           item-key="id"
           :disabled="!cardPermissions.drag"
+          
         >
           <template #item="{ element }">
             <kanbanCard
@@ -231,7 +232,7 @@
               class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-              @openModal="openModal"
+              @openModal="value => openModal(value, false)"
               @deleteCard="$emit('deleteCard', element)"
             >
               
@@ -239,7 +240,7 @@
                   v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
-                  @openModal="openModal"
+                  @openModal="value => openModal(value, false)"
                   @deleteCard="$emit('deleteCard', element)"
                 >
                   <template #kanban-actions>
@@ -247,7 +248,7 @@
                       :crudData="crudData"
                       :cardPermissions="cardPermissions"
                       :cardData="element"
-                      @openModal="openModal"
+                      @openModal="value => openModal(value, false)"
                       @deleteCard="$emit('deleteCard', element)"
                     />
                   </template>
@@ -494,10 +495,13 @@ export default {
       await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
       this.$emit('updateCardColumn', Number(elm.to.id));
     },
-    openModal(cardData){
+
+    
+    openModal(row = {}, isCreate = true){
       this.$emit('openModal', {
         col: this.columnData,
-        card: cardData
+        row, 
+        isCreate
       })
     }
   },

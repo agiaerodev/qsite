@@ -6,8 +6,8 @@
         :excludeActions="excludeActions"
         :searchAction="crudData.read?.searchAction"
         :title="title"
-        @search="val => search(val)"
-        @new="openModal({col: null, data: null})"
+        @search="val => setSearch(val)"
+        @new="openModal({col: null, row: {}, isCreate: true})"
         @refresh="init"
         ref="pageActionRef"
         :tour-name="tourName"
@@ -140,26 +140,16 @@
       </draggable>
     </div>
 
-  <superModal
-    v-model="stateModal.show"
-    v-bind="stateModal.modalProps"
-  >
     <component
+      ref="modalComponentRef"
+      v-if="modalComponent"
       :is="modalComponent"
-      v-bind="{
-        row: stateModal.row,
-        col: stateModal.col,
-        tab: stateModal.tab
-      }"
-      @cancel="() => closeModal"
-      @close="() => closeModal"
-      @init="(props) => {
-        stateModal.modalProps = props
-      }"
+      :stateModal="stateModal"
+      @cancel="closeModal()"
+      @close="closeModal()"
       @createCard="value => createCard(value)"
-
     />
-  </superModal>
+  
 
 </div>
 
@@ -231,14 +221,10 @@ export default {
       modalComponent: null,
 
       stateModal: {
-        modalProps: {
-          'custom-position': true,
-          'modalWidthSize': "80%"
-        },
+        show: false,
+        isCreate: true,
         col: {},
-        data: {},
-        tab: 'rr',
-        show: false
+        row: {},
       }
     };
   },
@@ -463,8 +449,7 @@ export default {
       this.closeModal()
     },
 
-    async addCard(columnId) {
-      console
+    async addCard(columnId) {      
       const column = this.kanbanColumns.find(item => item.id === columnId);
       if (column) {
         column.loading = true;
@@ -483,9 +468,8 @@ export default {
       }
     },
     async getKanbanCardList(column, page, refresh = false) {
-      try {
+      try {        
         const search = this.search ? { search: this.search } : {};
-
         let params = {
           filter: {
             'statusId': column.id,
@@ -497,8 +481,10 @@ export default {
         };
         if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
         if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
-
-       let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
+        
+        column.loading = true;
+        let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
+        column.loading = false
 
         return {
           total: response?.meta?.page?.total || 0,
@@ -635,7 +621,12 @@ export default {
       }
     },
     setSearch(value) {
-      this.search = value && value !== '' ? value : null;
+      this.search = value && value !== '' ? value : null;      
+      if(this.iskanbanMode){
+        this.kanbanColumns.forEach((column) => this.getKanbanCardList(column, 1, true))
+      } else {
+        this.$refs.dynamicListRef.search(val)
+      }
     },
     scrollLeft() {
       const content = this.scroll;
@@ -658,27 +649,20 @@ export default {
     },
 
 
-    openModal({col, card }){
-      if(card?.modalProps){
-        this.stateModal.modalProps = card.modalProps
-      }
+    openModal({col, row, isCreate = true }){      
       this.stateModal.col = col
-      this.stateModal.row = card
-      this.stateModal.tab = card?.selectedTab || ''
+      this.stateModal.row = row      
+      this.stateModal.isCreate = isCreate
+      this.$refs.modalComponentRef.init()
       this.stateModal.show = true
     },
     closeModal(){
       this.stateModal.col = {}
       this.stateModal.row = {}
       this.stateModal.show = false
+      this.stateModal.isCreate = true
     },
-    search(val){
-      if(this.iskanbanMode){
-        //kanban search
-      } else {
-        this.$refs.dynamicListRef.search(val)
-      }
-    },
+    
     //Hanlder method create
     handlerActionCreate() {
       //Redirect to vue route
