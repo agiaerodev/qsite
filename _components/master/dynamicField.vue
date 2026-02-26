@@ -952,6 +952,21 @@ export default {
                 val => {
                   if (!val) return true;
                   return this.$moment(val, maskFullDate, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskFullDate})`;
+                },
+                val => {
+                  if (!val) return true;
+                  const timeMatch = val.match(/(\d{2}):(\d{2})/);
+                  if (timeMatch) {
+                    const hours = parseInt(timeMatch[1]);
+                    const minutes = parseInt(timeMatch[2]);
+                    if (hours > 23 || hours < 0) {
+                      return this.$tr('isite.cms.message.invalidFormat')
+                    }
+                    if (minutes > 59 || minutes < 0) {
+                      return this.$tr('isite.cms.message.invalidFormat')
+                    } 
+                  }
+                  return true;
                 }
               ]
             },
