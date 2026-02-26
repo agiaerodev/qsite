@@ -148,9 +148,8 @@
       @cancel="closeModal()"
       @close="closeModal()"
       @createCard="value => createCard(value)"
+      @reloadColumn="addCard"
     />
-  
-
 </div>
 
 
@@ -448,7 +447,7 @@ export default {
       }
       this.closeModal()
     },
-
+    /* reload column*/
     async addCard(columnId) {      
       const column = this.kanbanColumns.find(item => item.id === columnId);
       if (column) {

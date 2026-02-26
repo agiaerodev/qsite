@@ -232,7 +232,7 @@
               class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-              @openModal="value => openModal(value, false)"
+              @openModal="value => openModal(element, false)"
               @deleteCard="$emit('deleteCard', element)"
             >
               
@@ -240,7 +240,7 @@
                   v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
-                  @openModal="value => openModal(value, false)"
+                  @openModal="value => openModal(element, false)"
                   @deleteCard="$emit('deleteCard', element)"
                 >
                   <template #kanban-actions>
@@ -248,7 +248,7 @@
                       :crudData="crudData"
                       :cardPermissions="cardPermissions"
                       :cardData="element"
-                      @openModal="value => openModal(value, false)"
+                      @openModal="value => openModal(element, false)"
                       @deleteCard="$emit('deleteCard', element)"
                     />
                   </template>

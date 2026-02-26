@@ -9,13 +9,13 @@
       kd-without-arrow
       tw-float-right
       tw-cursor-pointer
-      tw-text-xs              
+      tw-text-xs
       tw-h-7
     "
     style="color: #AAAAAA"
     icon="fa-light fa-ellipsis-vertical"
     @click.stop
-  >          
+  >
     <q-list
       dense
       class="
@@ -36,9 +36,9 @@
           @click.native="runAction(action)"
         >
           <q-item-section>
-            <div class="tw-flex tw-space-x-2 tw-py-2">
-              <q-icon v-if="action?.icon" :name="action.icon" color="primary" size="20px"/>
-              <div class="tw-mt-0.5 tw-font-semibold">
+            <div class="tw-flex tw-space-x-2 tw-py-2" :class="action?.class">
+              <q-icon v-if="action?.icon" :name="action.icon" :color="action?.color" size="14px"/>
+              <div class="tw-mt-0.5 tw-text-[12px]" :class="action?.class">
                 {{ action.label || action.tooltip }}
               </div>
             </div>
@@ -46,13 +46,13 @@
         </q-item>
       </template>
     </q-list>
-  </q-btn-dropdown>      
+  </q-btn-dropdown>
 </template>
 
 <script>
 
 export default {
-  props: {    
+  props: {
     cardData: {
       type: Object,
       default: () => ({}),
@@ -64,41 +64,43 @@ export default {
     crudData: {
       type: Object,
       default: () => ({}),
-    }, 
+    },
 
-  },  
+  },
   computed: {
-    cardActions(){      
+    cardActions(){
+      const actions = this.crudData.read.kanban?.actions || []
       const defaultActions = [
         {
           vIf: this.cardPermissions.edit,
-          name: 'viewCard',            
-          label: this.$tr('isite.cms.label.information'),
-          icon: 'fas fa-info-circle',
+          name: 'viewCard',
+          label: this.$tr('isite.cms.label.edit'),
+          icon: 'fa-light fa-pencil',
+          class: 'tw-text-slate-500',
           action: (item) => {
             this.openModal()
           }
         },
         {
-          vIf: this.cardPermissions.delete, 
-          name: 'deleteCard',            
-          icon: 'fa-light fa-trash-can',
-          color: 'red',
+          vIf: this.cardPermissions.delete,
+          name: 'deleteCard',
+          icon: 'fa-light fa-trash',
+          class: 'tw-text-slate-500',
           label: this.$tr('isite.cms.label.delete'),
-          action: (item) => {            
+          action: (item) => {
             this.deleteCard()
           }
         }
       ]
 
-      return [...this.crudData.read.kanban?.actions, ...defaultActions]  || defaultActions;
+      return actions.length ? [...actions, defaultActions] : defaultActions;
     },
   },
   methods: {
-    
+
     openModal(value) {
       this.$emit('openModal', value)
-    },    
+    },
     deleteCard(){
       this.$emit('deleteCard', this.cardData)
     },
