@@ -1,7 +1,8 @@
 <template>
   <div class="columnCtn tw-relative bg-white no-shadow"
-      :style="columnWidth"
-    >
+    :class="columnClass"
+  >
+  
     <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
@@ -190,7 +191,7 @@
             tw-w-full
             hover:tw-text-white
             hover:tw-bg-gray-200"
-          @click=" () => openModal({})"
+          @click=" () => openModal()"
           :disabled="allowCreateCard"
           >
           <i class="fa-solid fa-plus"></i>
@@ -201,7 +202,6 @@
           c-body
           tw-overflow-y-auto
           tw-overflow-x-hidden
-          tw-mb-4 tw-pr-2
         "
       >
         <draggable
@@ -221,6 +221,7 @@
           @unchoose="dragCursor = false"
           item-key="id"
           :disabled="!cardPermissions.drag"
+          
         >
           <template #item="{ element }">
             <kanbanCard
@@ -228,30 +229,30 @@
               :cardData="element"
               :cardPermissions
               :colorColumn="element.color"
-              class="tw-cursor-pointer"
+              class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-              @openModal="openModal(element)"
+              @openModal="value => openModal(value, false)"
               @deleteCard="$emit('deleteCard', element)"
             >
-              <template #header>
-                <component
-                  v-if="headerComponent"
-                  :is="headerComponent"
-                  v-bind="{data: element}"
-                  @openModal="openModal(element)"
-                />
-              </template>
-              <template #content>
+              
                 <component
                   v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
-                  @openModal="openModal(element)"
-                />
-              </template>
-
-
+                  @openModal="value => openModal(value, false)"
+                  @deleteCard="$emit('deleteCard', element)"
+                >
+                  <template #kanban-actions>
+                    <kanbanActions
+                      :crudData="crudData"
+                      :cardPermissions="cardPermissions"
+                      :cardData="element"
+                      @openModal="value => openModal(value, false)"
+                      @deleteCard="$emit('deleteCard', element)"
+                    />
+                  </template>
+                </component>
             </kanbanCard>
 
 
@@ -276,6 +277,7 @@
 
 import draggable from "vuedraggable";
 import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
+import kanbanActions from 'modules/qsite/_components/master/kanban/kanbanActions.vue';
 import services from 'modules/qsite/_components/master/kanban/services'
 
 
@@ -319,10 +321,7 @@ export default {
       type: Object,
     }
 
-  },
-  inject: [
-  ],
-
+  },  
   async beforeMount(){
     ///await this.getCardComponent();
   },
@@ -363,6 +362,7 @@ export default {
   components: {
     draggable,
     kanbanCard,
+    kanbanActions
   },
   computed: {
     kanban(){
@@ -405,10 +405,9 @@ export default {
     isTotalNumberOfRecords() {
       return this.columnData.total === this.columnData.data.length;
     },
-    columnWidth(){
-      return {
-        width: `${this?.kanban?.columnWidth}` || '240px'
-      }
+    columnClass(){
+      return this?.kanban?.columnClass || 'tw-w-[222px]'
+      
     },
     columnHeight(){
       return this?.kanban?.columnHeight || '235'
@@ -419,7 +418,7 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-      this.headerComponent =  markRaw(this?.kanban?.cardComponent?.header)
+      ///this.headerComponent =  markRaw(this?.kanban?.cardComponent?.header)
     },
 
     addColumnKanban() {
@@ -485,9 +484,8 @@ export default {
         } else {
           await services.updateColumn(this.kanban.columns.apiRoute, this.columnData.id, payload);
         }
-        this.$emit('saveStatusOrdering')
-        //await this.saveStatusOrdering();
-        //this.setPayloadStatus();
+        this.$emit('reorderColumns')
+        
       }
     },
       
@@ -497,10 +495,13 @@ export default {
       await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
       this.$emit('updateCardColumn', Number(elm.to.id));
     },
-    openModal(cardData){
+
+    
+    openModal(row = {}, isCreate = true){
       this.$emit('openModal', {
         col: this.columnData,
-        card: cardData
+        row, 
+        isCreate
       })
     }
   },

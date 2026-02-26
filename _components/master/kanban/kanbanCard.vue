@@ -4,79 +4,20 @@
       tw-bg-white
       tw-drop-shadow-lg
       tw-rounded-xl
-      tw-p-3
-      tw-border
-      tw-mb-4
+      tw-border      
       tw-select-none
+      tw-w-[212px]
+      tw-py-[8px]
+      tw-pr-[6px]
+      tw-pl-[10px]
     "
     :style="{ borderLeftColor: colorColumn }"
     
-  >
-    <section class="tw-flex tw-justify-between">
-      <div class="tw-w-full">
-        <div class="tw-flex">
-          <div class="tw-w-full">
-            <!-- header slot -->
-            <slot name="header">
-            </slot>
-          </div>
-          
-          <q-btn-dropdown
-            round
-            color="gray-4"
-            flat
-            size="12px"
-            padding="2px 4px"
-            class="
-              kd-without-arrow
-              tw-float-right
-              tw-cursor-pointer
-              tw-text-xs              
-              tw-h-7
-            "
-            style="color: #AAAAAA"
-            icon="fa-light fa-ellipsis-vertical"
-            @click.stop
-          >          
-            <q-list
-              dense
-              class="
-                kd-list-without-arrow
-                tw-bg-gray-100
-                tw-text-xs"
-            >
-              <template
-                v-for="(action, keyAction) in cardActions"
-                :key="keyAction"
-              >
-              <q-item
-                clickable
-                v-close-popup
-                v-if="action?.vIf != undefined ? action?.vIf : true"
-                v-bind="action.props"
-                @click.native="runAction(action)"
-              >
-                  <q-item-section>
-                    <div class="tw-flex tw-space-x-2 tw-py-2">
-                      <q-icon v-if="action?.icon" :name="action.icon" color="primary" size="20px"/>
-                      <div class="tw-mt-0.5 tw-font-semibold">
-                        {{ action.label || action.tooltip }}
-                      </div>
-                    </div>
-                  </q-item-section>
-              </q-item>
-              </template>
-            </q-list>
-          </q-btn-dropdown>
-        </div>
-      </div>
-    </section>
-
+  >    
     <!-- content slot -->
     <div>
       <slot 
-        @openModal="value => openModal(value)"
-        name="content"
+        @openModal="value => openModal(value)"  
       />
     </div>
    

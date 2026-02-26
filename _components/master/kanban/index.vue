@@ -6,8 +6,8 @@
         :excludeActions="excludeActions"
         :searchAction="crudData.read?.searchAction"
         :title="title"
-        @search="val => search(val)"
-        @new="openModal({col: null, data: null})"
+        @search="val => setSearch(val)"
+        @new="openModal({col: null, row: {}, isCreate: true})"
         @refresh="init"
         ref="pageActionRef"
         :tour-name="tourName"
@@ -48,7 +48,7 @@
         filter=".ignoreItem"
         draggable=".notMoveBetweenColumns"
         :disabled="disabledColumn"
-        class="tw-p-3 tw-h-auto tw-flex tw-space-x-4 tw-overflow-x-auto"
+        class="tw-p-3 tw-h-auto tw-flex tw-space-x-2 tw-overflow-x-auto"
         @change="reorderColumns"
         :item-key="`columnKanban${uId}`"
       >
@@ -56,7 +56,6 @@
           <div v-if="!loading" class="notMoveBetweenColumns">
             <kanbanColumn
               :cardComponent="cardComponent"
-              :headerComponent="headerComponent"
               :uId="uId"
               :crudData="crudData"
               :column-data="element"
@@ -73,6 +72,7 @@
               @deleteColumn="value => deleteColumn(value)"
               @deleteCard="item => deleteKanbanCard(item)"
               @updateCardColumn="column => updateCardColumn(column)"
+              @reorderColumns="reorderColumns"
               class="tw-flex-none tw-space-y-0 "
             />
           </div>
@@ -140,25 +140,16 @@
       </draggable>
     </div>
 
-  <superModal
-    v-model="stateModal.show"
-    v-bind="stateModal.modalProps"
-  >
     <component
+      ref="modalComponentRef"
+      v-if="modalComponent"
       :is="modalComponent"
-      v-bind="{
-        row: stateModal.row,
-        col: stateModal.col
-      }"
-      @cancel="() => closeModal"
-      @close="() => closeModal"
-      @init="(props) => {
-        stateModal.modalProps = props
-      }"
+      :stateModal="stateModal"
+      @cancel="closeModal()"
+      @close="closeModal()"
       @createCard="value => createCard(value)"
-
     />
-  </superModal>
+  
 
 </div>
 
@@ -227,24 +218,19 @@ export default {
       dynamicFilterValues: {},
 
       cardComponent: null,
-      headerComponent: null,
       modalComponent: null,
 
       stateModal: {
-        modalProps: {
-          'custom-position': true,
-          'modalWidthSize': "80%"
-        },
+        show: false,
+        isCreate: true,
         col: {},
-        data: {},
-        tab: null,
-        show: false
+        row: {},
       }
     };
   },
   mounted() {
     this.$nextTick(async function() {
-      await this.init();
+      //await this.init();
         const elementColumnKanban = document.getElementById(`columnKanban${this.uId}`);
         if (elementColumnKanban) {
           elementColumnKanban.addEventListener('scroll', evt =>
@@ -307,7 +293,7 @@ export default {
       if(this.readShowAs == 'kanban' ){
         response.push({
           label: this.iskanbanMode ? 'Table view' : 'Kanban view',
-          //vIf: !this.isMobile,
+          vIf: false,
           props: {
             icon: this.iskanbanMode ? 'fa-light fa-table' : 'fa-light fa-chart-kanban',
             id: 'switchKanbanButton'
@@ -386,7 +372,7 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-      this.headerComponent = markRaw(this?.kanban?.cardComponent?.header)
+
       this.modalComponent = markRaw(this?.kanban?.cardComponent?.modal)
     },
 
@@ -397,7 +383,10 @@ export default {
       });
     },
     async reorderColumns() {
-      this.reorder('kanbanColumns');
+
+      this.kanbanColumns.forEach((item, index) => {
+        item.position = index;
+      });
       await this.saveStatusOrdering();
     },
     reorder(type) {
@@ -460,8 +449,7 @@ export default {
       this.closeModal()
     },
 
-    async addCard(columnId) {
-      console
+    async addCard(columnId) {      
       const column = this.kanbanColumns.find(item => item.id === columnId);
       if (column) {
         column.loading = true;
@@ -480,10 +468,9 @@ export default {
       }
     },
     async getKanbanCardList(column, page, refresh = false) {
-      try {
+      try {        
         const search = this.search ? { search: this.search } : {};
-
-        const params = {
+        let params = {
           filter: {
             'statusId': column.id,
             ...search,
@@ -492,8 +479,12 @@ export default {
           page: page,
           take: 10,
         };
-
-       let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
+        if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
+        if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
+        
+        column.loading = true;
+        let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
+        column.loading = false
 
         return {
           total: response?.meta?.page?.total || 0,
@@ -538,18 +529,6 @@ export default {
                   await this.addCard(column.id)
                   column.loading = false
                 })
-
-                /*
-                const kanbanCard = await this.getKanbanCard(this.automation ? column : item.status, 1, true);
-                if (column) {
-                  column.data = kanbanCard.data || [];
-                  setTimeout(() => {
-                    column.loading = false;
-                  }, 1000);
-                  column.total = kanbanCard.total || 0;
-                }
-                  */
-
               }
             }
           ]
@@ -560,15 +539,12 @@ export default {
     },
     async saveStatusOrdering() {
       try {
-        if (!this.kanban.orderStatus) return;
+        const payload = this.kanbanColumns.reduce((obj, item) => {
+          obj[item.position] = item.id;
+          return obj;
+        }, {});
+        services.orderColumns(this.kanban?.columns?.orderApiRoute, payload)
 
-        const statusId = this.kanbanColumns.map((item) => ({ id: item.id }));
-        console.log('reorder columns')
-        /*
-        await this.$crud.create(route.apiRoute, {
-          [route.filter.name]: statusId
-        });
-        */
       } catch (error) {
         console.log(error);
       }
@@ -598,7 +574,6 @@ export default {
           (item) => item.id !== columnId
         );
         this.kanbanColumns = kanbanColumn;
-        console.log(columnId)
         if (!isNaN(columnId)) {
           await services.deleteColumn(this.kanban.columns.apiRoute, columnId)
         }
@@ -646,7 +621,12 @@ export default {
       }
     },
     setSearch(value) {
-      this.search = value && value !== '' ? value : null;
+      this.search = value && value !== '' ? value : null;      
+      if(this.iskanbanMode){
+        this.kanbanColumns.forEach((column) => this.getKanbanCardList(column, 1, true))
+      } else {
+        this.$refs.dynamicListRef.search(val)
+      }
     },
     scrollLeft() {
       const content = this.scroll;
@@ -669,29 +649,20 @@ export default {
     },
 
 
-    openModal({col, card, tab = null }){
-      if(card?.modalProps){
-        this.stateModal.modalProps = card.modalProps
-      }
+    openModal({col, row, isCreate = true }){      
       this.stateModal.col = col
-      this.stateModal.row = card
-      this.stateModal.tab = tab
+      this.stateModal.row = row      
+      this.stateModal.isCreate = isCreate
+      this.$refs.modalComponentRef.init()
       this.stateModal.show = true
-      //console.log({col, card })
     },
     closeModal(){
       this.stateModal.col = {}
       this.stateModal.row = {}
       this.stateModal.show = false
+      this.stateModal.isCreate = true
     },
-    search(val){
-      console.log(val)
-      if(this.iskanbanMode){
-        //kanban search
-      } else {
-        this.$refs.dynamicListRef.search(val)
-      }
-    },
+    
     //Hanlder method create
     handlerActionCreate() {
       //Redirect to vue route
@@ -705,6 +676,7 @@ export default {
     },
     updateDynamicFilterValues(filters) {
       this.dynamicFilterValues = filters;
+      this.init()
       ///this.table.filter = filters;
       //this.getDataTable(true, filters, { page: 1 });
     },
