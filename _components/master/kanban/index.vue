@@ -94,7 +94,6 @@
             </template>
 
             <div class="tw-text-center tw-w-full" v-if="!loading && kanbanColumns.length === 0">
-              <i class="fa-duotone fa-face-pleading tw-text-9xl colorTextPrimary"></i>
               <p class="tw-text-xl tw-font-semibold tw-py-4">No tiene estados creados en esta categoría</p>
             </div>
             <div
@@ -448,7 +447,7 @@ export default {
       this.closeModal()
     },
     /* reload column*/
-    async addCard(columnId) {      
+    async addCard(columnId) {
       const column = this.kanbanColumns.find(item => item.id === columnId);
       if (column) {
         column.loading = true;
@@ -467,7 +466,7 @@ export default {
       }
     },
     async getKanbanCardList(column, page, refresh = false) {
-      try {        
+      try {
         const search = this.search ? { search: this.search } : {};
         let params = {
           filter: {
@@ -480,7 +479,7 @@ export default {
         };
         if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
         if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
-        
+
         column.loading = true;
         let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
         column.loading = false
@@ -620,7 +619,7 @@ export default {
       }
     },
     setSearch(value) {
-      this.search = value && value !== '' ? value : null;      
+      this.search = value && value !== '' ? value : null;
       if(this.iskanbanMode){
         this.kanbanColumns.forEach((column) => this.getKanbanCardList(column, 1, true))
       } else {
@@ -648,9 +647,9 @@ export default {
     },
 
 
-    openModal({col, row, isCreate = true }){      
+    openModal({col, row, isCreate = true }){
       this.stateModal.col = col
-      this.stateModal.row = row      
+      this.stateModal.row = row
       this.stateModal.isCreate = isCreate
       this.$refs.modalComponentRef.init()
       this.stateModal.show = true
@@ -661,7 +660,7 @@ export default {
       this.stateModal.show = false
       this.stateModal.isCreate = true
     },
-    
+
     //Hanlder method create
     handlerActionCreate() {
       //Redirect to vue route
