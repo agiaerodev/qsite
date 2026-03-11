@@ -9,7 +9,7 @@
       row-key="name"
       v-model:pagination="paginationModel"
       hide-pagination
-      :visible-columns="visibleColumns"
+      :visible-columns="getVisibleColumns()"
     >
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />

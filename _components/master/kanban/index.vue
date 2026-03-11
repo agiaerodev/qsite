@@ -94,7 +94,7 @@
             </template>
 
             <div class="tw-text-center tw-w-full" v-if="!loading && kanbanColumns.length === 0">
-              <p class="tw-text-xl tw-font-semibold tw-py-4">No tiene estados creados en esta categoría</p>
+              
             </div>
             <div
               v-if="!loading && hoverArrow && scrollTotal > 0"

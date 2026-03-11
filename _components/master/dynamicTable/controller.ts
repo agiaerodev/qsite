@@ -57,6 +57,9 @@ export default function controller(props, emit) {
         if(action?.vIf == undefined) return action
         if ((typeof action?.vIf == 'function') && action.vIf(row)) return action
       })
+    }, 
+    getVisibleColumns(){
+      return props?.visibleColumns.length ? props.visibleColumns : props.columns.map(item => item.name)
     }
   }
 
