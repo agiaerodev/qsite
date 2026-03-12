@@ -14,7 +14,7 @@
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />
       </template>
-     <template v-slot:header="props" v-if="hasBeforeRowsSlot">
+      <template v-slot:header="props" v-if="hasBeforeRowsSlot">
         <q-tr>
           <q-th
             key="beforeRows"
@@ -95,6 +95,9 @@
 
       <template #pagination="props">
         <p>bottom table</p>
+      </template>
+      <template #no-data="props" v-if="hasNoDataSlot">
+        <slot name="no-data" />
       </template>
 
     </q-table>
