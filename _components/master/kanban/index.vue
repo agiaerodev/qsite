@@ -75,7 +75,7 @@
               @reorderColumns="reorderColumns"
               class="tw-flex-none tw-space-y-0 "
             />
-          </div>
+          </div>          
         </template>
         <template #footer>
           <div class="tw-flex tw-space-x-4">
@@ -582,7 +582,6 @@ export default {
     async saveColumn(data) {
       try {
         if (!this.kanban.column) return;
-        console.log('save colunm')
         //return await this.$crud.create(route.apiRoute );
       } catch (error) {
         console.log(error);
@@ -592,7 +591,6 @@ export default {
     async updateColumn(data) {
       try {
         if (!this.kanban.column) return;
-        console.log('updateColumn')
 
         //await this.$crud.update(route.apiRoute, data.id, payloadStatus);
       } catch (error) {
@@ -647,11 +645,11 @@ export default {
     },
 
 
-    openModal({col, row, isCreate = true }){
+    openModal({col, row, tab, isCreate = true }){
       this.stateModal.col = col
       this.stateModal.row = row
       this.stateModal.isCreate = isCreate
-      this.$refs.modalComponentRef.init()
+      this.$refs.modalComponentRef.init(tab)
       this.stateModal.show = true
     },
     closeModal(){
