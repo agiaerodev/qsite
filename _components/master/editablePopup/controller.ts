@@ -1,5 +1,5 @@
 import { computed, reactive, ref, onMounted, toRefs, watch, markRaw, shallowRef } from 'vue';
-
+import { alert, i18n } from 'src/plugins/utils.ts'
 
 export default function controller (props, emit)
 {
@@ -13,7 +13,8 @@ export default function controller (props, emit)
   const state = reactive({
     // Key: Default Value
     responseValue: null,
-    loading: false
+    loading: false,
+    canSubmit: false
   });
 
   // Computed
@@ -33,7 +34,8 @@ export default function controller (props, emit)
       if (!computeds.dynamicField.value || !props.col.isEditable) return false;
       if (_.has(computeds.dynamicField.value, 'vIf')) return computeds.dynamicField.value.vIf
       return true;
-    })
+    }),
+    disableSubmit: computed(() => !state.canSubmit)
   };
 
   // Methods
@@ -74,7 +76,17 @@ export default function controller (props, emit)
             emit('updateRow', newTmpRow);
           }).catch((val) => state.loading = false);
       } else emit('updateRow', tmpRow);
+    },
+    successHandler(){
+      state.canSubmit = true
+    },
+    errorHandler()
+    {
+      alert.error(i18n.tr('isite.cms.message.formInvalid'))
+      state.canSubmit = false
     }
+
+
   };
 
   // Mounted
