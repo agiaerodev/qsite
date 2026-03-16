@@ -65,7 +65,7 @@ export default function controller(props: any, emit: any) {
       store.globalFilters = computeds.filters.value;
       if (Object.keys(props.quickCards).length === 0) {
         if (props.configName) {
-          refs.settings.value = await service.getConfig(props.configName, true);
+          refs.settings.value = await service.getConfig(props.configName);
         } else {
           const configName = `${module}.config.quickCards.${entity}`;
           refs.settings.value = await service.getConfig(configName);
