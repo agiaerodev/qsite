@@ -18,72 +18,96 @@ export default function useFilterBuilder(emit) {
 
   watch(() => currentFilter.value.type, (newType, oldType) => {
     if (ignoreTypeWatch.value || newType === oldType) return;
+    try {
+      const oldFilter = cloneDeep(currentFilter.value);
+      const newDefinition = getCleanFilter(newType);
 
-    const oldFilter = cloneDeep(currentFilter.value);
-    const newDefinition = getCleanFilter(newType);
+      // Preserve common properties
+      newDefinition.key = oldFilter.key;
+      newDefinition.props.label = oldFilter.props.label;
+      newDefinition.quickFilter = oldFilter.quickFilter;
 
-    // Preserve common properties
-    newDefinition.key = oldFilter.key;
-    newDefinition.props.label = oldFilter.props.label;
-    newDefinition.quickFilter = oldFilter.quickFilter;
-
-    currentFilter.value = newDefinition;
+      currentFilter.value = newDefinition;
+      console.log('Filter definition updated for new type.');
+    } catch (error) {
+      console.error('Error watching currentFilter type:', error);
+    }
   });
 
-  const generatedJson = computed(() => generateJson(filtersList.value));
+  const generatedJson = computed(() => {
+    try {
+      return generateJson(filtersList.value);
+    } catch (error) {
+      console.error('Error generating JSON:', error);
+      return '[]';
+    }
+  });
 
   const addFilter = () => {
-    if (!currentFilter.value.key) {
-      Notify.create({
-        message: 'The ID Key is required',
-        color: 'red-5',
-        icon: 'fa-light fa-triangle-exclamation'
-      });
-      return;
-    }
-
-    const isDuplicate = filtersList.value.some(f =>
-      f.key === currentFilter.value.key && f !== originalItemRef
-    );
-
-    if (isDuplicate) {
-      Notify.create({
-        message: 'This ID Key is already in use. Please choose a unique key.',
-        color: 'amber-8',
-        icon: 'fa-light fa-triangle-exclamation'
-      });
-      return;
-    }
-
-    const filterCopy = cloneDeep(currentFilter.value);
-
-    if (editingIndex.value >= 0) {
-      const realIndex = filtersList.value.indexOf(originalItemRef);
-      if (realIndex !== -1) {
-        filtersList.value[realIndex] = filterCopy;
+    try {
+      if (!currentFilter.value.key) {
+        Notify.create({
+          message: 'The ID Key is required',
+          color: 'red-5',
+          icon: 'fa-light fa-triangle-exclamation'
+        });
+        return;
       }
-      Notify.create({ message: 'Filter updated', color: 'green-5', icon: 'fa-light fa-check' });
-    } else {
-      filtersList.value.push(filterCopy);
+
+      const isDuplicate = filtersList.value.some(f =>
+        f.key === currentFilter.value.key && f !== originalItemRef
+      );
+
+      if (isDuplicate) {
+        Notify.create({
+          message: 'This ID Key is already in use. Please choose a unique key.',
+          color: 'amber-8',
+          icon: 'fa-light fa-triangle-exclamation'
+        });
+        return;
+      }
+
+      const filterCopy = cloneDeep(currentFilter.value);
+
+      if (editingIndex.value >= 0) {
+        const realIndex = filtersList.value.indexOf(originalItemRef);
+        if (realIndex !== -1) {
+          filtersList.value[realIndex] = filterCopy;
+        }
+        Notify.create({ message: 'Filter updated', color: 'green-5', icon: 'fa-light fa-check' });
+      } else {
+        filtersList.value.push(filterCopy);
+        console.log('New filter added.');
+      }
+      resetForm();
+    } catch (error) {
+      console.error('Error in addFilter:', error);
+      Notify.create({ message: 'An unexpected error occurred while saving the filter.', color: 'red-7' });
     }
-    resetForm();
   };
 
   const editFilter = (index) => {
-    editingIndex.value = index;
-    originalItemRef = filtersList.value[index];
-    ignoreTypeWatch.value = true;
-    currentFilter.value = cloneDeep(filtersList.value[index]);
-    // Ensure complex objects exist for editing
-    if (currentFilter.value.type === 'select' && !currentFilter.value.loadOptions) {
-      currentFilter.value.loadOptions = { apiRoute: '', select: { label: 'name', id: 'id' }, requestParams: [] };
+    try {
+      editingIndex.value = index;
+      originalItemRef = filtersList.value[index];
+      ignoreTypeWatch.value = true;
+      currentFilter.value = cloneDeep(filtersList.value[index]);
+
+      // Ensure complex objects exist for editing
+      if (currentFilter.value.type === 'select' && !currentFilter.value.loadOptions) {
+        currentFilter.value.loadOptions = { apiRoute: '', select: { label: 'name', id: 'id' }, requestParams: [] };
+      }
+      if (currentFilter.value.type === 'select' && !currentFilter.value.staticOptions) {
+        currentFilter.value.staticOptions = [];
+      }
+
+      setTimeout(() => {
+        ignoreTypeWatch.value = false;
+      }, 100);
+    } catch (error) {
+      console.error('Error in editFilter:', error);
+      Notify.create({ message: 'Failed to load filter for editing.', color: 'red-7' });
     }
-    if (currentFilter.value.type === 'select' && !currentFilter.value.staticOptions) {
-      currentFilter.value.staticOptions = [];
-    }
-    setTimeout(() => {
-      ignoreTypeWatch.value = false;
-    }, 100);
   };
 
   const resetForm = () => {
@@ -93,23 +117,43 @@ export default function useFilterBuilder(emit) {
   };
 
   const addStaticOption = () => {
-    if (!newOption.label) return;
-    currentFilter.value.staticOptions.push({ ...newOption });
-    newOption.label = '';
-    newOption.value = '';
+    try {
+      if (!newOption.label) return;
+      currentFilter.value.staticOptions.push({ ...newOption });
+      newOption.label = '';
+      newOption.value = '';
+    } catch (error) {
+      console.error('Error adding static option:', error);
+    }
   };
-  const addRequestParam = () => {
-    if (!newRequestParam.name) return;
-    currentFilter.value.loadOptions.requestParams.push({ ...newRequestParam });
-    newRequestParam.name = '';
-    newRequestParam.value = '';
-  };
-  const handleCopy = () => copyToClipboard(generatedJson.value).then(() => Notify.create({
-    message: 'Copied',
-    color: 'indigo'
-  }));
 
-  watch(generatedJson, (newVal) => emit('update', JSON.parse(newVal)), { deep: true });
+  const addRequestParam = () => {
+    try {
+      if (!newRequestParam.name) return;
+      currentFilter.value.loadOptions.requestParams.push({ ...newRequestParam });
+      newRequestParam.name = '';
+      newRequestParam.value = '';
+    } catch (error) {
+      console.error('Error adding request param:', error);
+    }
+  };
+
+  const handleCopy = () => {
+    copyToClipboard(generatedJson.value)
+      .then(() => Notify.create({ message: 'Copied', color: 'indigo' }))
+      .catch(error => {
+        console.error('Failed to copy to clipboard:', error);
+        Notify.create({ message: 'Failed to copy', color: 'red-7' });
+      });
+  };
+
+  watch(generatedJson, (newVal) => {
+    try {
+      emit('update', JSON.parse(newVal));
+    } catch (error) {
+      console.error('Error emitting update event:', error);
+    }
+  }, { deep: true });
 
   return {
     fieldTypes,

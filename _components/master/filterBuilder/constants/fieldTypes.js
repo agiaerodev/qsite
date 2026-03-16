@@ -1,7 +1,7 @@
 // Single source of truth for filter types
 export const fieldTypesConfig = {
   input: {
-    label: 'Text Input',
+    label: 'Input',
     getDefinition: () => ({
       type: 'input',
       value: '',
@@ -16,7 +16,7 @@ export const fieldTypesConfig = {
     })
   },
   date: {
-    label: 'Single Date',
+    label: 'Date',
     getDefinition: () => ({
       type: 'date',
       value: '',
@@ -29,7 +29,7 @@ export const fieldTypesConfig = {
     })
   },
   fullDate: {
-    label: 'Full Date Time',
+    label: 'Full Date',
     getDefinition: () => ({
       type: 'fullDate',
       value: '',
@@ -43,7 +43,7 @@ export const fieldTypesConfig = {
     })
   },
   select: {
-    label: 'Select Dropdown',
+    label: 'Select',
     getDefinition: () => ({
       type: 'select',
       value: null,
