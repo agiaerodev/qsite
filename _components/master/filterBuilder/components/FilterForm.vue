@@ -6,11 +6,15 @@
     </div>
 
     <q-card-section class="tw-p-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-5">
-      <q-input v-model="currentFilter.key" label="Field ID (Key)" stack-label outlined dense color="indigo" placeholder="e.g. user_status" />
-      <q-select v-model="currentFilter.type" :options="fieldTypes" label="Component Type" stack-label outlined dense emit-value map-options color="indigo" />
-      <q-input v-model="currentFilter.props.label" label="Display Label" stack-label outlined dense color="indigo" placeholder="User Status" />
+      <q-input v-model="currentFilter.key" label="Field ID (Key)" stack-label outlined dense color="indigo"
+               placeholder="e.g. user_status" />
+      <q-select v-model="currentFilter.type" :options="fieldTypes" label="Component Type" stack-label outlined dense
+                emit-value map-options color="indigo" />
+      <q-input v-model="currentFilter.props.label" label="Display Label" stack-label outlined dense color="indigo"
+               placeholder="User Status" />
       <q-input v-model="currentFilter.value" label="Default Value" stack-label outlined dense color="indigo" />
-      <q-input v-model="currentFilter.props.hint" label="Hint" stack-label outlined dense color="indigo" placeholder="Enter a hint" />
+      <q-input v-model="currentFilter.props.hint" label="Hint" stack-label outlined dense color="indigo"
+               placeholder="Enter a hint" />
 
       <!-- Dynamic fields based on type -->
       <!-- Input Type Configuration -->
@@ -25,15 +29,21 @@
         color="indigo"
       />
 
-      <q-input v-if="currentFilter.type === 'input'" v-model="currentFilter.props.mask" label="Mask" stack-label outlined dense color="indigo" placeholder="e.g. ###-##-####" />
-      <q-input v-if="currentFilter.type === 'input' && currentFilter.props.type === 'number'" v-model.number="currentFilter.props.step" label="Step" type="number" stack-label outlined dense color="indigo" />
+      <q-input v-if="currentFilter.type === 'input'" v-model="currentFilter.props.mask" label="Mask" stack-label
+               outlined dense color="indigo" placeholder="e.g. ###-##-####" />
+      <q-input v-if="currentFilter.type === 'input' && currentFilter.props.type === 'number'"
+               v-model.number="currentFilter.props.step" label="Step" type="number" stack-label outlined dense
+               color="indigo" />
 
-      <q-input v-if="['date', 'fullDate'].includes(currentFilter.type)" v-model="currentFilter.props.mask" label="Date Mask" stack-label outlined dense color="indigo" />
-      <q-toggle v-if="currentFilter.type === 'fullDate'" v-model="currentFilter.props.format24h" label="24-hour format" color="indigo" />
+      <q-input v-if="['date', 'fullDate'].includes(currentFilter.type)" v-model="currentFilter.props.mask"
+               label="Date Mask" stack-label outlined dense color="indigo" />
+      <q-toggle v-if="currentFilter.type === 'fullDate'" v-model="currentFilter.props.format24h" label="24-hour format"
+                color="indigo" />
     </q-card-section>
 
     <q-card-section class="tw-px-6 tw-pb-8">
-      <div class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 tw-gap-4 tw-p-4 tw-bg-slate-50 tw-rounded-2xl tw-border tw-border-slate-100">
+      <div
+        class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 tw-gap-4 tw-p-4 tw-bg-slate-50 tw-rounded-2xl tw-border tw-border-slate-100">
         <div v-for="prop in toggles" :key="prop.model" class="tw-flex tw-flex-col tw-items-center">
           <span class="tw-text-[10px] tw-uppercase tw-font-bold tw-text-slate-400 tw-mb-2">{{ prop.label }}</span>
           <q-toggle v-model="currentFilter[prop.model]" color="indigo" dense />
@@ -48,7 +58,8 @@
     <q-slide-transition>
       <div v-if="currentFilter.type === 'select'" class="tw-border-t tw-border-slate-100">
         <div class="tw-px-6 tw-pt-6">
-          <q-tabs v-model="currentFilter.optionsSource" dense class="tw-bg-slate-100 tw-rounded-xl tw-p-1" active-color="indigo" indicator-color="transparent" align="justify" no-caps>
+          <q-tabs v-model="currentFilter.optionsSource" dense class="tw-bg-slate-100 tw-rounded-xl tw-p-1"
+                  active-color="indigo" indicator-color="transparent" align="justify" no-caps>
             <q-tab name="api" class="tw-rounded-lg">
               <div class="tw-flex tw-items-center tw-gap-2">
                 <q-icon name="fa-light fa-cloud-bolt" size="14px" />
@@ -66,26 +77,33 @@
 
         <q-tab-panels v-model="currentFilter.optionsSource" animated class="tw-bg-transparent">
           <q-tab-panel name="api" class="tw-p-6 tw-space-y-4">
-            <q-input v-model="currentFilter.loadOptions.apiRoute" label="Endpoint URL" outlined dense placeholder="/api/v1/options" prefix="GET" />
+            <q-input v-model="currentFilter.loadOptions.apiRoute" label="Endpoint URL" outlined dense
+                     placeholder="/api/v1/options" prefix="GET" />
             <div class="tw-grid tw-grid-cols-2 tw-gap-4">
-              <q-input v-model="currentFilter.loadOptions.select.label" label="Label Key" outlined dense placeholder="name" />
-              <q-input v-model="currentFilter.loadOptions.select.id" label="Value Key (ID)" outlined dense placeholder="uuid" />
+              <q-input v-model="currentFilter.loadOptions.select.label" label="Label Key" outlined dense
+                       placeholder="name" />
+              <q-input v-model="currentFilter.loadOptions.select.id" label="Value Key (ID)" outlined dense
+                       placeholder="uuid" />
             </div>
             <div class="tw-space-y-2">
               <div class="tw-text-xs tw-font-bold tw-text-slate-500">Request Parameters</div>
               <div class="tw-flex tw-gap-2">
                 <q-input v-model="newRequestParam.name" label="Key" dense outlined class="tw-grow" />
                 <q-input v-model="newRequestParam.value" label="Value" dense outlined class="tw-grow" />
-                <q-btn @click="$emit('add-request-param')" icon="fa-light fa-plus" color="indigo-7" unelevated class="tw-rounded-lg" />
+                <q-btn @click="$emit('add-request-param')" icon="fa-light fa-plus" color="indigo-7" unelevated
+                       class="tw-rounded-lg" />
               </div>
-              <q-list bordered separator v-if="currentFilter.loadOptions.requestParams.length" class="tw-rounded-xl tw-overflow-hidden">
-                <q-item v-for="(param, pIdx) in currentFilter.loadOptions.requestParams" :key="pIdx" class="tw-bg-white hover:tw-bg-slate-50">
+              <q-list bordered separator v-if="currentFilter.loadOptions.requestParams.length"
+                      class="tw-rounded-xl tw-overflow-hidden">
+                <q-item v-for="(param, pIdx) in currentFilter.loadOptions.requestParams" :key="pIdx"
+                        class="tw-bg-white hover:tw-bg-slate-50">
                   <q-item-section>
                     <q-item-label class="tw-font-medium">{{ param.name }}</q-item-label>
                     <q-item-label caption class="tw-font-mono">{{ param.value }}</q-item-label>
                   </q-item-section>
                   <q-item-section side>
-                    <q-btn @click="currentFilter.loadOptions.requestParams.splice(pIdx, 1)" icon="fa-light fa-trash-xmark" color="red-4" flat round dense />
+                    <q-btn @click="currentFilter.loadOptions.requestParams.splice(pIdx, 1)"
+                           icon="fa-light fa-trash-xmark" color="red-4" flat round dense />
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -96,16 +114,19 @@
             <div class="tw-flex tw-gap-3 tw-mb-4">
               <q-input v-model="newOption.label" label="Option Label" dense outlined class="tw-grow" />
               <q-input v-model="newOption.value" label="Value" dense outlined class="tw-grow" />
-              <q-btn @click="$emit('add-static-option')" icon="fa-light fa-plus" color="indigo-7" unelevated class="tw-rounded-lg" />
+              <q-btn @click="$emit('add-static-option')" icon="fa-light fa-plus" color="indigo-7" unelevated
+                     class="tw-rounded-lg" />
             </div>
             <q-list bordered separator class="tw-rounded-xl tw-overflow-hidden">
-              <q-item v-for="(opt, idx) in currentFilter.staticOptions" :key="idx" class="tw-bg-white hover:tw-bg-slate-50">
+              <q-item v-for="(opt, idx) in currentFilter.staticOptions" :key="idx"
+                      class="tw-bg-white hover:tw-bg-slate-50">
                 <q-item-section>
                   <q-item-label class="tw-font-medium">{{ opt.label }}</q-item-label>
                   <q-item-label caption class="tw-font-mono">{{ opt.value }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-btn @click="currentFilter.staticOptions.splice(idx, 1)" icon="fa-light fa-trash-xmark" color="red-4" flat round dense />
+                  <q-btn @click="currentFilter.staticOptions.splice(idx, 1)" icon="fa-light fa-trash-xmark"
+                         color="red-4" flat round dense />
                 </q-item-section>
               </q-item>
             </q-list>
@@ -115,8 +136,10 @@
     </q-slide-transition>
 
     <q-card-actions align="between" class="tw-bg-slate-50/50 tw-p-6">
-      <q-btn @click="$emit('reset-form')" label="Discard Draft" flat color="slate-400" no-caps icon="fa-light fa-trash-undo" />
-      <q-btn @click="$emit('add-filter')" unelevated color="indigo-7" class="tw-rounded-xl tw-px-6 tw-py-3 shadow-indigo" no-caps>
+      <q-btn @click="$emit('reset-form')" label="Discard Draft" flat color="slate-400" no-caps
+             icon="fa-light fa-trash-undo" />
+      <q-btn @click="$emit('add-filter')" unelevated color="indigo-7"
+             class="tw-rounded-xl tw-px-6 tw-py-3 shadow-indigo" no-caps>
         <q-icon :name="editingIndex >= 0 ? 'fa-light fa-pen-to-square' : 'fa-light fa-plus-circle'" start size="18px" />
         <span class="tw-font-bold">{{ editingIndex >= 0 ? 'Update Filter' : 'Save to Stack' }}</span>
       </q-btn>
