@@ -140,8 +140,10 @@
              icon="fa-light fa-trash-undo" />
       <q-btn @click="$emit('add-filter')" unelevated color="indigo-7"
              class="tw-rounded-xl tw-px-6 tw-py-3 shadow-indigo" no-caps>
-        <q-icon :name="editingIndex >= 0 ? 'fa-light fa-pen-to-square' : 'fa-light fa-plus-circle'" start size="18px" />
-        <span class="tw-font-bold">{{ editingIndex >= 0 ? 'Update Filter' : 'Save to Stack' }}</span>
+        <div class="tw-space-x-1">
+          <q-icon :name="editingIndex >= 0 ? 'fa-light fa-pen-to-square' : 'fa-light fa-plus-circle'" start size="18px" />
+          <span class="tw-font-bold">{{ editingIndex >= 0 ? 'Update' : 'Save' }}</span>
+        </div>
       </q-btn>
       <div class="tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-widest">
         <q-icon name="fa-light fa-database" class="tw-mr-1" />
