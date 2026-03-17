@@ -88,7 +88,29 @@
               <div class="tw-text-xs tw-font-bold tw-text-slate-500">Request Parameters</div>
               <div class="tw-flex tw-gap-2">
                 <q-input v-model="newRequestParam.name" label="Key" dense outlined class="tw-grow" />
-                <q-input v-model="newRequestParam.value" label="Value" dense outlined class="tw-grow" />
+                <q-select
+                  v-model="newRequestParam.type"
+                  :options="['string', 'json']"
+                  label="Type"
+                  dense
+                  outlined
+                  class="tw-w-32"
+                  emit-value
+                  map-options
+                />
+                <JsonEditorVue
+                  v-if="newRequestParam.type === 'json'"
+                  v-model="newRequestParam.value"
+                  class="tw-grow"
+                />
+                <q-input
+                  v-else
+                  v-model="newRequestParam.value"
+                  label="Value"
+                  dense
+                  outlined
+                  class="tw-grow"
+                />
                 <q-btn @click="$emit('add-request-param')" icon="fa-light fa-plus" color="indigo-7" unelevated
                        class="tw-rounded-lg" />
               </div>
@@ -97,7 +119,10 @@
                 <q-item v-for="(param, pIdx) in currentFilter.loadOptions.requestParams" :key="pIdx"
                         class="tw-bg-white hover:tw-bg-slate-50">
                   <q-item-section>
-                    <q-item-label class="tw-font-medium">{{ param.name }}</q-item-label>
+                    <div class="tw-flex tw-items-center tw-gap-2">
+                      <q-item-label class="tw-font-medium">{{ param.name }}</q-item-label>
+                      <q-badge v-if="param.type" :label="param.type" :color="param.type === 'json' ? 'orange' : 'grey'" outline rounded />
+                    </div>
                     <q-item-label caption class="tw-font-mono">{{ param.value }}</q-item-label>
                   </q-item-section>
                   <q-item-section side>
@@ -155,6 +180,7 @@
 
 <script setup>
 import { defineProps, defineEmits, computed } from 'vue';
+import JsonEditorVue from 'json-editor-vue';
 
 const props = defineProps({
   currentFilter: {

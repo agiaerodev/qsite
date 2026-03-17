@@ -9,7 +9,7 @@ import { getIconForType, generateJson } from '../helpers/filterBuilderHelpers';
 export default function useFilterBuilder(emit) {
   const filtersList = ref([]);
   const newOption = reactive({ label: '', value: '' });
-  const newRequestParam = reactive({ name: '', value: '' });
+  const newRequestParam = reactive({ name: '', value: '', type: 'string' });
   const editingIndex = ref(-1);
   let originalItemRef = null;
   const ignoreTypeWatch = ref(false);
@@ -133,6 +133,7 @@ export default function useFilterBuilder(emit) {
       currentFilter.value.loadOptions.requestParams.push({ ...newRequestParam });
       newRequestParam.name = '';
       newRequestParam.value = '';
+      newRequestParam.type = 'string';
     } catch (error) {
       console.error('Error adding request param:', error);
     }

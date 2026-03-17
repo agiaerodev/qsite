@@ -38,10 +38,24 @@ export function generateJson(filtersList) {
         if (lo.requestParams?.length > 0) {
           const params = {};
           lo.requestParams.forEach(item => {
-            if (item.value === 'true') params[item.name] = true;
-            else if (item.value === 'false') params[item.name] = false;
-            else if (!isNaN(Number(item.value)) && item.value.trim() !== '') params[item.name] = Number(item.value);
-            else params[item.name] = item.value;
+            // Handle explicit types
+            if (item.type === 'json') {
+              try {
+                params[item.name] = JSON.parse(item.value);
+              } catch (e) {
+                // Fallback to string if invalid JSON
+                console.warn(`Invalid JSON for param ${item.name}:`, item.value);
+                params[item.name] = item.value;
+              }
+            } else if (item.type === 'string') {
+               params[item.name] = item.value;
+            } else {
+              // Legacy type inference for items without explicit type
+              if (item.value === 'true') params[item.name] = true;
+              else if (item.value === 'false') params[item.name] = false;
+              else if (!isNaN(Number(item.value)) && item.value.trim() !== '') params[item.name] = Number(item.value);
+              else params[item.name] = item.value;
+            }
           });
           config.loadOptions.requestParams = params;
         }
