@@ -97,7 +97,7 @@
         :modelValue="showDynamicFilterModal"
         @showModal="showDynamicFilterModal = true"
         @hideModal="showDynamicFilterModal = false"
-        @update:summary="summary => dynamicFilterSummary = summary"
+        @update:summary="summary => updateDynamicSummary(summary)"
         @update:modelValue="filters => updateDynamicFilterValues(filters)"
       />
     </div> 
@@ -179,7 +179,15 @@ export default {
       default: () => ({})
     }
   },
-  emits: ['search', 'new', 'refresh', 'activateTour', 'updateDynamicFilterValues', 'visibleColumns'],
+  emits: [
+    'search', 
+    'new', 
+    'refresh', 
+    'activateTour', 
+    'updateDynamicFilterValues', 
+    'updateDynamicSummary',  
+    'visibleColumns',
+  ],
   components: { masterExport, masterSynchronizable, bulkActions, dynamicFilter },
   mounted() {
     this.$nextTick(function() {
@@ -522,6 +530,10 @@ export default {
     updateDynamicFilterValues(filters) {
       this.dynamicFilterValues = filters;
       this.$emit('updateDynamicFilterValues', filters)
+    },
+    updateDynamicSummary(summary) {
+      this.dynamicFilterSummary = summary
+      this.$emit('updateDynamicSummary', summary)
     },
     getVisibleColumns(){
       this.visibleColumns = this.tableColumns.length ? this.tableColumns.map(item => item.name) : []
