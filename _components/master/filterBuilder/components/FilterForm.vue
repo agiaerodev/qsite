@@ -15,9 +15,6 @@
       <q-input v-model="currentFilter.value" label="Default Value" stack-label outlined dense color="indigo" />
       <q-input v-model="currentFilter.props.hint" label="Hint" stack-label outlined dense color="indigo"
                placeholder="Enter a hint" />
-
-      <!-- Dynamic fields based on type -->
-      <!-- Input Type Configuration -->
       <q-select
         v-if="currentFilter.type === 'input'"
         v-model="currentFilter.props.type"
@@ -29,28 +26,30 @@
         color="indigo"
       />
 
-      <q-input v-if="currentFilter.type === 'input'" v-model="currentFilter.props.mask" label="Mask" stack-label
+      <q-input v-model="currentFilter.props.mask" label="Mask" stack-label
                outlined dense color="indigo" placeholder="e.g. ###-##-####" />
       <q-input v-if="currentFilter.type === 'input' && currentFilter.props.type === 'number'"
                v-model.number="currentFilter.props.step" label="Step" type="number" stack-label outlined dense
                color="indigo" />
-
-      <q-input v-if="['date', 'fullDate'].includes(currentFilter.type)" v-model="currentFilter.props.mask"
-               label="Date Mask" stack-label outlined dense color="indigo" />
-      <q-toggle v-if="currentFilter.type === 'fullDate'" v-model="currentFilter.props.format24h" label="24-hour format"
-                color="indigo" />
     </q-card-section>
 
     <q-card-section class="tw-px-6 tw-pb-8">
       <div
-        class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 tw-gap-4 tw-p-4 tw-bg-slate-50 tw-rounded-2xl tw-border tw-border-slate-100">
-        <div v-for="prop in toggles" :key="prop.model" class="tw-flex tw-flex-col tw-items-center">
-          <span class="tw-text-[10px] tw-uppercase tw-font-bold tw-text-slate-400 tw-mb-2">{{ prop.label }}</span>
-          <q-toggle v-model="currentFilter[prop.model]" color="indigo" dense />
-        </div>
-        <div v-if="currentFilter.type === 'select'" class="tw-flex tw-flex-col tw-items-center">
-          <span class="tw-text-[10px] tw-uppercase tw-font-bold tw-text-slate-400 tw-mb-2">Multiple</span>
-          <q-toggle v-model="currentFilter.props.multiple" color="indigo" dense />
+        class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 tw-gap-4 tw-p-4 tw-bg-slate-50 tw-rounded-2xl tw-border tw-border-slate-100"
+      >
+        <div
+          v-for="toggle in visibleToggles"
+          :key="toggle.model"
+          class="tw-flex tw-flex-col tw-items-center"
+        >
+          <span class="tw-text-[10px] tw-uppercase tw-font-bold tw-text-slate-400 tw-mb-2">
+              {{ toggle.label }}
+            </span>
+          <q-toggle
+            v-model="currentFilter.props[toggle.model]"
+            color="indigo"
+            dense
+          />
         </div>
       </div>
     </q-card-section>
@@ -141,7 +140,8 @@
       <q-btn @click="$emit('add-filter')" unelevated color="indigo-7"
              class="tw-rounded-xl tw-px-6 tw-py-3 shadow-indigo" no-caps>
         <div class="tw-space-x-1">
-          <q-icon :name="editingIndex >= 0 ? 'fa-light fa-pen-to-square' : 'fa-light fa-plus-circle'" start size="18px" />
+          <q-icon :name="editingIndex >= 0 ? 'fa-light fa-pen-to-square' : 'fa-light fa-plus-circle'" start
+                  size="18px" />
           <span class="tw-font-bold">{{ editingIndex >= 0 ? 'Update' : 'Save' }}</span>
         </div>
       </q-btn>
@@ -154,9 +154,9 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
-defineProps({
+const props = defineProps({
   currentFilter: {
     type: Object,
     required: true
@@ -188,4 +188,9 @@ defineProps({
 });
 
 defineEmits(['add-request-param', 'add-static-option', 'reset-form', 'add-filter']);
+const visibleToggles = computed(() => {
+  return props.toggles.filter(toggle =>
+    !toggle.shouldDisplay || toggle.shouldDisplay(props.currentFilter)
+  );
+});
 </script>

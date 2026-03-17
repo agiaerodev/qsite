@@ -28,6 +28,7 @@ export function generateJson(filtersList) {
     if (f.quickFilter) config.quickFilter = true;
 
     if (f.type === 'select') {
+      if(f.props.multiple) config.value = [];
       if (f.optionsSource === 'api') {
         const lo = f.loadOptions;
         config.loadOptions = {
