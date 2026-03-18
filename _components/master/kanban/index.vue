@@ -39,6 +39,7 @@
       @mouseleave="hoverArrow = false"
     >
       <draggable
+        v-if="!loading"
         :id="`columnKanban${uId}`"
         :list="kanbanColumns"
         :animation="200"
@@ -53,29 +54,31 @@
         :item-key="`columnKanban${uId}`"
       >
         <template #item="{element, index}">
-          <div v-if="!loading" class="notMoveBetweenColumns">
-            <kanbanColumn
-              :cardComponent="cardComponent"
-              :uId="uId"
-              :crudData="crudData"
-              :column-data="element"
-              :columnIndex="index"
-              :totalColumns="kanbanColumns.length"
-              :ref="`kanbanColumn-${element.id}`"
-              :columnPermissions="columnPermissions"
-              :cardPermissions="cardPermissions"
-              :countTotalRecords="countTotalRecords()"
-              @addColumn="addColumn"
-              @addKanbanCard="value => addKanbanCard(value)"
-              @addCard="addCard"
-              @openModal="(value) => openModal(value)"
-              @deleteColumn="value => deleteColumn(value)"
-              @deleteCard="item => deleteKanbanCard(item)"
-              @updateCardColumn="column => updateCardColumn(column)"
-              @reorderColumns="reorderColumns"
-              class="tw-flex-none tw-space-y-0 "
-            />
-          </div>          
+          <div>
+            <div v-if="!loading" class="notMoveBetweenColumns">
+              <kanbanColumn
+                :cardComponent="cardComponent"
+                :uId="uId"
+                :crudData="crudData"
+                :column-data="element"
+                :columnIndex="index"
+                :totalColumns="kanbanColumns.length"
+                :ref="`kanbanColumn-${element.id}`"
+                :columnPermissions="columnPermissions"
+                :cardPermissions="cardPermissions"
+                :countTotalRecords="countTotalRecords()"
+                @addColumn="addColumn"
+                @addKanbanCard="value => addKanbanCard(value)"
+                @addCard="addCard"
+                @openModal="(value) => openModal(value)"
+                @deleteColumn="value => deleteColumn(value)"
+                @deleteCard="item => deleteKanbanCard(item)"
+                @updateCardColumn="column => updateCardColumn(column)"
+                @reorderColumns="reorderColumns"
+                class="tw-flex-none tw-space-y-0 "
+              />
+            </div>          
+          </div>
         </template>
         <template #footer>
           <div class="tw-flex tw-space-x-4">
@@ -137,6 +140,14 @@
           </div>
         </template>
       </draggable>
+      <div 
+        v-if="loading"
+        class="tw-w-full tw-align-middle tw-justify-center tw-relative"
+      >
+        <!--Loading-->
+        <inner-loading :visible="loading"/>
+
+      </div>
     </div>
 
     <component
@@ -394,8 +405,12 @@ export default {
     },
     async getColumns(refresh = false) {
       try {
-        this.loading = true;
+        this.loading = true;        
         const response = await services.getColumns(this.kanban.columns.apiRoute, this.kanban.columns?.requestParams || {}, refresh)
+        /* test */
+        /*
+        const response = testColumns.list()
+        */
         //Set the initial data for kanbanColumns
         this.kanbanColumns = response.data.map((item, index) => {
           return {
@@ -480,8 +495,13 @@ export default {
         if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
         if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
 
-        column.loading = true;
+        column.loading = true;        
         let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
+        /* test  */
+        /*
+        const response = testCards.findByStatusId(column.id, page);        
+        */
+        
         column.loading = false
 
         return {

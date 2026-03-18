@@ -1,9 +1,8 @@
 <template>
   <div class="columnCtn tw-relative bg-white no-shadow"
     :class="columnClass"
-  >
-  
-    <div
+  >  
+    <div      
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
       @mouseover="hover = true"
@@ -21,8 +20,13 @@
           tw-bg-opacity-75
           tw-z-20
         "
+        :class="columnClass"
       >
-        <q-spinner color="primary" size="2em" />
+        <div class="tw-w-full tw-flex tw-justify-center">
+          <div>
+            <q-spinner color="primary" size="3em" />  
+          </div>          
+        </div>
       </div>
       <button
         class="
