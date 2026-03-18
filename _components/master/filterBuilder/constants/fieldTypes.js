@@ -11,7 +11,8 @@ export const fieldTypesConfig = {
         type: '',
         clearable: true,
         mask: '',
-        step: null
+        step: null,
+        rules: [],
       }
     })
   },
@@ -24,7 +25,8 @@ export const fieldTypesConfig = {
         label: '',
         hint: '',
         clearable: true,
-        mask: 'MM/DD/YYYY'
+        mask: 'MM/DD/YYYY',
+        rules: [],
       }
     })
   },
@@ -38,7 +40,8 @@ export const fieldTypesConfig = {
         hint: '',
         clearable: true,
         mask: 'MM/DD/YYYY HH:mm',
-        format24h: false
+        format24h: false,
+        rules: [],
       }
     })
   },
@@ -48,9 +51,11 @@ export const fieldTypesConfig = {
       type: 'select',
       value: null,
       props: {
+        rules: [],
         label: '',
         clearable: true,
-        multiple: false
+        multiple: false,
+        options: []
       },
       optionsSource: 'api',
       loadOptions: {
@@ -69,7 +74,8 @@ export const fieldTypesConfig = {
       props: {
         label: '',
         hint: '',
-        clearable: true
+        clearable: true,
+        rules: [],
       }
     })
   }

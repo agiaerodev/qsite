@@ -11,26 +11,26 @@ export function getIconForType(type) {
 
 export function generateJson(filtersList) {
   const output = {};
-  filtersList.forEach(f => {
+  filtersList.forEach(filter => {
     const config = {
-      value: f.value,
-      type: f.type,
+      value: filter.value,
+      type: filter.type,
       props: {}
     };
 
     // Populate props, filtering out null/undefined values
-    for (const key in f.props) {
-      if (f.props[key] !== null && f.props[key] !== undefined && f.props[key] !== '') {
-        config.props[key] = f.props[key];
+    for (const key in filter.props) {
+      if (filter.props[key] !== null && filter.props[key] !== undefined && filter.props[key] !== '') {
+        config.props[key] = filter.props[key];
       }
     }
 
-    if (f.quickFilter) config.quickFilter = true;
+    if (filter.quickFilter) config.quickFilter = true;
 
-    if (f.type === 'select') {
-      if(f.props.multiple) config.value = [];
-      if (f.optionsSource === 'api') {
-        const lo = f.loadOptions;
+    if (filter.type === 'select') {
+      if(filter.props.multiple) config.value = [];
+      if (filter.optionsSource === 'api') {
+        const lo = filter.loadOptions;
         config.loadOptions = {
           apiRoute: lo.apiRoute,
           select: { label: lo.select.label, id: lo.select.id }
@@ -59,14 +59,14 @@ export function generateJson(filtersList) {
           });
           config.loadOptions.requestParams = params;
         }
-      } else if (f.staticOptions.length > 0) {
-        config.props.options = f.staticOptions.map(opt => ({
+      } else if (filter.staticOptions.length > 0) {
+        config.props.options = filter.staticOptions.map(opt => ({
           label: opt.label,
           value: isNaN(opt.value) ? opt.value : Number(opt.value)
         }));
       }
     }
-    output[f.key] = config;
+    output[filter.key] = config;
   });
   return JSON.stringify(output, null, 2);
 }
