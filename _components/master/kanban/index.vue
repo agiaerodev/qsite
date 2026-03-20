@@ -66,10 +66,9 @@
                 :ref="`kanbanColumn-${element.id}`"
                 :columnPermissions="columnPermissions"
                 :cardPermissions="cardPermissions"
-                :countTotalRecords="countTotalRecords()"
+                @countTotalRecords="countTotalRecords()"
                 @addColumn="addColumn"
-                @addKanbanCard="value => addKanbanCard(value)"
-                @addCard="addCard"
+                @reloadColumn="({column, page}) => reloadColumn(column, page)"
                 @openModal="(value) => openModal(value)"
                 @deleteColumn="value => deleteColumn(value)"
                 @deleteCard="item => deleteKanbanCard(item)"
@@ -158,7 +157,7 @@
       @cancel="closeModal()"
       @close="closeModal()"
       @createCard="value => createCard(value)"
-      @reloadColumn="addCard"
+      @reloadColumn="value => reloadColumn(value)"
     />
 </div>
 
@@ -175,6 +174,7 @@ import superModal from 'modules/qsite/_components/master/kanban/_components/moda
 import testColumns from './test/columns'
 import testCards from './test/cards'
 import services from "modules/qsite/_components/master/kanban/services";
+import columns from "./test/columns";
 
 const modelPayload = {
   id: null,
@@ -440,9 +440,10 @@ export default {
       Promise.all(this.kanbanColumns.map(column => {
         this.loading = false
         return new Promise(resolve => {
-          this.getKanbanCard(column, 1, refresh).then(response => {
+          this.getKanbanCardList(column, 1, refresh).then(response => {
             column.data = response.data;
             column.total = response.total;
+            column.hasNextPage = response.hasNextPage            
             column.loading = false;
           });
         });
@@ -457,30 +458,30 @@ export default {
         response = await services.createCard(this.kanban.cards.apiRoute, card)
       }
       if(response?.data){
-        this.addCard(response.data.statusId)
+        this.reloadColumn(response.data.statusId)
       }
       this.closeModal()
     },
     /* reload column*/
-    async addCard(columnId) {
-      const column = this.kanbanColumns.find(item => item.id === columnId);
-      if (column) {
-        column.loading = true;
-        const kanbanCard = await this.getKanbanCard(column, 1, true);
-        column.data = kanbanCard.data;
-        column.loading = false;
+    async reloadColumn(columnId, page = 1) {
+      
+      const column = this.kanbanColumns.find(item => item.id == columnId);
+      if (column) {        
+        const loadingKey = page == 1  ? 'loading' : 'infiniteLoading'
+        const kanbanCard = await this.getKanbanCardList(column, page, true, loadingKey);        
+        
+        if(page == 1){
+          column.data = kanbanCard.data;          
+        } else {
+          column.data.push(...kanbanCard.data)
+        }
+        column.page = page
+        column.hasNextPage = kanbanCard.hasNextPage
         column.total = kanbanCard.total;
       }
     },
-    async getKanbanCard(column, page = 1, refresh = false) {
-      try {
-        return await this.getKanbanCardList(column, page, refresh);
-      } catch (error) {
-        column.loading = false;
-        console.log(error);
-      }
-    },
-    async getKanbanCardList(column, page, refresh = false) {
+    
+    async getKanbanCardList(column, page, refresh = false, loadingKey = 'loading') {
       try {
         const search = this.search ? { search: this.search } : {};
         let params = {
@@ -494,18 +495,22 @@ export default {
         };
         if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
         if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
-
-        column.loading = true;        
-        let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
+        
+        column[loadingKey] = true;        
+        let response = await services.getCards(this.kanban.cards.apiRoute, params, true)
         /* test  */
         /*
         const response = testCards.findByStatusId(column.id, page);        
         */
         
-        column.loading = false
+        column[loadingKey] = false
+        
+        const metaPage = response?.meta?.page
+        const hasNextPage =  metaPage?.hasNextPage || metaPage['HasNextPage'] || false;
 
         return {
-          total: response?.meta?.page?.total || 0,
+          total: metaPage?.total || 0,
+          hasNextPage,
           data: response?.data || []
         };
       } catch (error) {
@@ -517,18 +522,7 @@ export default {
         }
       }
     },
-    //for in infiniteHandler
-    async addKanbanCard(column, page) {
-      const kanbancolumn = this.kanbanColumns.find(
-        (item) => item.id === column.id
-      );
-      if (kanbancolumn) {
-        const kanbanCard = await this.getKanbanCardList(column, page);
-        if (kanbanCard.data.length > 0) {
-          kanbancolumn.data.push(...kanbanCard.data);
-        }
-      }
-    },
+    
     async deleteKanbanCard(item) {
       try {
         this.$alert.error({
@@ -544,7 +538,7 @@ export default {
                 const column = this.kanbanColumns.find(column => column.id === item.statusId);
                 if (column) column.loading = true;
                 await services.deleteCard(this.kanban.cards.apiRoute, item.id).then( async (response) => {
-                  await this.addCard(column.id)
+                  await this.reloadColumn(column.id)
                   column.loading = false
                 })
               }

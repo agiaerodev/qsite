@@ -9,7 +9,7 @@
       @mouseleave="hover = false"
     >
       <div
-        v-if="columnData.loading"
+        v-if="columnData.loading && !loading"
         class="
           tw-flex
           tw-justify-center
@@ -132,7 +132,7 @@
               padding="5px"
               icon="fa-duotone fa-rotate-right"
               size="6px"
-              @click="() => $emit('addCard', columnData.id)"
+              @click="reloadColumn()"
             >
               <q-tooltip>
                   {{ $trp('isite.cms.label.refresh') }}
@@ -220,15 +220,15 @@
           :force-fallback="true"
           @start="dragColumn = true"
           @end="move"
-          @change="countTotalRecords"
+          @change="() => this.$emit('countTotalRecords')"
           @choose="dragCursor = true"
           @unchoose="dragCursor = false"
           item-key="id"
-          :disabled="!cardPermissions.drag"
-          
+          :disabled="!cardPermissions.drag"          
         >
           <template #item="{ element }">
             <kanbanCard
+              v-if="!columnData.loading"
               :crudData="crudData"
               :cardData="element"
               :cardPermissions
@@ -263,11 +263,38 @@
           </template>
           <template #footer>
             <div>
+              <div class="tw-text-center tw-h-5 tw-rounded">
+                <q-banner
+                  inline-actions
+                  rounded
+                  class="primary"
+                  v-if="
+                    columnData.total !== 0 &&
+                    !columnData.hasNextPage
+                  "
+                >                  
+                  <div class="tw-font-[600]">All reservations loaded</div>
+                </q-banner>
+              </div>
               <div
                 :class="`trigger-${this.uId}${columnData.id}`"
                 class="tw-text-center tw-h-5 tw-flex tw-justify-center"
               >
-                <q-spinner v-if="loading" color="primary" size="1.3em" />
+                <div                 
+                  class="
+                    tw-w-full 
+                    tw-h-[60px]
+                    tw-flex 
+                    tw-justify-center
+                  "
+                >     
+                  <div
+                    v-if="columnData?.infiniteLoading"
+                  >
+                    <q-spinner  color="primary" size="2em" />
+                  </div>
+                </div>
+                
               </div>
             </div>
           </template>
@@ -314,10 +341,6 @@ export default {
     uId: {
       type: String,
     },
-    countTotalRecords: {
-      type: Number
-    },
-
     cardComponent: {
       type: Object,
     },
@@ -449,24 +472,22 @@ export default {
         }
       });
     },
+    reloadColumn(){
+      if (!this.columnData.loading) {
+        this.$emit('reloadColumn', {
+          column: this.columnData.id,
+          page: 1 
+        })        
+      }
+    },
     async infiniteHandler() {
       try {
-          if (!this.columnData.loading && !this.isTotalNumberOfRecords) {
-            this.loading = true;
-            this.columnData.page = this.columnData.page + 1;
-            /*
-            await this.addKanbanCard(
-              this.columnData,
-              this.columnData.page
-            );
-            */
-
-            this.$emit('addKanbanCard', {
-              column: this.columnData,
-              page: this.columnData.page
-            })
-
-            this.loading = false;
+        if (this.columnData.hasNextPage) {            
+          const page = this.columnData.page + 1;
+          this.$emit('reloadColumn', {
+            column: this.columnData.id,
+            page
+          })
         }
       } catch (error) {
         console.log(error);
