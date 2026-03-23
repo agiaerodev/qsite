@@ -374,8 +374,7 @@ export default {
   methods: {
     async init(refresh = false) {
       this.getCardComponent()
-      this.kanbanColumns = [];
-      await this.getColumns(true);
+      await this.buildColumns(true);
     },
 
     getCardComponent(){
@@ -403,9 +402,10 @@ export default {
         item.position = index;
       });
     },
-    async getColumns(refresh = false) {
+    async buildColumns(refresh = false) {
       try {
-        this.loading = true;        
+        this.loading = true; 
+        this.kanbanColumns = [];       
         const response = await services.getColumns(this.kanban.columns.apiRoute, this.kanban.columns?.requestParams || {}, refresh)
         /* test */
         /*
@@ -496,13 +496,12 @@ export default {
         if(this.kanban.cards?.requestParams) params = {...params, ...this.kanban.cards?.requestParams}
         if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
         
-        column[loadingKey] = true;        
+        column[loadingKey] = true;
         let response = await services.getCards(this.kanban.cards.apiRoute, params, true)
         /* test  */
         /*
         const response = testCards.findByStatusId(column.id, page);        
         */
-        
         column[loadingKey] = false
         
         const metaPage = response?.meta?.page
@@ -633,7 +632,8 @@ export default {
     setSearch(value) {
       this.search = value && value !== '' ? value : null;
       if(this.iskanbanMode){
-        this.kanbanColumns.forEach((column) => this.getKanbanCardList(column, 1, true))
+        this.buildColumns(true);
+
       } else {
         this.$refs.dynamicListRef.search(val)
       }
