@@ -158,6 +158,7 @@
       @close="closeModal()"
       @createCard="value => createCard(value)"
       @reloadColumn="value => reloadColumn(value)"
+      @reloadCard="value => reloadCard(value)"
     />
 </div>
 
@@ -462,6 +463,26 @@ export default {
       }
       this.closeModal()
     },
+
+    /* reloadCard */
+    async reloadCard({ columnId, data}) {
+      console.log('reloadCar', columnId, data)
+      
+      this.kanbanColumns.find((column, columnIndex) => {
+        if(column.id == columnId){
+          column.data.find(async (item,index) => {
+            if(item.id == data.id){              
+              column.data[index] = {}
+              await getReservation(data.id, requestParams, true).then((response) => {
+                column.data[index] = response.data
+              })             
+            }
+          })
+        }
+      })
+    },
+
+
     /* reload column*/
     async reloadColumn(columnId, page = 1) {
       
