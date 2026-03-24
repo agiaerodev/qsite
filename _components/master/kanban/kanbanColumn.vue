@@ -270,7 +270,8 @@
                   class="primary"
                   v-if="
                     columnData.total !== 0 &&
-                    !columnData.hasNextPage
+                    !columnData.hasNextPage &&
+                    !columnData.loading
                   "
                 >                  
                   <div class="tw-font-[600]">All reservations loaded</div>

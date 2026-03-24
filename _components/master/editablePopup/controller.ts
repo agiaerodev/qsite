@@ -51,7 +51,7 @@ export default function controller (props, emit)
         //Instance the initial response value
         if (dynamicField.type == 'select' && !dynamicField.props?.multiple)
         {
-          state.responseValue = scope.id;
+          state.responseValue = scope?.id || null;
         } else state.responseValue = scope;
       }
     },
@@ -92,6 +92,7 @@ export default function controller (props, emit)
   // Mounted
   onMounted(() =>
   {
+    state.loading = false
   });
 
   // Watch
