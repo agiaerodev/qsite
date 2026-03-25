@@ -51,8 +51,12 @@ export default function controller(props, emit) {
       return (typeof template === 'string') ? markRaw(components[template]) : markRaw(template)
     },
 
-    getTooltip(){
+    hasTooltip(){
       return props.col?.tooltip || null
+    }, 
+
+    getTooltip(){
+      return props.col.tooltip(props.val, props.row)
     }
   }
 
