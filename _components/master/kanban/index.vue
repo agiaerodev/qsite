@@ -159,6 +159,7 @@
       @createCard="value => createCard(value)"
       @reloadColumn="value => reloadColumn(value)"
       @reloadCard="value => reloadCard(value)"
+      @openModal="(value) => openModal(value)"
     />
 </div>
 
@@ -465,16 +466,19 @@ export default {
     },
 
     /* reloadCard */
-    async reloadCard({ columnId, data}) {
+    async reloadCard({ columnId, data, requestParams}) {
       console.log('reloadCar', columnId, data)
       
       this.kanbanColumns.find((column, columnIndex) => {
         if(column.id == columnId){
+          console.log('col')
           column.data.find(async (item,index) => {
             if(item.id == data.id){              
-              column.data[index] = {}
+              console.log('card')
+              this.kanbanColumns[columnIndex].data[index] = {}
               await getReservation(data.id, requestParams, true).then((response) => {
-                column.data[index] = response.data
+                console.log('response', response)
+                this.kanbanColumns[columnIndex].data[index] = response.data
               })             
             }
           })
