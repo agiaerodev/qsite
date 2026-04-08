@@ -53,30 +53,28 @@
         @change="reorderColumns"
         :item-key="`columnKanban${uId}`"
       >
-        <template #item="{element, index}">
-          <div>
-            <div v-if="!loading" class="notMoveBetweenColumns">
-              <kanbanColumn
-                :cardComponent="cardComponent"
-                :uId="uId"
-                :crudData="crudData"
-                :column-data="element"
-                :columnIndex="index"
-                :totalColumns="kanbanColumns.length"
-                :ref="`kanbanColumn-${element.id}`"
-                :columnPermissions="columnPermissions"
-                :cardPermissions="cardPermissions"
-                @countTotalRecords="countTotalRecords()"
-                @addColumn="addColumn"
-                @reloadColumn="({column, page}) => reloadColumn(column, page)"
-                @openModal="(value) => openModal(value)"
-                @deleteColumn="value => deleteColumn(value)"
-                @deleteCard="item => deleteKanbanCard(item)"
-                @updateCardColumn="column => updateCardColumn(column)"
-                @reorderColumns="reorderColumns"
-                class="tw-flex-none tw-space-y-0 "
-              />
-            </div>          
+        <template #item="{element, index}">          
+          <div v-if="!loading" class="notMoveBetweenColumns">
+            <kanbanColumn
+              :cardComponent="cardComponent"
+              :uId="uId"
+              :crudData="crudData"
+              :column-data="element"
+              :columnIndex="index"
+              :totalColumns="kanbanColumns.length"
+              :ref="`kanbanColumn-${element.id}`"
+              :columnPermissions="columnPermissions"
+              :cardPermissions="cardPermissions"
+              @countTotalRecords="countTotalRecords()"
+              @addColumn="addColumn"
+              @reloadColumn="({column, page}) => reloadColumn(column, page)"
+              @openModal="(value) => openModal(value)"
+              @deleteColumn="value => deleteColumn(value)"
+              @deleteCard="item => deleteKanbanCard(item)"
+              @updateCardColumn="column => updateCardColumn(column)"
+              @reorderColumns="reorderColumns"
+              class="tw-flex-none tw-space-y-0 "
+            />
           </div>
         </template>
         <template #footer>
@@ -254,7 +252,7 @@ export default {
   computed: {
 
     title(){
-      return this?.crudData?.title || 'Kanban Component'
+      return this?.crudData?.title || ''
     },
     //Validate read show as
     readShowAs() {

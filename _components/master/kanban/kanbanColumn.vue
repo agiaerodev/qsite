@@ -550,7 +550,7 @@ export default {
 }
 
 .ghostCard {
-  @apply tw-opacity-75 tw-bg-white !important;
+  @apply tw-opacity-40 tw-bg-white !important;
 }
 
 .kanbanName p {
