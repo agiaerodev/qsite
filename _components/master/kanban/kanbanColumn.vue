@@ -553,14 +553,6 @@ export default {
   @apply tw-opacity-40 tw-bg-white !important;
 }
 
-.kanbanName p {
-  @apply tw-lowercase;
-}
-
-.kanbanName p::first-letter {
-  @apply tw-uppercase;
-}
-
 .arrowKanbanName .kanbanName .q-field__focusable-action {
   @apply tw--mt-4;
 }
