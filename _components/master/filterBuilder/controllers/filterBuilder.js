@@ -79,6 +79,7 @@ export default function useFilterBuilder(emit) {
         filtersList.value.push(filterCopy);
         console.log('New filter added.');
       }
+      // El watch de filtersList se encargará de emitir el update automáticamente
       resetForm();
     } catch (error) {
       console.error('Error in addFilter:', error);
@@ -148,13 +149,15 @@ export default function useFilterBuilder(emit) {
       });
   };
 
-  watch(generatedJson, (newVal) => {
+  watch(filtersList, (newVal) => {
     try {
-      emit('update', JSON.parse(newVal));
+      if (!newVal || newVal.length === undefined) return;
+      console.log('EMITIENDO UPDATE (watch):', newVal);
+      emit('update', cloneDeep(newVal));
     } catch (error) {
       console.error('Error emitting update event:', error);
     }
-  }, { deep: true });
+  }, { deep: true, immediate: false });
 
   return {
     fieldTypes,

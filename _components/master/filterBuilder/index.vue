@@ -23,7 +23,7 @@
             v-model:filtersList="filtersList"
             :editFilter="editFilter"
             :getIconForType="getIconForType"
-            @delete-filter="deleteFilter"
+            @delete-filter="handleDeleteFilter"
           />
         </div>
 
@@ -37,6 +37,7 @@
 </template>
 
 <script setup>
+import { cloneDeep } from 'lodash';
 import useFilterBuilder from './controllers/filterBuilder.js';
 import FilterHeader from './components/FilterHeader.vue';
 import FilterForm from './components/FilterForm.vue';
@@ -63,8 +64,9 @@ const {
   getIconForType,
 } = useFilterBuilder(emit);
 
-const deleteFilter = (index) => {
+const handleDeleteFilter = (index) => {
   filtersList.value.splice(index, 1);
+  // El watch de filtersList en el controlador se encargará de emitir automáticamente
 };
 </script>
 
