@@ -327,6 +327,10 @@ export default {
       type: Number,
       required: true,
     },
+    kanbanColumns: {
+      type: Array, 
+      default: () => []
+    },
     totalColumns: {
       type: Number,
       default: () => 0,
@@ -516,10 +520,31 @@ export default {
     },
       
     async move(elm) {      
-      if (elm.from.id === elm.to.id) return;
-      const data = { id: elm.clone.id, statusId: elm.to.id };      
-      await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
-      this.$emit('updateCardColumn', Number(elm.to.id));
+      if (elm.from.id === elm.to.id) return false;
+      const fromId = elm.from.id
+      const toId = elm.to.id
+
+      const from = this.kanbanColumns.find(item => item.id == fromId)
+      const to = this.kanbanColumns.find(item => item.id == toId)
+      const row = to.data.find(item => item.id == elm.clone.id)  
+      
+      if(to?.options?.events){        
+        /* emits and pass the event to kanban */
+        this.$emit('columnEvents', {
+          col: from,
+          row,
+          event: {
+            ...to.options.events.dragEnd, 
+            from, 
+            to,
+          }       
+        })
+        return false
+      } else {
+        const data = { id: elm.clone.id, statusId: elm.to.id };      
+        await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
+        this.$emit('updateCardColumn', Number(toId));
+      }
     },
 
     

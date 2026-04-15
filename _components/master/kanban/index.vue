@@ -61,6 +61,7 @@
               :crudData="crudData"
               :column-data="element"
               :columnIndex="index"
+              :kanbanColumns="kanbanColumns"
               :totalColumns="kanbanColumns.length"
               :ref="`kanbanColumn-${element.id}`"
               :columnPermissions="columnPermissions"
@@ -73,6 +74,7 @@
               @deleteCard="item => deleteKanbanCard(item)"
               @updateCardColumn="column => updateCardColumn(column)"
               @reorderColumns="reorderColumns"
+              @columnEvents="value => columnEventshandler(value)"
               class="tw-flex-none tw-space-y-0 "
             />
           </div>
@@ -414,6 +416,7 @@ export default {
         //Set the initial data for kanbanColumns
         this.kanbanColumns = response.data.map((item, index) => {
           return {
+            ...item,
             id: item.id,
             title: item?.title || item?.name || '--',
 
@@ -682,11 +685,11 @@ export default {
     },
 
 
-    openModal({col, row, tab, isCreate = true }){
+    openModal({col, row, tab, isCreate = true, event = null }){
       this.stateModal.col = col
       this.stateModal.row = row
       this.stateModal.isCreate = isCreate
-      this.$refs.modalComponentRef.init(tab)
+      this.$refs.modalComponentRef.init(tab, event)
       this.stateModal.show = true
     },
     closeModal(){
@@ -694,6 +697,19 @@ export default {
       this.stateModal.row = {}
       this.stateModal.show = false
       this.stateModal.isCreate = true
+    },
+
+    columnEventshandler({col, row, event}){
+      console.log({col, row, event})
+      this.openModal({
+        col, 
+        row,
+        tab: null, 
+        isCreate: false, 
+        event
+      })
+      
+
     },
 
     //Hanlder method create
