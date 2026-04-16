@@ -27,4 +27,5 @@ export default {
   favourites: `${urlBase}/favourites`,
   filesUploadWithDetails: `${urlBaseMedia}/files/upload-with-details`,
   files: `${urlBaseMedia}/files`,
-}
+  cruds: `${urlBase}/cruds`,
+};

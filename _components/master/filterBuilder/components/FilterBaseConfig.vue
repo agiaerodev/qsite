@@ -26,7 +26,7 @@
              v-model.number="currentFilter.props.step" label="Step" type="number" stack-label outlined dense
              color="indigo" />
   </q-card-section>
-  {{ currentFilter.props.rules  }}
+
   <FilterRules v-model="currentFilter.props.rules" />
 
   <q-card-section class="tw-px-6 tw-pb-8">
