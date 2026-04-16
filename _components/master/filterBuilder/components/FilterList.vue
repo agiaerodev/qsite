@@ -1,5 +1,5 @@
 <template>
-  <div v-if="localFiltersList.length > 0" class="tw-space-y-3">
+  <div v-if="filtersList.length > 0" class="tw-space-y-3">
     <h3
       class="tw-text-xs tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-widest tw-flex tw-items-center tw-gap-2">
       <q-icon name="fa-light fa-layer-group" />
@@ -7,7 +7,7 @@
     </h3>
 
     <draggable
-      :model-value="localFiltersList"
+      :model-value="filtersList"
       @update:model-value="handleReorder"
       item-key="key"
       :animation="300"
@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 import draggable from 'vuedraggable';
 
 const props = defineProps({
@@ -68,13 +68,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:filtersList', 'delete-filter', 'filters-reordered']);
 
-const localFiltersList = computed({
-  get: () => props.filtersList,
-  set: (value) => {
-    emit('update:filtersList', value);
-    emit('filters-reordered', value);
-  }
-});
 
 const handleReorder = (newList) => {
   emit('update:filtersList', newList);

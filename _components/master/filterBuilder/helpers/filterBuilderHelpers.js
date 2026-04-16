@@ -22,6 +22,7 @@ export function generateJson(filtersList) {
     for (const key in filter.props) {
       if (
         key !== 'quickFilter' &&
+        key !== 'options' && // Don't include options from props, handle separately
         filter.props[key] !== null &&
         filter.props[key] !== undefined &&
         filter.props[key] !== '') {
@@ -38,10 +39,11 @@ export function generateJson(filtersList) {
       if (filter.optionsSource === 'api') {
         const lo = filter.loadOptions;
         config.loadOptions = {
-          apiRoute: lo.apiRoute,
-          select: { label: lo.select.label, id: lo.select.id }
+          apiRoute: lo?.apiRoute || '',
+          select: { label: lo?.select?.label || 'name', id: lo?.select?.id || 'id' }
         };
-        if (lo.requestParams?.length > 0) {
+        // Safety check for requestParams array
+        if (lo?.requestParams && Array.isArray(lo.requestParams) && lo.requestParams.length > 0) {
           const params = {};
           lo.requestParams.forEach(item => {
             // Handle explicit types
@@ -59,17 +61,29 @@ export function generateJson(filtersList) {
               // Legacy type inference for items without explicit type
               if (item.value === 'true') params[item.name] = true;
               else if (item.value === 'false') params[item.name] = false;
-              else if (!isNaN(Number(item.value)) && item.value.trim() !== '') params[item.name] = Number(item.value);
+              else if (!isNaN(Number(item.value)) && item.value?.trim?.() !== '') params[item.name] = Number(item.value);
               else params[item.name] = item.value;
             }
           });
           config.loadOptions.requestParams = params;
         }
-      } else if (filter.staticOptions.length > 0) {
-        config.props.options = filter.staticOptions.map(opt => ({
-          label: opt.label,
-          value: isNaN(opt.value) ? opt.value : Number(opt.value)
-        }));
+      } else if (filter.staticOptions && Array.isArray(filter.staticOptions) && filter.staticOptions.length > 0) {
+        // Convert string booleans to actual booleans
+        config.props.options = filter.staticOptions.map(opt => {
+          let value = opt.value;
+          // Handle string booleans
+          if (value === 'true') {
+            value = true;
+          } else if (value === 'false') {
+            value = false;
+          } else if (!isNaN(Number(value)) && value !== '') {
+            value = Number(value);
+          }
+          return {
+            label: opt.label,
+            value: value
+          };
+        });
       }
     }
     output[filter.key] = config;

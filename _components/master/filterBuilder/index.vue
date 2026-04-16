@@ -26,7 +26,7 @@
             v-model:filtersList="filtersList"
             :editFilter="editFilter"
             :getIconForType="getIconForType"
-            @delete-filter="handleDeleteFilter"
+            @delete-filter="deleteFilter"
             @filters-reordered="handleFiltersReordered"
           />
         </div>
@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import useFilterBuilder from './controllers/filterBuilder.js';
 import FilterHeader from './components/FilterHeader.vue';
 import FilterForm from './components/FilterForm.vue';
@@ -82,28 +82,25 @@ const {
   getIconForType,
   initializeFromProps,
   updateField,
+  deleteFilter,
+  handleFiltersReordered,
 } = useFilterBuilder(emit, props);
 
 // ====================
 // Lifecycle
 // ====================
 onMounted(() => {
+  console.log('[index.vue onMounted] Inicializando desde props:', props.data?.[props.column]);
   initializeFromProps();
 });
 
-// ====================
-// Methods
-// ====================
-const handleDeleteFilter = async (index) => {
-  filtersList.value.splice(index, 1);
-  await updateField();
-};
-
-const handleFiltersReordered = async (reorderedFilters) => {
-  // Actualizar el arreglo con los filtros reordenados
-  filtersList.value = reorderedFilters;
-  await updateField();
-};
+// Watch para re-inicializar si los datos en props cambian
+watch(() => props.data?.[props.column], (newData) => {
+  if (newData && Object.keys(newData).length > 0) {
+    console.log('[index.vue watch] Props.data cambió, re-inicializando:', newData);
+    initializeFromProps();
+  }
+}, { deep: true });
 </script>
 
 <style scoped>
