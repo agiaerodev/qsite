@@ -7,7 +7,8 @@
     </h3>
 
     <draggable
-      v-model="localFiltersList"
+      :model-value="localFiltersList"
+      @update:model-value="handleReorder"
       item-key="key"
       :animation="300"
       ghost-class="ghost-card"
@@ -65,12 +66,20 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:filtersList', 'delete-filter']);
+const emit = defineEmits(['update:filtersList', 'delete-filter', 'filters-reordered']);
 
 const localFiltersList = computed({
   get: () => props.filtersList,
-  set: (value) => emit('update:filtersList', value)
+  set: (value) => {
+    emit('update:filtersList', value);
+    emit('filters-reordered', value);
+  }
 });
+
+const handleReorder = (newList) => {
+  emit('update:filtersList', newList);
+  emit('filters-reordered', newList);
+};
 </script>
 
 <style scoped>

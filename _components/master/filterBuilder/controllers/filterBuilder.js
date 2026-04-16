@@ -14,25 +14,29 @@ export default function useFilterBuilder(emit, props = {}) {
   const editingIndex = ref(-1);
   let originalItemRef = null;
   const ignoreTypeWatch = ref(false);
-
+  const dataToLoad = computed(() => props.data?.[props.column] || {})
   const currentFilter = ref(getCleanFilter());
 
   // ====================
   // Inicialización desde Props
   // ====================
   function initializeFromProps() {
-    const dataToLoad = props.data?.[props.column] || {};
+    if (typeof dataToLoad.value === 'string') {
+      filtersList.value = [];
+      return;
+    }
+    if (dataToLoad.value && Object.keys(dataToLoad.value).length > 0) {
+      const loadedFilters = Object.entries(dataToLoad.value).map(
+        ([key, value]) => ({
+          key,
+          value: value.value ?? null,
+          type: value.type ?? 'input',
+          props: value.props ?? {},
+          quickFilter: value.quick_filter ?? false,
+        })
+      );
 
-    if (dataToLoad && Object.keys(dataToLoad).length > 0) {
-      const loadedFilters = Object.entries(dataToLoad).map(([key, value]) => ({
-        key,
-        value: value.value ?? null,
-        type: value.type ?? 'input',
-        props: value.props ?? {},
-        quickFilter: value.quick_filter ?? false,
-      }));
-
-      filtersList.value = cloneDeep(loadedFilters);
+      filtersList.value = loadedFilters;
     }
   }
 
@@ -214,6 +218,7 @@ export default function useFilterBuilder(emit, props = {}) {
     addRequestParam,
     handleCopy,
     getIconForType,
-    initializeFromProps
+    initializeFromProps,
+    updateField
   };
 }

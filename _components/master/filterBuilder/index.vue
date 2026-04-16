@@ -27,6 +27,7 @@
             :editFilter="editFilter"
             :getIconForType="getIconForType"
             @delete-filter="handleDeleteFilter"
+            @filters-reordered="handleFiltersReordered"
           />
         </div>
 
@@ -80,6 +81,7 @@ const {
   handleCopy,
   getIconForType,
   initializeFromProps,
+  updateField,
 } = useFilterBuilder(emit, props);
 
 // ====================
@@ -92,9 +94,15 @@ onMounted(() => {
 // ====================
 // Methods
 // ====================
-const handleDeleteFilter = (index) => {
+const handleDeleteFilter = async (index) => {
   filtersList.value.splice(index, 1);
-  // El watch de filtersList en el controlador se encargará de emitir automáticamente
+  await updateField();
+};
+
+const handleFiltersReordered = async (reorderedFilters) => {
+  // Actualizar el arreglo con los filtros reordenados
+  filtersList.value = reorderedFilters;
+  await updateField();
 };
 </script>
 
