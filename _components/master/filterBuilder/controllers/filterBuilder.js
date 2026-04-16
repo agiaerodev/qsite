@@ -5,8 +5,9 @@ import { fieldTypes } from '../constants/fieldTypes';
 import { toggles } from '../constants/toggles';
 import { getCleanFilter } from '../models/FilterModel';
 import { getIconForType, generateJson } from '../helpers/filterBuilderHelpers';
+import baseService from 'modules/qcrud/_services/baseService.js';
 
-export default function useFilterBuilder(emit) {
+export default function useFilterBuilder(emit, props = {}) {
   const filtersList = ref([]);
   const newOption = reactive({ label: '', value: '' });
   const newRequestParam = reactive({ name: '', value: '', type: 'string' });
@@ -16,6 +17,26 @@ export default function useFilterBuilder(emit) {
 
   const currentFilter = ref(getCleanFilter());
 
+  // ====================
+  // Inicialización desde Props
+  // ====================
+  function initializeFromProps() {
+    // Usar directamente props.data
+    const dataToLoad = props.data[props.column] || {};
+
+    // Si hay datos, convertirlos a formato de filtersList
+    if (dataToLoad && Object.keys(dataToLoad).length > 0) {
+      const loadedFilters = Object.entries(dataToLoad).map(([key, value]) => ({
+        key,
+        ...value,
+      }));
+      filtersList.value = cloneDeep(loadedFilters);
+    }
+  }
+
+  // ====================
+  // Watchers
+  // ====================
   watch(() => currentFilter.value.type, (newType, oldType) => {
     if (ignoreTypeWatch.value || newType === oldType) return;
     try {
@@ -34,6 +55,9 @@ export default function useFilterBuilder(emit) {
     }
   });
 
+  // ====================
+  // Computed
+  // ====================
   const generatedJson = computed(() => {
     try {
       return generateJson(filtersList.value);
@@ -43,7 +67,10 @@ export default function useFilterBuilder(emit) {
     }
   });
 
-  const addFilter = () => {
+  // ====================
+  // Methods
+  // ====================
+  const addFilter = async () => {
     try {
       if (!currentFilter.value.key) {
         Notify.create({
@@ -79,6 +106,7 @@ export default function useFilterBuilder(emit) {
         filtersList.value.push(filterCopy);
         console.log('New filter added.');
       }
+      await updateField();
       // El watch de filtersList se encargará de emitir el update automáticamente
       resetForm();
     } catch (error) {
@@ -87,7 +115,7 @@ export default function useFilterBuilder(emit) {
     }
   };
 
-  const editFilter = (index) => {
+  const editFilter = async (index) => {
     try {
       editingIndex.value = index;
       originalItemRef = filtersList.value[index];
@@ -101,10 +129,7 @@ export default function useFilterBuilder(emit) {
       if (currentFilter.value.type === 'select' && !currentFilter.value.staticOptions) {
         currentFilter.value.staticOptions = [];
       }
-
-      setTimeout(() => {
-        ignoreTypeWatch.value = false;
-      }, 100);
+      ignoreTypeWatch.value = false;
     } catch (error) {
       console.error('Error in editFilter:', error);
       Notify.create({ message: 'Failed to load filter for editing.', color: 'red-7' });
@@ -143,16 +168,28 @@ export default function useFilterBuilder(emit) {
   const handleCopy = () => {
     copyToClipboard(generatedJson.value)
       .then(() => Notify.create({ message: 'Copied', color: 'indigo' }))
-      .catch(error => {
+      .catch((error) => {
         console.error('Failed to copy to clipboard:', error);
         Notify.create({ message: 'Failed to copy', color: 'red-7' });
       });
   };
 
-  watch(filtersList, (newVal) => {
+  const updateField = async () => {
+    try {
+      await baseService.update('apiRoutes.qsite.cruds', props.data.id, {
+        [props.column]: JSON.parse(generatedJson.value),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // ====================
+  // Emit Updates
+  // ====================
+  watch(filtersList, async (newVal) => {
     try {
       if (!newVal || newVal.length === undefined) return;
-      console.log('EMITIENDO UPDATE (watch):', newVal);
       emit('update', cloneDeep(newVal));
     } catch (error) {
       console.error('Error emitting update event:', error);
@@ -174,6 +211,7 @@ export default function useFilterBuilder(emit) {
     addStaticOption,
     addRequestParam,
     handleCopy,
-    getIconForType
+    getIconForType,
+    initializeFromProps
   };
 }

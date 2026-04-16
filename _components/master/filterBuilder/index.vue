@@ -1,5 +1,8 @@
 <template>
-  <div id="filterBuilderGenerator" class="tw-min-h-screen tw-bg-slate-50 tw-p-8 tw-font-sans">
+  <div
+    id="filterBuilderGenerator"
+    class="tw-min-h-screen tw-bg-slate-50 tw-p-8 tw-font-sans"
+  >
     <div class="tw-max-w-7xl tw-mx-auto">
       <FilterHeader />
 
@@ -27,17 +30,14 @@
           />
         </div>
 
-        <JsonPreview
-          :generatedJson="generatedJson"
-          :handleCopy="handleCopy"
-        />
+        <JsonPreview :generatedJson="generatedJson" :handleCopy="handleCopy" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { cloneDeep } from 'lodash';
+import { onMounted } from 'vue';
 import useFilterBuilder from './controllers/filterBuilder.js';
 import FilterHeader from './components/FilterHeader.vue';
 import FilterForm from './components/FilterForm.vue';
@@ -46,6 +46,23 @@ import JsonPreview from './components/JsonPreview.vue';
 
 const emit = defineEmits(['update']);
 
+// ====================
+// Props
+// ====================
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
+  },
+  column: {
+    type: String,
+    required: true,
+  }
+});
+
+// ====================
+// Composable
+// ====================
 const {
   fieldTypes,
   toggles,
@@ -62,8 +79,19 @@ const {
   addRequestParam,
   handleCopy,
   getIconForType,
-} = useFilterBuilder(emit);
+  initializeFromProps,
+} = useFilterBuilder(emit, props);
 
+// ====================
+// Lifecycle
+// ====================
+onMounted(() => {
+  initializeFromProps();
+});
+
+// ====================
+// Methods
+// ====================
 const handleDeleteFilter = (index) => {
   filtersList.value.splice(index, 1);
   // El watch de filtersList en el controlador se encargará de emitir automáticamente
@@ -85,7 +113,16 @@ const handleDeleteFilter = (index) => {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
 }
 
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
 </style>
