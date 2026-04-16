@@ -52,22 +52,38 @@
         </q-select>
 
         <!-- VALUE (If applicable) -->
-        <q-input
-          v-if="needsValue(rule.type)"
-          v-model.number="rule.value"
-          type="number"
-          dense
-          outlined
-          class="tw-w-24"
-          placeholder="Value"
-          bg-color="white"
-          :rules="[val => val !== null && val !== undefined && val !== '' || 'Value is required']"
-          lazy-rules
-        >
-          <template v-slot:prepend>
-            <q-icon name="fa-solid fa-hashtag" size="xs" color="grey-6" />
-          </template>
-        </q-input>
+        <div class="tw-relative">
+          <q-input
+            v-if="needsValue(rule.type)"
+            v-model.number="rule.value"
+            type="number"
+            dense
+            outlined
+            class="tw-w-24"
+            placeholder="Value"
+            bg-color="white"
+            :error="
+              rule.value === null ||
+              rule.value === undefined ||
+              rule.value === ''
+            "
+            lazy-rules
+            hide-bottom-space
+          >
+            <template v-slot:prepend>
+              <q-icon name="fa-solid fa-hashtag" size="xs" color="grey-6" />
+            </template>
+          </q-input>
+          <q-tooltip
+            v-if="
+              rule.value === null ||
+              rule.value === undefined ||
+              rule.value === ''
+            "
+          >
+            Value is required
+          </q-tooltip>
+        </div>
 
         <!-- CUSTOM MESSAGE -->
         <q-input
@@ -145,7 +161,9 @@
         color="grey-6"
         class="tw-w-full tw-border-2 tw-border-dashed tw-border-slate-200 tw-rounded-lg tw-py-2 tw-cursor-not-allowed"
       >
-        <q-tooltip>Complete numeric values for all rules that require them</q-tooltip>
+        <q-tooltip
+          >Complete numeric values for all rules that require them</q-tooltip
+        >
       </q-btn>
     </div>
 
@@ -220,9 +238,11 @@ const needsValue = (type) =>
 
 const canAddMoreRules = computed(() => {
   // Check if all current rules have valid values
-  const allRulesValid = rules.value.every(rule => {
+  const allRulesValid = rules.value.every((rule) => {
     if (needsValue(rule.type)) {
-      return rule.value !== null && rule.value !== undefined && rule.value !== '';
+      return (
+        rule.value !== null && rule.value !== undefined && rule.value !== ''
+      );
     }
     return true;
   });
@@ -300,7 +320,10 @@ const generateRuleString = (rule) => {
   if (rule.type === 'custom') return rule.code || null;
 
   // Validate that value is provided for rules that need it
-  if (needsValue(rule.type) && (rule.value === null || rule.value === undefined || rule.value === '')) {
+  if (
+    needsValue(rule.type) &&
+    (rule.value === null || rule.value === undefined || rule.value === '')
+  ) {
     return null;
   }
 
