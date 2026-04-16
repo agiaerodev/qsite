@@ -75,6 +75,7 @@
               @updateCardColumn="column => updateCardColumn(column)"
               @reorderColumns="reorderColumns"
               @columnEvents="value => columnEventshandler(value)"
+              @revertCard="revertCard"
               class="tw-flex-none tw-space-y-0 "
             />
           </div>
@@ -160,6 +161,7 @@
       @reloadColumn="value => reloadColumn(value)"
       @reloadCard="value => reloadCard(value)"
       @openModal="(value) => openModal(value)"
+      @revertCard="revertCard"
     />
 </div>
 
@@ -700,7 +702,6 @@ export default {
     },
 
     columnEventshandler({col, row, event}){
-      console.log({col, row, event})
       this.openModal({
         col, 
         row,
@@ -708,8 +709,6 @@ export default {
         isCreate: false, 
         event
       })
-      
-
     },
 
     //Hanlder method create
@@ -729,6 +728,14 @@ export default {
       ///this.table.filter = filters;
       //this.getDataTable(true, filters, { page: 1 });
     },
+    revertCard(fromId, toId, row, columnSnapshot){
+      
+      const fromIndex = this.kanbanColumns.findIndex(item => item.id == fromId)
+      const toIndex = this.kanbanColumns.findIndex(item => item.id == toId)
+
+      this.kanbanColumns[fromIndex].data = columnSnapshot
+      this.kanbanColumns[toIndex].data = this.kanbanColumns[toIndex].data.filter(item => item.id != row.id)
+    }
   }
 };
 </script>

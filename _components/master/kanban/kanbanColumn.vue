@@ -1,8 +1,8 @@
 <template>
   <div class="columnCtn tw-relative bg-white no-shadow"
     :class="columnClass"
-  >  
-    <div      
+  >
+    <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
       @mouseover="hover = true"
@@ -24,8 +24,8 @@
       >
         <div class="tw-w-full tw-flex tw-justify-center">
           <div>
-            <q-spinner color="primary" size="3em" />  
-          </div>          
+            <q-spinner color="primary" size="3em" />
+          </div>
         </div>
       </div>
       <button
@@ -218,13 +218,13 @@
           filter=".ignoreItem"
           :style="{ height: computedHeight }"
           :force-fallback="true"
-          @start="dragColumn = true"
+          @start="start()"
           @end="move"
-          @change="() => this.$emit('countTotalRecords')"
-          @choose="dragCursor = true"
-          @unchoose="dragCursor = false"
+          @change="change"
+          @choose="choose()"
+          @unchoose="unchoose()"
           item-key="id"
-          :disabled="!cardPermissions.drag"          
+          :disabled="!cardPermissions.drag"
         >
           <template #item="{ element }">
             <kanbanCard
@@ -233,13 +233,14 @@
               :cardData="element"
               :cardPermissions
               :colorColumn="element.color"
+              :class="element?.loading ? 'ghostCard': ''"
               class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
               @openModal="tab => openModal(element, false, tab)"
               @deleteCard="$emit('deleteCard', element)"
             >
-              
+
                 <component
                   v-if="cardComponent"
                   :is="cardComponent"
@@ -273,7 +274,7 @@
                     !columnData.hasNextPage &&
                     !columnData.loading
                   "
-                >                  
+                >
                   <div class="tw-font-[600]">All reservations loaded</div>
                 </q-banner>
               </div>
@@ -281,21 +282,21 @@
                 :class="`trigger-${this.uId}${columnData.id}`"
                 class="tw-text-center tw-h-5 tw-flex tw-justify-center"
               >
-                <div                 
+                <div
                   class="
-                    tw-w-full 
+                    tw-w-full
                     tw-h-[60px]
-                    tw-flex 
+                    tw-flex
                     tw-justify-center
                   "
-                >     
+                >
                   <div
                     v-if="columnData?.infiniteLoading"
                   >
                     <q-spinner  color="primary" size="2em" />
                   </div>
                 </div>
-                
+
               </div>
             </div>
           </template>
@@ -312,7 +313,6 @@ import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
 import kanbanActions from 'modules/qsite/_components/master/kanban/kanbanActions.vue';
 import services from 'modules/qsite/_components/master/kanban/services'
 
-
 export default {
   props: {
     crudData: {
@@ -328,7 +328,7 @@ export default {
       required: true,
     },
     kanbanColumns: {
-      type: Array, 
+      type: Array,
       default: () => []
     },
     totalColumns: {
@@ -353,7 +353,7 @@ export default {
       type: Object,
     }
 
-  },  
+  },
   async beforeMount(){
     ///await this.getCardComponent();
   },
@@ -389,6 +389,7 @@ export default {
       dragColumn: false,
       dragCursor: false,
       cardActions: [],
+      columnSnapshot: null
     };
   },
   components: {
@@ -439,7 +440,7 @@ export default {
     },
     columnClass(){
       return this?.kanban?.columnClass || 'tw-w-[222px]'
-      
+
     },
     columnHeight(){
       return this?.kanban?.columnHeight || '235'
@@ -481,13 +482,13 @@ export default {
       if (!this.columnData.loading) {
         this.$emit('reloadColumn', {
           column: this.columnData.id,
-          page: 1 
-        })        
+          page: 1
+        })
       }
     },
     async infiniteHandler() {
       try {
-        if (this.columnData.hasNextPage) {            
+        if (this.columnData.hasNextPage) {
           const page = this.columnData.page + 1;
           this.$emit('reloadColumn', {
             column: this.columnData.id,
@@ -515,44 +516,72 @@ export default {
           await services.updateColumn(this.kanban.columns.apiRoute, this.columnData.id, payload);
         }
         this.$emit('reorderColumns')
-        
+
       }
     },
-      
-    async move(elm) {      
+
+    async start(){
+      this.dragColumn = true
+    },
+    /**/
+    choose(){
+      this.dragCursor = true
+      this.columnSnapshot = [...this.columnData.data]
+    },
+
+    unchoose(){
+      this.dragCursor = false
+    },
+
+    async change(){
+      this.$emit('countTotalRecords')
+    },
+
+    async move(elm) {
       if (elm.from.id === elm.to.id) return false;
       const fromId = elm.from.id
       const toId = elm.to.id
 
       const from = this.kanbanColumns.find(item => item.id == fromId)
       const to = this.kanbanColumns.find(item => item.id == toId)
-      const row = to.data.find(item => item.id == elm.clone.id)  
-      
-      if(to?.options?.events){        
+      const row = to.data.find(item => item.id == elm.clone.id)
+
+      if(to?.options?.events){
         /* emits and pass the event to kanban */
         this.$emit('columnEvents', {
           col: from,
           row,
           event: {
-            ...to.options.events.dragEnd, 
-            from, 
+            ...to.options.events.dragEnd,
+            from,
             to,
-          }       
+            row,
+            columnSnapshot: this.columnSnapshot
+
+          }
         })
+
         return false
       } else {
-        const data = { id: elm.clone.id, statusId: elm.to.id };      
-        await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
+        const data = { id: elm.clone.id, statusId: elm.to.id };
+        row.loading = true
+
+        await services.updateCard(this.kanban.cards.apiRoute, data.id, data).catch(error => {
+          this.$emit('revertCard', from.id, to.id, row, this.columnSnapshot)
+          row.loading = false
+          this.columnSnapshot = null
+          return
+        })
+        row.loading = false
         this.$emit('updateCardColumn', Number(toId));
       }
     },
 
-    
-    openModal(row = {}, isCreate = true, tab){      
+    openModal(row = {}, isCreate = true, tab){
       this.$emit('openModal', {
         col: this.columnData,
-        row, 
-        isCreate, 
+        row,
+        isCreate,
         tab
       })
     }
