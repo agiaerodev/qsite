@@ -38,7 +38,7 @@
           <q-item-section>
             <div class="tw-flex tw-space-x-2 tw-py-2" :class="action?.class">
               <q-icon v-if="action?.icon" :name="action.icon" :color="action?.color" size="14px"/>
-              <div class="tw-mt-0.5 tw-text-[12px]" :class="action?.class">
+              <div class="tw-text-[12px]" :class="action?.class">
                 {{ action.label || action.tooltip }}
               </div>
             </div>
@@ -93,7 +93,7 @@ export default {
         }
       ]
 
-      return actions.length ? [...actions, defaultActions] : defaultActions;
+      return actions.length ? [...actions, ...defaultActions] : defaultActions;
     },
   },
   methods: {
@@ -108,7 +108,7 @@ export default {
       //Define action params
       let actionData = this.$clone(this.cardData || {});
       //Check if has action function
-      if (action.action) await action.action(actionData);
+      if (action.action) await action.action(actionData, this);
     },
   },
 };
