@@ -21,15 +21,17 @@ export default function useFilterBuilder(emit, props = {}) {
   // Inicialización desde Props
   // ====================
   function initializeFromProps() {
-    // Usar directamente props.data
-    const dataToLoad = props.data[props.column] || {};
+    const dataToLoad = props.data?.[props.column] || {};
 
-    // Si hay datos, convertirlos a formato de filtersList
     if (dataToLoad && Object.keys(dataToLoad).length > 0) {
       const loadedFilters = Object.entries(dataToLoad).map(([key, value]) => ({
         key,
-        ...value,
+        value: value.value ?? null,
+        type: value.type ?? 'input',
+        props: value.props ?? {},
+        quickFilter: value.quick_filter ?? false,
       }));
+
       filtersList.value = cloneDeep(loadedFilters);
     }
   }
