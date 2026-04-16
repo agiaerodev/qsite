@@ -20,12 +20,18 @@ export function generateJson(filtersList) {
 
     // Populate props, filtering out null/undefined values
     for (const key in filter.props) {
-      if (filter.props[key] !== null && filter.props[key] !== undefined && filter.props[key] !== '') {
+      if (
+        key !== 'quickFilter' &&
+        filter.props[key] !== null &&
+        filter.props[key] !== undefined &&
+        filter.props[key] !== '') {
         config.props[key] = filter.props[key];
       }
     }
 
-    if (filter.quickFilter) config.quickFilter = true;
+    if (filter.quickFilter) {
+      config.quickFilter = true;
+    }
 
     if (filter.type === 'select') {
       if(filter.props.multiple) config.value = [];

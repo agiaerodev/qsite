@@ -42,7 +42,8 @@
               {{ toggle.label }}
             </span>
         <q-toggle
-          v-model="currentFilter.props[toggle.model]"
+          :model-value="toggle.model === 'quickFilter' ? currentFilter.quickFilter : currentFilter.props[toggle.model]"
+          @update:model-value="toggle.model === 'quickFilter' ? (currentFilter.quickFilter = $event) : (currentFilter.props[toggle.model] = $event)"
           color="indigo"
           dense
         />
