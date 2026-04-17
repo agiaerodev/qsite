@@ -39,10 +39,11 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from 'vue';
 import FilterBaseConfig from './FilterBaseConfig.vue';
 import FilterDataSource from './FilterDataSource.vue';
+import { useFilterFormController } from '../controllers/filterForm.js';
 
+// ...existing code...
 const props = defineProps({
   currentFilter: {
     type: Object,
@@ -75,9 +76,6 @@ const props = defineProps({
 });
 
 defineEmits(['add-request-param', 'add-static-option', 'reset-form', 'add-filter']);
-const visibleToggles = computed(() => {
-  return props.toggles.filter(toggle =>
-    !toggle.shouldDisplay || toggle.shouldDisplay(props.currentFilter)
-  );
-});
+
+useFilterFormController(props);
 </script>

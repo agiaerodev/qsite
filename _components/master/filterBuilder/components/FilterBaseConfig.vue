@@ -53,13 +53,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import FilterRules from './FilterRules.vue';
+import { useFilterBaseConfigController } from '../controllers/filterBaseConfig.js';
+
+// ...existing code...
 const props = defineProps(['currentFilter', 'fieldTypes', 'toggles']);
 
-const visibleToggles = computed(() => {
-  return props.toggles.filter(toggle =>
-    !toggle.shouldDisplay || toggle.shouldDisplay(props.currentFilter)
-  );
-});
+const { visibleToggles } = useFilterBaseConfigController(props);
 </script>

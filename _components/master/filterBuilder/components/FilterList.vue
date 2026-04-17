@@ -48,8 +48,8 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 import draggable from 'vuedraggable';
+import { useFilterListController } from '../controllers/filterList.js';
 
 const props = defineProps({
   filtersList: {
@@ -68,11 +68,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:filtersList', 'delete-filter', 'filters-reordered']);
 
-
-const handleReorder = (newList) => {
-  emit('update:filtersList', newList);
-  emit('filters-reordered', newList);
-};
+// ...existing code...
+const { handleReorder } = useFilterListController(emit);
 </script>
 
 <style scoped>

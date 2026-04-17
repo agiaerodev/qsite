@@ -22,7 +22,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { useJsonPreviewController } from '../controllers/jsonPreview.js';
+
+const props = defineProps({
   generatedJson: {
     type: String,
     required: true
@@ -32,6 +34,8 @@ defineProps({
     required: true
   }
 });
+
+useJsonPreviewController(props);
 </script>
 
 <style scoped>

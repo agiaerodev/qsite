@@ -214,30 +214,13 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
 import JsonEditorVue from 'json-editor-vue';
+import { useFilterDataSourceController } from '../controllers/filterDataSource.js';
 
 const props = defineProps(['currentFilter', 'newRequestParam', 'newOption']);
 defineEmits(['add-request-param', 'add-static-option']);
 
-// Computed property para optionsSource con valor por defecto
-const optionsSourceModel = computed({
-  get() {
-    return props.currentFilter.optionsSource || 'api';
-  },
-  set(value) {
-    props.currentFilter.optionsSource = value;
-  },
-});
-
-const removeStaticOption = (idx) => {
-  props.currentFilter.staticOptions = props.currentFilter.staticOptions.filter(
-    (_, i) => i !== idx
-  );
-};
-
-const removeRequestParam = (idx) => {
-  props.currentFilter.loadOptions.requestParams.splice(idx, 1);
-};
-
+// ...existing code...
+const { optionsSourceModel, removeStaticOption, removeRequestParam } =
+  useFilterDataSourceController(props);
 </script>

@@ -13,4 +13,7 @@
 </template>
 
 <script setup>
+import { useFilterHeaderController } from '../controllers/filterHeader.js';
+
+useFilterHeaderController();
 </script>
