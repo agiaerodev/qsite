@@ -580,7 +580,7 @@ import multipleDynamicFields from 'modules/qsite/_components/master/multipleDyna
 import dateRangePicker from 'modules/qsite/_components/master/dateRangePicker';
 import timeSpent from 'modules/qsite/_components/master/timeSpent';
 import previewFile from 'modules/qsite/_components/v3/previewFile/index.vue';
-import { eventBus } from 'src/plugins/utils';
+import { eventBus, helper } from 'src/plugins/utils';
 import dateViewToggle from 'modules/qsite/_components/master/dateViewToggle';
 
 export default {
@@ -953,17 +953,7 @@ export default {
                   if (!val) return true;
                   return this.$moment(val, maskFullDate, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskFullDate})`;
                 },
-                val => {
-                  if (!val) return true
-                  const timeMatch = val.match(/(\d{2}):(\d{2})/)
-                  if (timeMatch) {
-                    const hours = parseInt(timeMatch[1])
-                    const minutes = parseInt(timeMatch[2])
-                    if (hours > 23) return this.$tr('isite.cms.message.invalidFormat')
-                    if (minutes > 59) return this.$tr('isite.cms.message.invalidFormat')
-                  }
-                  return true
-                }
+                val => helper.isValidFullDateHour(val) ?? 'Invalid hour'
               ]
             },
             slot: {
@@ -1046,8 +1036,8 @@ export default {
         case'checkbox':
           props = {
             field: {
-              trueValue: 1,
-              falseValue: 0,
+              trueValue: this.field.emitBoolean ? true : 1,
+              falseValue: this.field.emitBoolean ? false : 0,
               ...props
             },
             fieldComponent: {
@@ -1127,8 +1117,8 @@ export default {
         case'toggle':
           props = {
             field: {
-              falseValue: '0',
-              trueValue: '1',
+              falseValue: this.field.emitBoolean ? false : '0',
+              trueValue: this.field.emitBoolean ? true : '1',
               ...props
             }
           };
@@ -1595,7 +1585,11 @@ export default {
           this.responseValue = propValue || [];
           break;
         case 'checkbox':
-          this.responseValue = (propValue !== undefined) ? propValue : null;
+          if (this.emitBoolean) {
+            this.responseValue = (propValue === true || propValue === 1 || propValue === '1') ? true : false;
+          } else {
+            this.responseValue = (propValue !== undefined) ? propValue : null;
+          }
           break;
         case 'media':
           this.responseValue = propValue || {};
@@ -1610,7 +1604,11 @@ export default {
           this.responseValue = propValue || null;
           break;
         case 'toggle':
-          this.responseValue = (propValue || 0).toString();
+          if (this.field.emitBoolean) {
+            this.responseValue = (propValue === true || propValue === 1 || propValue === '1') ? true : false;
+          } else {
+            this.responseValue = (propValue || 0).toString();
+          }
           break;
         case 'positionMarkerMap':
           this.responseValue = propValue || false;
