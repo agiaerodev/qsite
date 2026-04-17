@@ -2,7 +2,6 @@
   <div class="columnCtn tw-relative bg-white no-shadow"
     :class="columnClass"
   >
-  
     <div
       class="tw-h-auto"
       :class="`cardItemsCtn-${this.uId}${columnData.id}`"
@@ -10,7 +9,7 @@
       @mouseleave="hover = false"
     >
       <div
-        v-if="columnData.loading"
+        v-if="columnData.loading && !loading"
         class="
           tw-flex
           tw-justify-center
@@ -21,8 +20,13 @@
           tw-bg-opacity-75
           tw-z-20
         "
+        :class="columnClass"
       >
-        <q-spinner color="primary" size="2em" />
+        <div class="tw-w-full tw-flex tw-justify-center">
+          <div>
+            <q-spinner color="primary" size="3em" />
+          </div>
+        </div>
       </div>
       <button
         class="
@@ -128,7 +132,7 @@
               padding="5px"
               icon="fa-duotone fa-rotate-right"
               size="6px"
-              @click="() => $emit('addCard', columnData.id)"
+              @click="reloadColumn()"
             >
               <q-tooltip>
                   {{ $trp('isite.cms.label.refresh') }}
@@ -214,33 +218,34 @@
           filter=".ignoreItem"
           :style="{ height: computedHeight }"
           :force-fallback="true"
-          @start="dragColumn = true"
+          @start="start()"
           @end="move"
-          @change="countTotalRecords"
-          @choose="dragCursor = true"
-          @unchoose="dragCursor = false"
+          @change="change"
+          @choose="choose()"
+          @unchoose="unchoose()"
           item-key="id"
           :disabled="!cardPermissions.drag"
-          
         >
           <template #item="{ element }">
             <kanbanCard
+              v-if="!columnData.loading"
               :crudData="crudData"
               :cardData="element"
               :cardPermissions
               :colorColumn="element.color"
+              :class="element?.loading ? 'ghostCard': ''"
               class="tw-cursor-pointer tw-mb-4"
               :id="element.id"
               :style="isDragCursor ? 'cursor: grabbing' : 'cursor: pointer'"
-              @openModal="value => openModal(value, false)"
+              @openModal="tab => openModal(element, false, tab)"
               @deleteCard="$emit('deleteCard', element)"
             >
-              
+
                 <component
                   v-if="cardComponent"
                   :is="cardComponent"
                   v-bind="{data: element}"
-                  @openModal="value => openModal(value, false)"
+                  @openModal="tab => openModal(element, false, tab)"
                   @deleteCard="$emit('deleteCard', element)"
                 >
                   <template #kanban-actions>
@@ -248,7 +253,7 @@
                       :crudData="crudData"
                       :cardPermissions="cardPermissions"
                       :cardData="element"
-                      @openModal="value => openModal(value, false)"
+                      @openModal="tab => openModal(element, false, tab)"
                       @deleteCard="$emit('deleteCard', element)"
                     />
                   </template>
@@ -259,11 +264,39 @@
           </template>
           <template #footer>
             <div>
+              <div class="tw-text-center tw-h-5 tw-rounded">
+                <q-banner
+                  inline-actions
+                  rounded
+                  class="primary"
+                  v-if="
+                    columnData.total !== 0 &&
+                    !columnData.hasNextPage &&
+                    !columnData.loading
+                  "
+                >
+                  <div class="tw-font-[600]">All reservations loaded</div>
+                </q-banner>
+              </div>
               <div
                 :class="`trigger-${this.uId}${columnData.id}`"
                 class="tw-text-center tw-h-5 tw-flex tw-justify-center"
               >
-                <q-spinner v-if="loading" color="primary" size="1.3em" />
+                <div
+                  class="
+                    tw-w-full
+                    tw-h-[60px]
+                    tw-flex
+                    tw-justify-center
+                  "
+                >
+                  <div
+                    v-if="columnData?.infiniteLoading"
+                  >
+                    <q-spinner  color="primary" size="2em" />
+                  </div>
+                </div>
+
               </div>
             </div>
           </template>
@@ -280,7 +313,6 @@ import kanbanCard from "modules/qsite/_components/master/kanban/kanbanCard.vue";
 import kanbanActions from 'modules/qsite/_components/master/kanban/kanbanActions.vue';
 import services from 'modules/qsite/_components/master/kanban/services'
 
-
 export default {
   props: {
     crudData: {
@@ -294,6 +326,10 @@ export default {
     columnIndex: {
       type: Number,
       required: true,
+    },
+    kanbanColumns: {
+      type: Array,
+      default: () => []
     },
     totalColumns: {
       type: Number,
@@ -310,10 +346,6 @@ export default {
     uId: {
       type: String,
     },
-    countTotalRecords: {
-      type: Number
-    },
-
     cardComponent: {
       type: Object,
     },
@@ -321,7 +353,7 @@ export default {
       type: Object,
     }
 
-  },  
+  },
   async beforeMount(){
     ///await this.getCardComponent();
   },
@@ -357,6 +389,7 @@ export default {
       dragColumn: false,
       dragCursor: false,
       cardActions: [],
+      columnSnapshot: null
     };
   },
   components: {
@@ -407,7 +440,7 @@ export default {
     },
     columnClass(){
       return this?.kanban?.columnClass || 'tw-w-[222px]'
-      
+
     },
     columnHeight(){
       return this?.kanban?.columnHeight || '235'
@@ -445,24 +478,22 @@ export default {
         }
       });
     },
+    reloadColumn(){
+      if (!this.columnData.loading) {
+        this.$emit('reloadColumn', {
+          column: this.columnData.id,
+          page: 1
+        })
+      }
+    },
     async infiniteHandler() {
       try {
-          if (!this.columnData.loading && !this.isTotalNumberOfRecords) {
-            this.loading = true;
-            this.columnData.page = this.columnData.page + 1;
-            /*
-            await this.addKanbanCard(
-              this.columnData,
-              this.columnData.page
-            );
-            */
-
-            this.$emit('addKanbanCard', {
-              column: this.columnData,
-              page: this.columnData.page
-            })
-
-            this.loading = false;
+        if (this.columnData.hasNextPage) {
+          const page = this.columnData.page + 1;
+          this.$emit('reloadColumn', {
+            column: this.columnData.id,
+            page
+          })
         }
       } catch (error) {
         console.log(error);
@@ -485,23 +516,73 @@ export default {
           await services.updateColumn(this.kanban.columns.apiRoute, this.columnData.id, payload);
         }
         this.$emit('reorderColumns')
-        
+
       }
     },
-      
-    async move(elm) {      
-      if (elm.from.id === elm.to.id) return;
-      const data = { id: elm.clone.id, statusId: elm.to.id };      
-      await services.updateCard(this.kanban.cards.apiRoute, data.id, data)
-      this.$emit('updateCardColumn', Number(elm.to.id));
+
+    async start(){
+      this.dragColumn = true
+    },
+    /**/
+    choose(){
+      this.dragCursor = true
+      this.columnSnapshot = [...this.columnData.data]
     },
 
-    
-    openModal(row = {}, isCreate = true){
+    unchoose(){
+      this.dragCursor = false
+    },
+
+    async change(){
+      this.$emit('countTotalRecords')
+    },
+
+    async move(elm) {
+      if (elm.from.id === elm.to.id) return false;
+      const fromId = elm.from.id
+      const toId = elm.to.id
+
+      const from = this.kanbanColumns.find(item => item.id == fromId)
+      const to = this.kanbanColumns.find(item => item.id == toId)
+      const row = to.data.find(item => item.id == elm.clone.id)
+
+      if(to?.options?.events){
+        /* emits and pass the event to kanban */
+        this.$emit('columnEvents', {
+          col: from,
+          row,
+          event: {
+            ...to.options.events.dragEnd,
+            from,
+            to,
+            row,
+            columnSnapshot: this.columnSnapshot
+
+          }
+        })
+
+        return false
+      } else {
+        const data = { id: elm.clone.id, statusId: elm.to.id };
+        row.loading = true
+
+        await services.updateCard(this.kanban.cards.apiRoute, data.id, data).catch(error => {
+          this.$emit('revertCard', from.id, to.id, row, this.columnSnapshot)
+          row.loading = false
+          this.columnSnapshot = null
+          return
+        })
+        row.loading = false
+        this.$emit('updateCardColumn', Number(toId));
+      }
+    },
+
+    openModal(row = {}, isCreate = true, tab){
       this.$emit('openModal', {
         col: this.columnData,
-        row, 
-        isCreate
+        row,
+        isCreate,
+        tab
       })
     }
   },
@@ -523,15 +604,7 @@ export default {
 }
 
 .ghostCard {
-  @apply tw-opacity-75 tw-bg-white !important;
-}
-
-.kanbanName p {
-  @apply tw-lowercase;
-}
-
-.kanbanName p::first-letter {
-  @apply tw-uppercase;
+  @apply tw-opacity-40 tw-bg-white !important;
 }
 
 .arrowKanbanName .kanbanName .q-field__focusable-action {

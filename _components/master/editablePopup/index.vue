@@ -1,8 +1,14 @@
 <template>
-  <q-popup-proxy v-if="canEdit" :cover="false" anchor="bottom start"
-                 transition-show="fade-in" transition-hide="fade-out"
-                 :max-width="dynamicField.maxWidth" ref="popupProxy"
-                 @show="setInitialValue">
+  <q-popup-proxy
+    v-if="canEdit"
+    :cover="false"
+    anchor="bottom start"
+    transition-show="fade-in"
+    transition-hide="fade-out"
+    :max-width="dynamicField.maxWidth"
+    ref="popupProxy"
+    @before-show="setInitialValue"
+  >
     <div class="q-pa-md relative-position bg-white" >
       <!-- Title -->
       <b class="text-blue-grey">
@@ -10,19 +16,42 @@
       </b>
       <q-separator class="q-mt-sm" />
       <!-- Form -->
-      <q-form autocorrect="off" autocomplete="off" @submit="updateRow"
-              @validation-error="$alert.error($tr('isite.cms.message.formInvalid'))">
-        <div class="q-py-sm">
-          <!-- Field -->
-          <dynamic-field v-model="responseValue" :field="dynamicField" />
-          <!--Actions-->
-          <div class="justify-end row q-gutter-sm">
-            <q-btn :label="$tr('isite.cms.label.cancel')"
-                   no-caps color="grey" unelevated rounded v-close-popup />
-            <q-btn :label="$tr('isite.cms.label.save')" color="green"
-                   no-caps unelevated rounded v-close-popup type="submit" />
+      <q-form
+        ref="propProxyForm"
+        autocorrect="off"
+        autocomplete="off"
+        @submit="updateRow"
+        @validation-success="successHandler()"
+        @validation-error="errorHandler()">
+          <div class="q-py-sm">
+            <!-- Field -->
+            <dynamic-field
+              v-model="responseValue"
+              :field="dynamicField"
+              @update:model-value="$refs.propProxyForm.validate()"
+            />
+            <!--Actions-->
+            <div class="justify-end row q-gutter-sm">
+              <q-btn
+                :label="$tr('isite.cms.label.cancel')"
+                no-caps
+                color="grey"
+                unelevated
+                rounded
+                v-close-popup
+              />
+              <!-- submmit -->
+              <q-btn
+                :label="$tr('isite.cms.label.save')"
+                color="green"
+                no-caps unelevated
+                rounded
+                v-close-popup
+                type="submit"
+                :disabled="disableSubmit"
+              />
+            </div>
           </div>
-        </div>
       </q-form>
       <!-- Loading -->
       <inner-loading :visible="loading" />

@@ -1,35 +1,18 @@
 <template>
-  <div
-    class="
-      tw-bg-white
-      tw-drop-shadow-lg
-      tw-rounded-xl
-      tw-border      
-      tw-select-none
-      tw-w-[212px]
-      tw-py-[8px]
-      tw-pr-[6px]
-      tw-pl-[10px]
-    "
-    :style="{ borderLeftColor: colorColumn }"
-    
-  >    
-    <!-- content slot -->
-    <div>
-      <slot 
-        @openModal="value => openModal(value)"  
-      />
-    </div>
-   
+  <div>
+    <!-- content slot -->    
+    <slot
+      @openModal="openModal"
+    />
   </div>
 </template>
 
 <script>
 
 export default {
-  inject: {    
+  inject: {
   },
-  props: {    
+  props: {
     cardData: {
       type: Object,
       default: () => this.cardDataDefault,
@@ -42,10 +25,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    colorColumn: {
-      type: String,
-      default: () => "#00000",
-    },
+    
   },
   data() {
     return {
@@ -66,11 +46,11 @@ export default {
     kanban(){
       return this.crudData?.kanban || null;
     },
-    cardActions(){      
+    cardActions(){
       const defaultActions = [
         {
           vIf: this.cardPermissions.edit,
-          name: 'viewCard',            
+          name: 'viewCard',
           label: this.$tr('isite.cms.label.information'),
           icon: 'fas fa-info-circle',
           action: (item) => {
@@ -78,25 +58,23 @@ export default {
           }
         },
         {
-          vIf: this.cardPermissions.delete, 
-          name: 'deleteCard',            
+          vIf: this.cardPermissions.delete,
+          name: 'deleteCard',
           icon: 'fa-light fa-trash-can',
           color: 'red',
           label: this.$tr('isite.cms.label.delete'),
-          action: (item) => {            
+          action: (item) => {
             this.deleteCard()
           }
         }
       ]
-
       return [...this.crudData.read.kanban?.actions, ...defaultActions]  || defaultActions;
     },
   },
   methods: {
-    
-    openModal(value) {
-      this.$emit('openModal', value)
-    },    
+    openModal() {
+      this.$emit('openModal')
+    },
     deleteCard(){
       this.$emit('deleteCard', this.cardData)
     },

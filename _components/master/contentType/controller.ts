@@ -2,8 +2,8 @@ import {computed, reactive, ref, onMounted, toRefs, watch, markRaw, shallowRef, 
 import { helper } from 'src/plugins/utils';
 import components from 'modules/qsite/_components/master/contentType/components'
 
-export default function controller(props, emit) {  
-  
+export default function controller(props, emit) {
+
   // Refs
   const refs = {
     // refKey: ref(defaultValue)
@@ -13,7 +13,7 @@ export default function controller(props, emit) {
   const state = reactive({
     // Key: Default Value
     component: shallowRef(),
-    componentProps: null, 
+    componentProps: null,
     componentEvents: null
 
   })
@@ -34,15 +34,15 @@ export default function controller(props, emit) {
   const methods = {
     // methodKey: () => {}
     init() {
-      methods.loadComponent();      
-    },    
+      methods.loadComponent();
+    },
     loadComponent(){
-      if(computeds.isComponent.value){      
+      if(computeds.isComponent.value){
         const component = props.col.contentType(props.row, props.col)
-        if(component?.template){            
+        if(component?.template){
           state.component = methods.getComponent(component.template)
           if(component?.props) state.componentProps = component.props
-          if(component?.events) state.componentEvents = component.events            
+          if(component?.events) state.componentEvents = component.events
         }
       }
     },
@@ -51,8 +51,13 @@ export default function controller(props, emit) {
       return (typeof template === 'string') ? markRaw(components[template]) : markRaw(template)
     },
 
+    hasTooltip(){
+      if(!props.col?.tooltip) return false
+      return props.col?.tooltip(props.val, props.row) ? true :  false
+    },
+
     getTooltip(){
-      return props.col?.tooltip || null
+      return props.col.tooltip(props.val, props.row)
     }
   }
 
@@ -63,7 +68,7 @@ export default function controller(props, emit) {
 
   // Watch
   watch(props, (newField, oldField): void => {
-    methods.init()  
+    methods.init()
   }, {deep: true})
 
   return {...refs, ...(toRefs(state)), ...computeds, ...methods}

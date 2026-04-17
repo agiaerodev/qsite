@@ -29,7 +29,8 @@ export default function controller(props, emit) {
   const computeds = {
     // key: computed(() => {})   
     hasBeforeRowsSlot: computed(() => !!slots['before-rows']),
-    hasAfterRowsSlot: computed(() => !!slots['after-rows']), 
+    hasAfterRowsSlot: computed(() => !!slots['after-rows']),
+    hasNoDataSlot: computed(() => !!slots['no-data']),
   }
   
 
@@ -57,6 +58,9 @@ export default function controller(props, emit) {
         if(action?.vIf == undefined) return action
         if ((typeof action?.vIf == 'function') && action.vIf(row)) return action
       })
+    }, 
+    getVisibleColumns(){
+      return props?.visibleColumns.length ? props.visibleColumns : props.columns.map(item => item.name)
     }
   }
 
