@@ -580,7 +580,7 @@ import multipleDynamicFields from 'modules/qsite/_components/master/multipleDyna
 import dateRangePicker from 'modules/qsite/_components/master/dateRangePicker';
 import timeSpent from 'modules/qsite/_components/master/timeSpent';
 import previewFile from 'modules/qsite/_components/v3/previewFile/index.vue';
-import { eventBus } from 'src/plugins/utils';
+import { eventBus, helper } from 'src/plugins/utils';
 import dateViewToggle from 'modules/qsite/_components/master/dateViewToggle';
 
 export default {
@@ -953,17 +953,7 @@ export default {
                   if (!val) return true;
                   return this.$moment(val, maskFullDate, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskFullDate})`;
                 },
-                val => {
-                  if (!val) return true
-                  const timeMatch = val.match(/(\d{2}):(\d{2})/)
-                  if (timeMatch) {
-                    const hours = parseInt(timeMatch[1])
-                    const minutes = parseInt(timeMatch[2])
-                    if (hours > 23) return this.$tr('isite.cms.message.invalidFormat')
-                    if (minutes > 59) return this.$tr('isite.cms.message.invalidFormat')
-                  }
-                  return true
-                }
+                val => helper.isValidFullDateHour(val) ?? 'Invalid hour'
               ]
             },
             slot: {
