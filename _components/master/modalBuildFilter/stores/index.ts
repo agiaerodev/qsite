@@ -4,6 +4,8 @@ const state = reactive({
   loading: false,
   showModal: false,
   titleModal: 'Field Builder',
+  criteria: 0,
+  fieldKey: 'id',
 });
 
 const store = computed(() => {

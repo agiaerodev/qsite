@@ -36,8 +36,9 @@ export const loading = computed({
 // ====================
 // API Methods
 // ====================
-export async function getCrud(criteria: any, fieldKey: string = 'id') {
+export async function getCrud() {
   try {
+    const { criteria, fieldKey } = store;
     loading.value = true;
 
     const params = {
@@ -75,8 +76,8 @@ export function handleUpdateFilters(data: any) {
 // ====================
 // Init
 // ====================
-export async function init(criteria: any, fieldKey: string = 'id') {
-  await getCrud(criteria, fieldKey);
+export async function init() {
+  await getCrud();
 }
 
 

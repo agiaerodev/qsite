@@ -90,26 +90,16 @@ import {
   titleModal,
 } from './controllers/modalBuildFilter';
 
-const props = defineProps({
-  criteria: {
-    type: [String, Number],
-    default: () => 0,
-  },
-  fieldKey: {
-    type: String,
-    default: 'id',
-  },
-});
 
 onMounted(() => {
-  init(props.criteria, props.fieldKey);
+  init();
 });
 
 watch(
   () => showModal.value,
   (newVal) => {
     if (newVal) {
-      getCrud(props.criteria, props.fieldKey);
+      getCrud();
     }
   },
   { immediate: true }

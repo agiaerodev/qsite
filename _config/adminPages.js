@@ -12,7 +12,7 @@ export default {
     authenticated: true,
     subHeader: {
       refresh: true,
-    }
+    },
   },
   //Organization Page
   organizationsAll: {
@@ -28,7 +28,7 @@ export default {
     authenticated: true,
     subHeader: {
       refresh: true,
-    }
+    },
   },
   organizations: {
     permission: 'isite.organizations.index',
@@ -42,7 +42,7 @@ export default {
     authenticated: true,
     subHeader: {
       refresh: true,
-    }
+    },
   },
   //Organization form
   organizationForm: {
@@ -57,8 +57,8 @@ export default {
     authenticated: true,
     subHeader: {
       refresh: true,
-      breadcrumb: ['qsite.organizations']
-    }
+      breadcrumb: ['qsite.organizations'],
+    },
   },
   //Organization Page
   categories: {
@@ -74,7 +74,7 @@ export default {
     authenticated: true,
     subHeader: {
       refresh: true,
-    }
+    },
   },
   //Icruds
   icruds: {
@@ -89,8 +89,8 @@ export default {
     icon: 'fal fa-code',
     authenticated: true,
     subHeader: {
-      refresh: true
-    }
+      refresh: true,
+    },
   },
   //Logs
   auditLog: {
@@ -105,8 +105,8 @@ export default {
     icon: 'fal fa-file-code',
     authenticated: true,
     subHeader: {
-      refresh: true
-    }
+      refresh: true,
+    },
   },
   //Layouts
   layouts: {
@@ -121,7 +121,22 @@ export default {
     icon: 'fal fa-layer-group',
     authenticated: true,
     subHeader: {
-      refresh: true
-    }
+      refresh: true,
+    },
   },
-}
+  dynamicCruds: {
+    //permission: 'isite.l.manage',
+    activated: true,
+    path: '/site/dynamic-cruds',
+    name: 'Dynamic Crud',
+    crud: import('modules/qsite/_crud/dynamicCrud.vue'),
+    page: () => import('modules/qcrud/_pages/admin/crudPage'),
+    layout: () => import('layouts/master.vue'),
+    title: 'dynamic-cruds',
+    icon: 'fal fa-layer-group',
+    authenticated: true,
+    subHeader: {
+      refresh: true,
+    },
+  },
+};
