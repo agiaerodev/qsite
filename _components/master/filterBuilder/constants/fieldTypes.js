@@ -66,7 +66,7 @@ export const fieldTypesConfig = {
       staticOptions: []
     })
   },
-  dateRange: {
+  /*dateRange: {
     label: 'Date Range',
     getDefinition: () => ({
       type: 'dateRange',
@@ -78,7 +78,7 @@ export const fieldTypesConfig = {
         rules: [],
       }
     })
-  }
+  }*/
 };
 
 export const fieldTypes = Object.keys(fieldTypesConfig).map(key => ({
