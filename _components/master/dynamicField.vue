@@ -1046,8 +1046,8 @@ export default {
         case'checkbox':
           props = {
             field: {
-              trueValue: 1,
-              falseValue: 0,
+              trueValue: this.field.emitBoolean ? true : 1,
+              falseValue: this.field.emitBoolean ? false : 0,
               ...props
             },
             fieldComponent: {
@@ -1127,8 +1127,8 @@ export default {
         case'toggle':
           props = {
             field: {
-              falseValue: '0',
-              trueValue: '1',
+              falseValue: this.field.emitBoolean ? false : '0',
+              trueValue: this.field.emitBoolean ? true : '1',
               ...props
             }
           };
@@ -1595,7 +1595,11 @@ export default {
           this.responseValue = propValue || [];
           break;
         case 'checkbox':
-          this.responseValue = (propValue !== undefined) ? propValue : null;
+          if (this.emitBoolean) {
+            this.responseValue = (propValue === true || propValue === 1 || propValue === '1') ? true : false;
+          } else {
+            this.responseValue = (propValue !== undefined) ? propValue : null;
+          }
           break;
         case 'media':
           this.responseValue = propValue || {};
@@ -1610,7 +1614,11 @@ export default {
           this.responseValue = propValue || null;
           break;
         case 'toggle':
-          this.responseValue = (propValue || 0).toString();
+          if (this.field.emitBoolean) {
+            this.responseValue = (propValue === true || propValue === 1 || propValue === '1') ? true : false;
+          } else {
+            this.responseValue = (propValue || 0).toString();
+          }
           break;
         case 'positionMarkerMap':
           this.responseValue = propValue || false;
