@@ -90,14 +90,12 @@ const {
 // Lifecycle
 // ====================
 onMounted(() => {
-  console.log('[index.vue onMounted] Inicializando desde props:', props.data?.[props.column]);
   initializeFromProps();
 });
 
 // Watch para re-inicializar si los datos en props cambian
 watch(() => props.data?.[props.column], (newData) => {
   if (newData && Object.keys(newData).length > 0) {
-    console.log('[index.vue watch] Props.data cambió, re-inicializando:', newData);
     initializeFromProps();
   }
 }, { deep: true });
