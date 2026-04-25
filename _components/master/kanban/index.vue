@@ -687,11 +687,18 @@ export default {
     },
 
 
-    openModal({col, row, tab, isCreate = true, event = null }){
+    openModal({col, row, tab, isCreate = true, event = null}){
       this.stateModal.col = col
       this.stateModal.row = row
       this.stateModal.isCreate = isCreate
-      this.$refs.modalComponentRef.init(tab, event)
+      row.loading = true
+      this.$refs.modalComponentRef.init(tab, event).then(response => {
+        row.loading = false
+      }).catch(error => {
+        this.$alert.error(`Error Opening card, reservation id: ${row.id}`)
+        this.closeModal()
+        row.loading = false
+      })
       this.stateModal.show = true
     },
     closeModal(){
