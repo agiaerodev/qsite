@@ -10,18 +10,26 @@
             {{ fieldLabel }}
           </div>
           <!--Value-->
-          <div class="text-caption q-ml-sm text-grey-9"> {{ infoReadOnly }}</div>
+          <div class="text-caption q-ml-sm text-grey-9">{{ infoReadOnly }}</div>
         </div>
       </div>
       <!--Field-->
       <div v-else :data-testid="`dynamicField-${field.testId || field.name}`">
         <!--Label-->
-        <div class="input-title text-capitalize" v-if="loadField('html') || loadField('multiSelect')">
+        <div
+          class="input-title text-capitalize"
+          v-if="loadField('html') || loadField('multiSelect')"
+        >
           {{ fieldLabel }}
         </div>
         <!-- Help btn -->
         <div
-          v-if="(field?.props?.vIf == undefined || field?.props?.vIf) && helpLoad.load && field.help && field.help.description"
+          v-if="
+            (field?.props?.vIf == undefined || field?.props?.vIf) &&
+            helpLoad.load &&
+            field.help &&
+            field.help.description
+          "
           :class="helpLoad.class"
         >
           <help-text
@@ -31,19 +39,35 @@
           />
         </div>
         <!--Crud-->
-        <crud v-model="responseValue" v-bind="fieldProps" :key="field.name" :type="field.props.crudType || 'select'"
-              ref="crudComponent" v-if="loadField('crud') || (field.props && field.props.crudData)"
-              :class="`q-mb-xs ${field.help ? 'crud-dynamic-field' : ''} ${(field.props && field.props.crudType == 'button-create') ? 'absolute-right' : ''}`" />
+        <crud
+          v-model="responseValue"
+          v-bind="fieldProps"
+          :key="field.name"
+          :type="field.props.crudType || 'select'"
+          ref="crudComponent"
+          v-if="loadField('crud') || (field.props && field.props.crudData)"
+          :class="`q-mb-xs ${field.help ? 'crud-dynamic-field' : ''} ${
+            field.props && field.props.crudType == 'button-create'
+              ? 'absolute-right'
+              : ''
+          }`"
+        />
         <!--Input-->
-        <q-input v-model="responseValue" v-bind="fieldProps" @keyup.enter="$emit('enter')" v-if="loadField('input')"
-                 :label="fieldLabel" :class="`${field.help ? 'input-dynamic-field' : ''}`">
+        <q-input
+          v-model="responseValue"
+          v-bind="fieldProps"
+          @keyup.enter="$emit('enter')"
+          v-if="loadField('input')"
+          :label="fieldLabel"
+          :class="`${field.help ? 'input-dynamic-field' : ''}`"
+        >
           <template v-slot:append v-if="fieldProps.isMicrophone">
             <q-btn
               icon="fa-light fa-microphone"
               :class="{
-                  'tw-text-green-500': isRecording,
-                  'tw-text-slate-500': !isRecording,
-                  'hover:tw-text-green-500': isRecording,
+                'tw-text-green-500': isRecording,
+                'tw-text-slate-500': !isRecording,
+                'hover:tw-text-green-500': isRecording,
               }"
               size="sm"
               round
@@ -55,43 +79,85 @@
             <q-icon :name="fieldProps.icon" size="18px" />
           </template>
           <template v-slot:append v-if="isFieldPassword">
-            <q-icon :name="showPassword ? 'fa-light fa-eye' : 'fa-light fa-eye-slash'" class="cursor-pointer"
-                    @click="showPassword = !showPassword" />
+            <q-icon
+              :name="showPassword ? 'fa-light fa-eye' : 'fa-light fa-eye-slash'"
+              class="cursor-pointer"
+              @click="showPassword = !showPassword"
+            />
           </template>
         </q-input>
         <!--Input Standard-->
-        <q-input v-model="responseValue" v-bind="fieldProps" @keyup.enter="$emit('enter')"
-                 v-if="loadField('inputStandard')" style="margin-bottom: 20px">
+        <q-input
+          v-model="responseValue"
+          v-bind="fieldProps"
+          @keyup.enter="$emit('enter')"
+          v-if="loadField('inputStandard')"
+          style="margin-bottom: 20px"
+        >
           <template v-slot:prepend v-if="fieldProps.icon">
             <q-icon :name="fieldProps.icon" size="18px" />
           </template>
           <template v-slot:append v-if="isFieldPassword">
-            <q-icon :name="showPassword ? 'fa-light fa-eye' : 'fa-light fa-eye-slash'" class="cursor-pointer"
-                    @click="showPassword = !showPassword" />
+            <q-icon
+              :name="showPassword ? 'fa-light fa-eye' : 'fa-light fa-eye-slash'"
+              class="cursor-pointer"
+              @click="showPassword = !showPassword"
+            />
           </template>
         </q-input>
         <!-- Input quantity -->
-        <div v-if="loadField('quantity')" class="tw-flex tw-w-full tw-items-center">
+        <div
+          v-if="loadField('quantity')"
+          class="tw-flex tw-w-full tw-items-center"
+        >
           <div>
-            <q-btn class="" size="sm" flat round color="primary" icon="fa-solid fa-minus"
-                   @click="field.value = responseValue > 0  ? --responseValue: 0" :disable="fieldProps.readonly" />
+            <q-btn
+              class=""
+              size="sm"
+              flat
+              round
+              color="primary"
+              icon="fa-solid fa-minus"
+              @click="field.value = responseValue > 0 ? --responseValue : 0"
+              :disable="fieldProps.readonly"
+            />
           </div>
           <div class="tw-w-11/12">
-            <q-input v-model="responseValue" v-bind="fieldProps" class="bg-white col-8"></q-input>
+            <q-input
+              v-model="responseValue"
+              v-bind="fieldProps"
+              class="bg-white col-8"
+            ></q-input>
           </div>
           <div>
-            <q-btn class="" size="sm" flat round color="primary" icon="fa-solid fa-plus"
-                   @click="field.value = ++responseValue"
-                   :disable="fieldProps.readonly" />
+            <q-btn
+              class=""
+              size="sm"
+              flat
+              round
+              color="primary"
+              icon="fa-solid fa-plus"
+              @click="field.value = ++responseValue"
+              :disable="fieldProps.readonly"
+            />
           </div>
         </div>
         <!--Search-->
-        <q-input v-model="responseValue" v-bind="fieldProps" @keyup.enter="$emit('enter')" v-if="loadField('search')"
-                 :class="`${field.help ? 'search-dynamic-field' : ''}`">
+        <q-input
+          v-model="responseValue"
+          v-bind="fieldProps"
+          @keyup.enter="$emit('enter')"
+          v-if="loadField('search')"
+          :class="`${field.help ? 'search-dynamic-field' : ''}`"
+        >
           <template v-slot:append>
-            <q-icon v-if="(fieldProps.icon === undefined) || fieldProps.icon"
-                    :name="fieldProps.icon || 'fa-duotone fa-magnifying-glass'"
-                    size="xs" class="cursor-pointer" @click="$emit('enter')" />
+            <q-icon
+              v-if="fieldProps.icon === undefined || fieldProps.icon"
+              :name="fieldProps.icon || 'fa-duotone fa-magnifying-glass'"
+              size="xs"
+              class="cursor-pointer"
+              @click="$emit('enter')"
+            />
           </template>
         </q-input>
         <!--Date-->
@@ -101,7 +167,8 @@
           v-bind="fieldProps.field"
           :label="fieldLabel"
           class="tw-w-full"
-          :class="`${field.help ? 'date-dynamic-field' : ''}`">
+          :class="`${field.help ? 'date-dynamic-field' : ''}`"
+        >
           <template v-slot:prepend>
             <!-- Quick Navigation Button (Previous Day) -->
             <q-btn
@@ -119,14 +186,23 @@
               </q-tooltip>
             </q-btn>
             <!--Float calendar-->
-            <q-icon v-if="fieldProps.field.icon"
-                    :name="fieldProps.field.icon"
-                    size="18px"
-                    class="cursor-pointer"
-                    color="blue-grey">
-              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="responseValue" v-bind="fieldProps.slot"
-                        @update:modelValue="() => $refs.qDateProxy.hide()" />
+            <q-icon
+              v-if="fieldProps.field.icon"
+              :name="fieldProps.field.icon"
+              size="18px"
+              class="cursor-pointer"
+              color="blue-grey"
+            >
+              <q-popup-proxy
+                ref="qDateProxy"
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="responseValue"
+                  v-bind="fieldProps.slot"
+                  @update:modelValue="() => $refs.qDateProxy.hide()"
+                />
               </q-popup-proxy>
             </q-icon>
           </template>
@@ -149,62 +225,99 @@
           </template>
         </q-input>
         <!--Hour-->
-        <q-input v-if="loadField('hour')"
-                 v-model="responseValue"
-                 v-bind="fieldProps.field"
-                 :label="fieldLabel"
-                 :class="`${field.help ? 'hour-dynamic-field' : ''}`">
+        <q-input
+          v-if="loadField('hour')"
+          v-model="responseValue"
+          v-bind="fieldProps.field"
+          :label="fieldLabel"
+          :class="`${field.help ? 'hour-dynamic-field' : ''}`"
+        >
           <template v-slot:prepend>
             <!--Float Time-->
-            <q-icon v-if="fieldProps.field.icon"
-                    :name="fieldProps.field.icon"
-                    size="18px"
-                    class="cursor-pointer"
-                    color="blue-grey">
-              <q-popup-proxy ref="qTimeProxy" transition-show="scale" transition-hide="scale">
-                <q-time v-model="responseValue" v-bind="fieldProps.slot"
-                        @update:modelValue="() => $refs.qTimeProxy.hide()" />
+            <q-icon
+              v-if="fieldProps.field.icon"
+              :name="fieldProps.field.icon"
+              size="18px"
+              class="cursor-pointer"
+              color="blue-grey"
+            >
+              <q-popup-proxy
+                ref="qTimeProxy"
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-time
+                  v-model="responseValue"
+                  v-bind="fieldProps.slot"
+                  @update:modelValue="() => $refs.qTimeProxy.hide()"
+                />
               </q-popup-proxy>
             </q-icon>
           </template>
         </q-input>
         <!--Full date-->
-        <q-input v-if="loadField('fullDate')"
-                 v-model="responseValue"
-                 v-bind="fieldProps.field"
-                 :label="fieldLabel"
-                 :class="`${field.help ? 'full-date-dynamic-field' : ''}`">
+        <q-input
+          v-if="loadField('fullDate')"
+          v-model="responseValue"
+          v-bind="fieldProps.field"
+          :label="fieldLabel"
+          :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
+        >
           <template v-slot:prepend>
-            <q-icon name="fa-light fa-calendar-day" class="cursor-pointer" color="blue-grey">
-              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="responseValue" v-bind="fieldProps.slot"
-                        @update:modelValue="() => $refs.qDateProxy.hide()" />
+            <q-icon
+              name="fa-light fa-calendar-day"
+              class="cursor-pointer"
+              color="blue-grey"
+            >
+              <q-popup-proxy
+                ref="qDateProxy"
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="responseValue"
+                  v-bind="fieldProps.slot"
+                  @update:modelValue="() => $refs.qDateProxy.hide()"
+                />
               </q-popup-proxy>
             </q-icon>
           </template>
           <template v-slot:append>
-            <q-icon name="fa-light fa-clock" class="cursor-pointer" color="blue-grey">
-              <q-popup-proxy ref="qTimeProxy" transition-show="scale" transition-hide="scale">
-                <q-time v-model="responseValue" :format24h="fieldProps.field.format24h"
-                        @update:modelValue="() => $refs.qTimeProxy.hide()"
-                        v-bind="fieldProps.slot" />
+            <q-icon
+              name="fa-light fa-clock"
+              class="cursor-pointer"
+              color="blue-grey"
+            >
+              <q-popup-proxy
+                ref="qTimeProxy"
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-time
+                  v-model="responseValue"
+                  :format24h="fieldProps.field.format24h"
+                  @update:modelValue="() => $refs.qTimeProxy.hide()"
+                  v-bind="fieldProps.slot"
+                />
               </q-popup-proxy>
             </q-icon>
           </template>
         </q-input>
         <!--Time spent -->
-        <timeSpent v-if="loadField('timeSpent')"
-                   v-model="responseValue"
-                   :fieldProps="fieldProps"
-                   :label="fieldLabel"
-                   :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
+        <timeSpent
+          v-if="loadField('timeSpent')"
+          v-model="responseValue"
+          :fieldProps="fieldProps"
+          :label="fieldLabel"
+          :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
         />
         <!--Date range -->
-        <dateRangePicker v-if="loadField('dateRange')"
-                         v-model="responseValue"
-                         :fieldProps="fieldProps"
-                         :label="fieldLabel"
-                         :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
+        <dateRangePicker
+          v-if="loadField('dateRange')"
+          v-model="responseValue"
+          :fieldProps="fieldProps"
+          :label="fieldLabel"
+          :class="`${field.help ? 'full-date-dynamic-field' : ''}`"
         />
         <dateViewToggle
           v-if="loadField('dateViewToggle')"
@@ -212,12 +325,23 @@
         />
 
         <!--Select-->
-        <q-select v-model="responseValue" v-bind="fieldProps" :label="fieldLabel" use-input :options="formatOptions"
-                  @update:modelValue="matchTags(field)" v-if="loadField('select')" @filter="filterSelectOptions"
-                  @clear="val => field.props.multiple ? responseValue = [] : ''"
-                  @input-value="addedNewValue"
-                  :class="`${field.help ? 'select-dynamic-field' : ''}`">
-          <template v-slot:selected-item="scope" v-if="field.props.quantityMultiple && field.props.multiple">
+        <q-select
+          v-model="responseValue"
+          v-bind="fieldProps"
+          :label="fieldLabel"
+          use-input
+          :options="formatOptions"
+          @update:modelValue="matchTags(field)"
+          v-if="loadField('select')"
+          @filter="filterSelectOptions"
+          @clear="(val) => (field.props.multiple ? (responseValue = []) : '')"
+          @input-value="addedNewValue"
+          :class="`${field.help ? 'select-dynamic-field' : ''}`"
+        >
+          <template
+            v-slot:selected-item="scope"
+            v-if="field.props.quantityMultiple && field.props.multiple"
+          >
             <q-chip
               v-if="scope.index < field.props.quantityMultiple"
               removable
@@ -233,7 +357,10 @@
           <template v-slot:no-option v-if="!fieldProps.hideDropdownIcon">
             <slot name="before-options" />
             <q-item>
-              <q-item-section class="text-grey" v-if="field?.loadOptions?.filterByQuery">
+              <q-item-section
+                class="text-grey"
+                v-if="field?.loadOptions?.filterByQuery"
+              >
                 {{ fieldProps.hint }}
               </q-item-section>
               <q-item-section class="text-grey" v-else>
@@ -254,23 +381,33 @@
                   <img
                     :src="getImageField(scope.opt.id)"
                     :style="'height: 24px; width: 24px; border-radius: 50%;'"
-                  >
+                  />
                 </q-avatar>
               </q-item-section>
               <!--Labels-->
               <q-item-section>
                 <div class="row items-center">
                   <div v-if="field.props.selectColor">
-                    <div class="tw-h-4 tw-w-4 tw-rounded-full tw-py-3"
-                         :class="badgeColor(field, scope)" />
+                    <div
+                      class="tw-h-4 tw-w-4 tw-rounded-full tw-py-3"
+                      :class="badgeColor(field, scope)"
+                    />
                   </div>
                   <div v-if="scope.opt.icon">
-                    <q-icon size="20px" :name="scope.opt.icon"
-                            :style="`color: ${scope.opt.color ?? ''}`" class="q-mr-sm" />
+                    <q-icon
+                      size="20px"
+                      :name="scope.opt.icon"
+                      :style="`color: ${scope.opt.color ?? ''}`"
+                      class="q-mr-sm"
+                    />
                   </div>
-                  <div :class="{'tw-px-4' : field.props.selectColor }">
+                  <div :class="{ 'tw-px-4': field.props.selectColor }">
                     <q-item-label v-html="scope.opt.label" />
-                    <q-item-label style="margin: 0" caption v-if="scope.opt.sublabel">
+                    <q-item-label
+                      style="margin: 0"
+                      caption
+                      v-if="scope.opt.sublabel"
+                    >
                       {{ scope.opt.sublabel }}
                     </q-item-label>
                   </div>
@@ -296,17 +433,41 @@
           </template>
           <!--Icon-->
           <template v-slot:prepend v-if="fieldProps.icon">
-            <q-icon :name="fieldProps.icon" size="18px" :color="fieldProps.color" />
+            <q-icon
+              :name="fieldProps.icon"
+              size="18px"
+              :color="fieldProps.color"
+            />
           </template>
           <!--Append Options-->
-          <template v-slot:append v-if="field.props.quantityMultiple && field.props.multiple">
-            <div v-if="(responseValue.length - field.props.quantityMultiple) > 0" style="color: rgba(0, 0, 0, 0.87)">+ {{ responseValue.length - field.props.quantityMultiple}}</div>
+          <template
+            v-slot:append
+            v-if="field.props.quantityMultiple && field.props.multiple"
+          >
+            <div
+              v-if="responseValue.length - field.props.quantityMultiple > 0"
+              style="color: rgba(0, 0, 0, 0.87)"
+            >
+              + {{ responseValue.length - field.props.quantityMultiple }}
+            </div>
           </template>
           <!-- Before Options -->
           <template v-slot:before-options>
             <div v-if="field.props.selectAll && field.props.multiple">
-              <q-btn class="full-width" flat color="primary" no-caps @click="selectAllOptions">
-                <q-icon left size="xs" :name="`fa-light ${allSelected ? 'fa-square-check' : 'fa-square'}`" />
+              <q-btn
+                class="full-width"
+                flat
+                color="primary"
+                no-caps
+                @click="selectAllOptions"
+              >
+                <q-icon
+                  left
+                  size="xs"
+                  :name="`fa-light ${
+                    allSelected ? 'fa-square-check' : 'fa-square'
+                  }`"
+                />
                 <div>{{ $tr('isite.cms.label.selectAll') }}</div>
               </q-btn>
             </div>
@@ -318,23 +479,29 @@
           </template>
           <template v-slot:before v-if="selectImg">
             <q-avatar>
-              <img :src="selectImg">
+              <img :src="selectImg" />
             </q-avatar>
           </template>
         </q-select>
         <!--tree select-->
-        <q-field v-model="responseValue" v-bind="fieldProps.fieldComponent" v-if="loadField('treeSelect')"
-                 :label="fieldLabel"
-                 :class="`${field.help ? 'treeselect-dynamic-field' : ''}`">
+        <q-field
+          v-model="responseValue"
+          v-bind="fieldProps.fieldComponent"
+          v-if="loadField('treeSelect')"
+          :label="fieldLabel"
+          :class="`${field.help ? 'treeselect-dynamic-field' : ''}`"
+        >
           <tree-select
             v-model="responseValue"
             v-bind="fieldProps.field"
             :options="formatOptions"
             placeholder=""
             :max-height="200"
-            @select="(node, instanceId) => $emit('select', {node, instanceId})"
+            @select="
+              (node, instanceId) => $emit('select', { node, instanceId })
+            "
           >
-            <template #option-label="{node}">
+            <template #option-label="{ node }">
               <label>
                 <!-- Image -->
                 <q-img
@@ -353,21 +520,44 @@
           </tree-select>
         </q-field>
         <!--HTML-->
-        <q-field v-model="responseValue" v-bind="fieldProps.fieldComponent" v-if="loadField('html')" label=""
-                 class="field-no-padding">
+        <q-field
+          v-model="responseValue"
+          v-bind="fieldProps.fieldComponent"
+          v-if="loadField('html')"
+          label=""
+          class="field-no-padding"
+        >
           <ck-editor v-model="responseValue" :name="field.name" />
         </q-field>
         <!--multiSelect-->
-        <q-field v-model="responseValue" v-if="loadField('multiSelect')" label="" v-bind="fieldProps.fieldComponent">
-          <recursive-select v-model="responseValue" class="bg-white full-width" :items="options" />
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('multiSelect')"
+          label=""
+          v-bind="fieldProps.fieldComponent"
+        >
+          <recursive-select
+            v-model="responseValue"
+            class="bg-white full-width"
+            :items="options"
+          />
         </q-field>
         <!--Checkbox-->
-        <q-field v-model="responseValue" v-if="loadField('checkbox')" class="field-no-padding"
-                 v-bind="fieldProps.fieldComponent" label="">
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('checkbox')"
+          class="field-no-padding"
+          v-bind="fieldProps.fieldComponent"
+          label=""
+        >
           <q-item tag="label" dense style="padding: 0">
             <!--checkbox-->
             <q-item-section side style="padding: 0">
-              <q-checkbox v-model="responseValue" v-bind="fieldProps.field" label="" />
+              <q-checkbox
+                v-model="responseValue"
+                v-bind="fieldProps.field"
+                label=""
+              />
             </q-item-section>
             <!--Label-->
             <q-item-section v-if="fieldProps.field.label">
@@ -378,8 +568,13 @@
           </q-item>
         </q-field>
         <!--Image-->
-        <q-field v-model="responseValue" v-if="loadField('image')" class="field-no-padding" label=""
-                 v-bind="fieldProps.fieldComponent">
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('image')"
+          class="field-no-padding"
+          label=""
+          v-bind="fieldProps.fieldComponent"
+        >
           <upload-image v-model="responseValue" v-bind="fieldProps.field" />
         </q-field>
         <!--Media-->
@@ -391,105 +586,188 @@
           v-bind="fieldProps.fieldComponent"
         >
           <!--<media v-model="responseValue" class="bg-white" v-bind="fieldProps.field" />-->
-          <select-media v-model="responseValue" class="bg-white" v-bind="fieldProps.field" @files="field.getFiles" />
+          <select-media
+            v-model="responseValue"
+            class="bg-white"
+            v-bind="fieldProps.field"
+            @files="field.getFiles"
+          />
         </q-field>
         <!--Manage Permission-->
-        <manage-permissions v-model="responseValue" class="tw-mb-5" v-if="loadField('permissions')"
-                            @update:modelValue="watchValue" :allow-inherit="field.allowInherit ? true : false" />
+        <manage-permissions
+          v-model="responseValue"
+          class="tw-mb-5"
+          v-if="loadField('permissions')"
+          @update:modelValue="watchValue"
+          :allow-inherit="field.allowInherit ? true : false"
+        />
         <!--Manage Settings-->
-        <manage-settings v-model="responseValue" class="q-mb-sm" :settings="field.settings"
-                         v-if="loadField('settings')" @update:modelValue="watchValue" />
+        <manage-settings
+          v-model="responseValue"
+          class="q-mb-sm"
+          :settings="field.settings"
+          v-if="loadField('settings')"
+          @update:modelValue="watchValue"
+        />
         <!--Schedules form-->
         <div class="round bg-white" v-if="loadField('schedule')">
-          <schedules-form v-model="responseValue" @input="watchValue" class="q-mb-sm"
-                          @converted="value => $emit('converted', value)" />
+          <schedules-form
+            v-model="responseValue"
+            @input="watchValue"
+            class="q-mb-sm"
+            @converted="(value) => $emit('converted', value)"
+          />
         </div>
         <!--input color-->
-        <q-input v-model="responseValue" v-bind="fieldProps.field" :label="fieldLabel" v-if="loadField('inputColor')"
-                 @click="$refs.qColorProxi.show()" :ref="`inputColor-${fieldKey}`"
-                 :class="`${field.help ? 'input-color-dynamic-field' : ''}`">
+        <q-input
+          v-model="responseValue"
+          v-bind="fieldProps.field"
+          :label="fieldLabel"
+          v-if="loadField('inputColor')"
+          @click="$refs.qColorProxi.show()"
+          :ref="`inputColor-${fieldKey}`"
+          :class="`${field.help ? 'input-color-dynamic-field' : ''}`"
+        >
           <template v-slot:append>
             <!--Icon-->
             <q-icon name="fa-light fa-droplet" class="cursor-pointer" />
             <!--Picker-->
-            <q-popup-proxy ref="qColorProxi" transition-show="scale" transition-hide="scale">
+            <q-popup-proxy
+              ref="qColorProxi"
+              transition-show="scale"
+              transition-hide="scale"
+            >
               <q-color v-model="responseValue" />
             </q-popup-proxy>
           </template>
         </q-input>
         <!--Toggle-->
-        <q-toggle v-model="responseValue" v-bind="fieldProps.field" :label="fieldLabel" v-if="loadField('toggle')" />
+        <q-toggle
+          v-model="responseValue"
+          v-bind="fieldProps.field"
+          :label="fieldLabel"
+          v-if="loadField('toggle')"
+        />
         <!--position Marker (MAP)-->
-        <q-field v-model="responseValue" v-bind="fieldProps.fieldComponent" v-if="loadField('positionMarkerMap')"
-                 label=""
-                 class="field-no-padding no-border">
-          <map-leaflet v-model="responseValue" type="positionMarkerMap" v-bind="fieldProps.field" />
+        <q-field
+          v-model="responseValue"
+          v-bind="fieldProps.fieldComponent"
+          v-if="loadField('positionMarkerMap')"
+          label=""
+          class="field-no-padding no-border"
+        >
+          <map-leaflet
+            v-model="responseValue"
+            type="positionMarkerMap"
+            v-bind="fieldProps.field"
+          />
         </q-field>
         <!--Signature-->
-        <q-field v-model="responseValue" v-if="loadField('signature')"
-                 v-bind="fieldProps.fieldComponent" stack-label label="">
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('signature')"
+          v-bind="fieldProps.fieldComponent"
+          stack-label
+          label=""
+        >
           <signature v-model="responseValue" v-bind="fieldProps.field" />
         </q-field>
         <!--Uploader-->
-        <q-field v-model="responseValue" v-if="loadField('uploader')" v-bind="fieldProps.fieldComponent" stack-label>
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('uploader')"
+          v-bind="fieldProps.fieldComponent"
+          stack-label
+        >
           <uploader v-model="responseValue" v-bind="fieldProps.field" />
         </q-field>
         <!--rating-->
-        <q-field v-model="responseValue" v-if="loadField('rating')" v-bind="fieldProps.fieldComponent">
-          <q-rating v-model="responseValue" v-bind="fieldProps.field" class="q-mt-sm" />
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('rating')"
+          v-bind="fieldProps.fieldComponent"
+        >
+          <q-rating
+            v-model="responseValue"
+            v-bind="fieldProps.field"
+            class="q-mt-sm"
+          />
         </q-field>
         <!--icon select-->
-        <select-icon v-model="responseValue" v-if="loadField('selectIcon')" v-bind="fieldProps" class="q-mb-md"
-                     :class="`${field.help ? 'select-icon-dinamyc-field' : ''}`" />
+        <select-icon
+          v-model="responseValue"
+          v-if="loadField('selectIcon')"
+          v-bind="fieldProps"
+          class="q-mb-md"
+          :class="`${field.help ? 'select-icon-dinamyc-field' : ''}`"
+        />
         <!--optionGroup-->
-        <q-field v-model="responseValue" v-if="loadField('optionGroup')" v-bind="fieldProps.fieldComponent">
-          <q-option-group class="q-pt-md" v-model="responseValue" v-bind="fieldProps.field" />
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('optionGroup')"
+          v-bind="fieldProps.fieldComponent"
+        >
+          <q-option-group
+            class="q-pt-md"
+            v-model="responseValue"
+            v-bind="fieldProps.field"
+          />
         </q-field>
         <!--captcha-->
-        <q-field v-model="responseValue" v-if="loadField('captcha')" v-bind="fieldProps.fieldComponent">
-          <captcha v-model="responseValue" @input="responseValue = $event" :ref="fieldProps.field.ref" />
+        <q-field
+          v-model="responseValue"
+          v-if="loadField('captcha')"
+          v-bind="fieldProps.fieldComponent"
+        >
+          <captcha
+            v-model="responseValue"
+            @input="responseValue = $event"
+            :ref="fieldProps.field.ref"
+          />
         </q-field>
         <!--Schedulable-->
         <div class="round bg-white" v-if="loadField('schedulable')">
-          <schedulable v-model="responseValue" v-bind="fieldProps" @input="watchValue" class="q-mb-sm" />
+          <schedulable
+            v-model="responseValue"
+            v-bind="fieldProps"
+            @input="watchValue"
+            class="q-mb-sm"
+          />
         </div>
         <!--Json Editor-->
-        <div v-if="loadField('json')" class="field-no-padding no-border code-dinamyc-field" label="">
+        <div
+          v-if="loadField('json')"
+          class="field-no-padding no-border code-dinamyc-field"
+          label=""
+        >
           <div class="full-width">
             <div class="text-grey-8 q-mb-xs" v-if="fieldProps.field.label">
               {{ fieldProps.field.label }}
             </div>
-            <json-editor-vue class="jsoneditor-vue" v-model="responseValue" mode="tree" />
+            <json-editor-vue
+              class="jsoneditor-vue"
+              v-model="responseValue"
+              mode="tree"
+            />
           </div>
         </div>
         <!--Text Info-->
         <div
           v-if="loadField('banner')"
-          class='
-            tw-flex
-            tw-flex-col
-            tw-items-end
-            tw-mb-4
-          '
+          class="tw-flex tw-flex-col tw-items-end tw-mb-4"
         >
           <div
-            class='
-              tw-border
-              tw-border-solid
-              tw-rounded-xl
-              tw-w-full
-              tw-p-3.5
-            '
+            class="tw-border tw-border-solid tw-rounded-xl tw-w-full tw-p-3.5"
             :style="{
               borderColor: fieldProps.colorValue,
-              backgroundColor: `${fieldProps.colorValue}1A`
+              backgroundColor: `${fieldProps.colorValue}1A`,
             }"
           >
             <!--content-->
             <div
-              class='tw-flex tw-items-center'
+              class="tw-flex tw-items-center"
               :class="{
-                'tw-mb-2': fieldProps.actions.length > 0
+                'tw-mb-2': fieldProps.actions.length > 0,
               }"
             >
               <!--Icon-->
@@ -500,14 +778,15 @@
                 size="26px"
               />
               <!--message-->
-              <p class='tw-ml-3.5' v-html="fieldProps.message" />
+              <p class="tw-ml-3.5" v-html="fieldProps.message" />
             </div>
           </div>
           <!--Actions-->
           <q-btn
-            class='tw--mt-4 tw-mr-5'
+            class="tw--mt-4 tw-mr-5"
             v-for="(btn, keyBtn) in fieldProps.actions"
-            :key="keyBtn" v-bind="btn.props"
+            :key="keyBtn"
+            v-bind="btn.props"
             @click="btn.action ? btn.action() : null"
           />
         </div>
@@ -520,7 +799,10 @@
           :class="`${field.help ? 'expression-dinamyc-field' : ''}`"
         />
         <localizedPhone
-          v-if="loadField('localizedPhone') && configModules('main.qlocations.moduleName')"
+          v-if="
+            loadField('localizedPhone') &&
+            configModules('main.qlocations.moduleName')
+          "
           v-model="responseValue"
           :fieldProps="fieldProps"
         />
@@ -531,10 +813,20 @@
           :fieldProps="fieldProps"
         />
 
+        <attach-files
+          v-if="loadField('attachFiles')"
+          v-model="responseValue"
+          v-bind="fieldProps"
+        />
+
         <!--copy-->
-        <q-input v-model="responseValue" v-if="loadField('copy')" v-bind="fieldProps"
-                 :ref="`copy-${fieldKey}`" :label="fieldLabel"
-                 :class="`${field.help ? 'copy-dynamic-field' : ''}`"
+        <q-input
+          v-model="responseValue"
+          v-if="loadField('copy')"
+          v-bind="fieldProps"
+          :ref="`copy-${fieldKey}`"
+          :label="fieldLabel"
+          :class="`${field.help ? 'copy-dynamic-field' : ''}`"
         >
           <template v-slot:append>
             <!--Copy button-->
@@ -582,12 +874,13 @@ import timeSpent from 'modules/qsite/_components/master/timeSpent';
 import previewFile from 'modules/qsite/_components/v3/previewFile/index.vue';
 import { eventBus, helper } from 'src/plugins/utils';
 import dateViewToggle from 'modules/qsite/_components/master/dateViewToggle';
+import attachFiles from './attachField/index.vue';
 
 export default {
   name: 'dynamicField',
   beforeUnmount() {
     //Close listen event
-    this.stopRecording()
+    this.stopRecording();
   },
   props: {
     modelValue: { default: null },
@@ -597,12 +890,20 @@ export default {
     readOnly: { type: Boolean, default: false },
     keyField: {
       type: String,
-      default: () => ''
+      default: () => '',
     },
-    enableCache: { default: false }
+    enableCache: { default: false },
   },
-  emits: ['update:modelValue', 'inputReadOnly', 'filter', 'select', 'enter', 'converted'],
+  emits: [
+    'update:modelValue',
+    'inputReadOnly',
+    'filter',
+    'select',
+    'enter',
+    'converted',
+  ],
   components: {
+    attachFiles,
     managePermissions,
     manageSettings,
     recursiveSelect,
@@ -630,11 +931,11 @@ export default {
   watch: {
     modelValue: {
       deep: true,
-      handler: function(newValue, oldValue) {
+      handler: function (newValue, oldValue) {
         if (JSON.stringify(newValue) != JSON.stringify(oldValue)) {
           this.setDefaultVModel(newValue);
         }
-      }
+      },
     },
     responseValue(newValue, oldValue) {
       this.watchValue();
@@ -642,7 +943,11 @@ export default {
     rootOptions(newValue) {
       this.options = this.rootOptions;
       //Select by default
-      if (!this.field.loadOptions?.filterByQuery && this.field.props?.selectByDefault && this.rootOptions.length) {
+      if (
+        !this.field.loadOptions?.filterByQuery &&
+        this.field.props?.selectByDefault &&
+        this.rootOptions.length
+      ) {
         if (Array.isArray(this.responseValue) && !this.responseValue.length)
           this.responseValue = [this.rootOptions[0].value];
         else if (!Array.isArray(this.responseValue) && !this.responseValue)
@@ -656,27 +961,27 @@ export default {
     },
     'field.loadOptions': {
       deep: true,
-      handler: function(newValue, oldValue) {
+      handler: function (newValue, oldValue) {
         if (JSON.stringify(newValue) != JSON.stringify(oldValue))
           this.getOptions();
-      }
-    }
+      },
+    },
   },
   mounted() {
-    this.$nextTick(function() {
+    this.$nextTick(function () {
       this.init();
     });
   },
   data() {
     return {
-      success: false,//global component status
+      success: false, //global component status
       loading: false,
       fieldKey: this.$uid(),
-      responseValue: null,//value to response
-      showPassword: false,//to show password,
-      options: [],//Options
-      rootOptions: [],//Options
-      rootOptionsData: [],//Options
+      responseValue: null, //value to response
+      showPassword: false, //to show password,
+      options: [], //Options
+      rootOptions: [], //Options
+      rootOptionsData: [], //Options
       editorText: {
         toolbar: [
           ['bold', 'italic', 'strike', 'underline', 'removeFormat'],
@@ -688,24 +993,33 @@ export default {
               fixedLabel: true,
               fixedIcon: true,
               list: 'no-icons',
-              options: ['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7']
-            }
+              options: [
+                'size-1',
+                'size-2',
+                'size-3',
+                'size-4',
+                'size-5',
+                'size-6',
+                'size-7',
+              ],
+            },
           ],
           ['quote', 'unordered', 'ordered'],
-          ['fullscreen']
-        ]
+          ['fullscreen'],
+        ],
       },
       sortOptions: true,
       imageFields: [],
       lastQuery: null,
       recognition: null,
       isRecording: false,
-      lastTranscript: "",
+      lastTranscript: '',
     };
   },
   computed: {
     selectImg() {
-      const data = this.rootOptions.find(item => item.id == this.responseValue) || {};
+      const data =
+        this.rootOptions.find((item) => item.id == this.responseValue) || {};
 
       return data.img || null;
     },
@@ -714,7 +1028,8 @@ export default {
       let response = '';
       if (this.field.props && this.field.props.label) {
         response = this.field.props.label;
-        if (this.field.isTranslatable) response = `${response} (${this.language})`;
+        if (this.field.isTranslatable)
+          response = `${response} (${this.language})`;
       } else if (this.field.type == 'search') {
         return `${this.$tr('isite.cms.label.search', { capitalize: true })}...`;
       } else if (['date', 'fullDate'].includes(this.field.type)) {
@@ -723,9 +1038,16 @@ export default {
         return `${this.$tr('isite.cms.label.hour')}`;
 
       //Set tree data
-      if (this.field.type == 'treeSelect' && this.responseValue && !Array.isArray(this.responseValue)) {
+      if (
+        this.field.type == 'treeSelect' &&
+        this.responseValue &&
+        !Array.isArray(this.responseValue)
+      ) {
         if (this.rootOptionsData && this.rootOptionsData.length) {
-          let infoSelected = this.$array.parents(this.rootOptionsData, this.responseValue);
+          let infoSelected = this.$array.parents(
+            this.rootOptionsData,
+            this.responseValue
+          );
           if (infoSelected) response += ` | ${infoSelected.parents}`;
         }
       }
@@ -735,15 +1057,21 @@ export default {
     //Return field props
     fieldProps() {
       //Default props
-      let props = { ...this.field.props || {} };
+      let props = { ...(this.field.props || {}) };
 
       //Add ruler to required field
       if (this.field.required) {
-        let requireRule = val => !!val || this.$tr('isite.cms.message.fieldRequired');
+        let requireRule = (val) =>
+          !!val || this.$tr('isite.cms.message.fieldRequired');
         if (this.field.type == 'media') {
           const zone = props.zone;
-          if (props.multiple || props.zone == 'gallery') requireRule = val => val[zone]?.orders.length || this.$tr('isite.cms.message.fieldRequired');
-          else requireRule = val => !!val[zone] || this.$tr('isite.cms.message.fieldRequired');
+          if (props.multiple || props.zone == 'gallery')
+            requireRule = (val) =>
+              val[zone]?.orders.length ||
+              this.$tr('isite.cms.message.fieldRequired');
+          else
+            requireRule = (val) =>
+              !!val[zone] || this.$tr('isite.cms.message.fieldRequired');
         }
         if (!props.rules) props.rules = [];
         props.rules.push(requireRule);
@@ -751,53 +1079,55 @@ export default {
 
       //Case per type field
       switch (this.field.type) {
-        case'crud':
+        case 'crud':
           props = { ...props };
           break;
-        case'input':
+        case 'input':
           props = {
             bgColor: 'white',
             outlined: true,
             dense: true,
-            ...props
+            ...props,
           };
 
           //Add rule to validate field
           if (this.field.validateField && this.field.validateField.apiRoute) {
-            props.rules = [...(props.rules || []), this.validateField];//Add rule to validate field
+            props.rules = [...(props.rules || []), this.validateField]; //Add rule to validate field
           }
           props.debounce = '500'; //Add debounce
           //Extra logic to input type password
-          if (this.isFieldPassword) props.type = this.showPassword ? 'text' : 'password';
+          if (this.isFieldPassword)
+            props.type = this.showPassword ? 'text' : 'password';
 
           break;
-        case'inputStandard':
+        case 'inputStandard':
           props = {
             bgColor: 'white',
             outlined: true,
             dense: true,
-            ...props
+            ...props,
           };
 
           //Add rule to validate field
           if (this.field.validateField && this.field.validateField.apiRoute) {
-            props.rules = [...(props.rules || []), this.validateField];//Add rule to validate field
+            props.rules = [...(props.rules || []), this.validateField]; //Add rule to validate field
           }
           props.debounce = '500'; //Add debounce
 
           //Extra logic to input type password
-          if (this.isFieldPassword) props.type = this.showPassword ? 'text' : 'password';
+          if (this.isFieldPassword)
+            props.type = this.showPassword ? 'text' : 'password';
 
           break;
-        case'quantity':
+        case 'quantity':
           props = {
             bgColor: 'white',
             outlined: true,
             dense: true,
-            ...props
+            ...props,
           };
           break;
-        case'search':
+        case 'search':
           props = {
             bgColor: 'white',
             debounce: '800',
@@ -805,15 +1135,16 @@ export default {
             dense: true,
             clearable: true,
             label: this.fieldLabel,
-            ...props
+            ...props,
           };
           break;
-        case'date':
+        case 'date':
           //Instance the mask
           const maskDate = props.mask || 'YYYY/MM/DD';
-          const hint = props.hintAsHuman && this.responseValue ?
-            this.$trd(this.responseValue, { type: 'dayHuman' }) :
-            `${this.$tr('isite.cms.label.format')}: ${maskDate}`;
+          const hint =
+            props.hintAsHuman && this.responseValue
+              ? this.$trd(this.responseValue, { type: 'dayHuman' })
+              : `${this.$tr('isite.cms.label.format')}: ${maskDate}`;
           props = {
             field: {
               bgColor: 'white',
@@ -827,21 +1158,28 @@ export default {
               mask: maskDate.replace(/[a-z,A-Z]/g, '#'),
               rules: [
                 ...(props.rules || []),
-                val => {
+                (val) => {
                   if (!val) return true;
-                  return this.$moment(val, maskDate, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskDate})`;
-                }
-              ]
+                  return (
+                    this.$moment(val, maskDate, true).isValid() ||
+                    `${this.$tr(
+                      'isite.cms.message.invalidFormat'
+                    )} (${maskDate})`
+                  );
+                },
+              ],
             },
             slot: {
               ...props,
-              mask: maskDate
-            }
+              mask: maskDate,
+            },
           };
           break;
-        case'dateRange':
+        case 'dateRange':
           //Instance the mask
-          const maskDateRange = props?.mask ? `${props.mask} - ${props.mask}` : 'YYYY/MM/DD - YYYY/MM/DD';
+          const maskDateRange = props?.mask
+            ? `${props.mask} - ${props.mask}`
+            : 'YYYY/MM/DD - YYYY/MM/DD';
 
           props = {
             field: {
@@ -857,22 +1195,27 @@ export default {
               mask: maskDateRange.replace(/[a-z,A-Z]/g, '#'),
               rules: [
                 ...(props.rules || []),
-                val => {
+                (val) => {
                   if (!val) return true;
-                  return this.$moment(val, maskDateRange, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskDateRange})`;
-                }
-              ]
+                  return (
+                    this.$moment(val, maskDateRange, true).isValid() ||
+                    `${this.$tr(
+                      'isite.cms.message.invalidFormat'
+                    )} (${maskDateRange})`
+                  );
+                },
+              ],
             },
             slot: {
               ...props,
               mask: maskDateRange,
               field: props?.field || null,
               startOfDay: props?.startOfDay ?? '00:00:00',
-              endOfDay: props?.endOfDay ?? '23:59:59'
-            }
+              endOfDay: props?.endOfDay ?? '23:59:59',
+            },
           };
           break;
-        case'timeSpent':
+        case 'timeSpent':
           //Instance the mask
           const maskTimeSpent = '2w 4d 6h 45m';
           const regexTimeSpent = /^\s*(\d+[wdhmWDHM]\s*)+\s*$/; //numbers and wdhm
@@ -891,20 +1234,24 @@ export default {
               ...props,
               rules: [
                 ...(props.rules || []),
-                val => {
+                (val) => {
                   if (!val) return true;
-                  return regexTimeSpent.test(val) || `${this.$tr('isite.cms.message.invalidFormat')} (${maskTimeSpent})`;
-                }
-              ]
-
+                  return (
+                    regexTimeSpent.test(val) ||
+                    `${this.$tr(
+                      'isite.cms.message.invalidFormat'
+                    )} (${maskTimeSpent})`
+                  );
+                },
+              ],
             },
             slot: {
               ...props,
-              field: props?.field || null
-            }
+              field: props?.field || null,
+            },
           };
           break;
-        case'hour':
+        case 'hour':
           //Instance the mask
           const maskHour = 'HH:mm';
 
@@ -921,19 +1268,24 @@ export default {
               mask: maskHour.replace(/[a-z,A-Z]/g, '#'),
               rules: [
                 ...(props.rules || []),
-                val => {
+                (val) => {
                   if (!val) return true;
-                  return this.$moment(val, maskHour, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskHour})`;
-                }
-              ]
+                  return (
+                    this.$moment(val, maskHour, true).isValid() ||
+                    `${this.$tr(
+                      'isite.cms.message.invalidFormat'
+                    )} (${maskHour})`
+                  );
+                },
+              ],
             },
             slot: {
               format24h: false,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'fullDate':
+        case 'fullDate':
           //Instance the mask
           const maskFullDate = props.mask || 'YYYY/MM/DD HH:mm';
 
@@ -949,32 +1301,37 @@ export default {
               mask: maskFullDate.replace(/[a-z,A-Z]/g, '#'),
               rules: [
                 ...(props.rules || []),
-                val => {
+                (val) => {
                   if (!val) return true;
-                  return this.$moment(val, maskFullDate, true).isValid() || `${this.$tr('isite.cms.message.invalidFormat')} (${maskFullDate})`;
+                  return (
+                    this.$moment(val, maskFullDate, true).isValid() ||
+                    `${this.$tr(
+                      'isite.cms.message.invalidFormat'
+                    )} (${maskFullDate})`
+                  );
                 },
-                val => helper.isValidFullDateHour(val) ?? 'Invalid hour'
-              ]
+                (val) => helper.isValidFullDateHour(val) ?? 'Invalid hour',
+              ],
             },
             slot: {
               mask: maskFullDate,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'select':
+        case 'select':
           props = {
             'emit-value': props?.emitValue ?? true,
             'map-options': true,
-            'outlined': true,
-            'dense': true,
+            outlined: true,
+            dense: true,
             'bg-color': 'white',
             'dropdown-icon': 'fa-solid fa-caret-down',
             //style: 'width: 100%',
             behavior: 'menu',
             class: 'q-pb-md custom-btn',
             ...props,
-            loading: props.loading || this.loading
+            loading: props.loading || this.loading,
           };
 
           //add default hints
@@ -989,105 +1346,108 @@ export default {
           props.hint = hintValue.join(' - ');
 
           break;
-        case'treeSelect':
+        case 'treeSelect':
           props = {
             'emit-value': true,
             field: {
               clearable: props?.clearable || false,
               multiple: props?.multiple || false,
-              sortValueBy: props?.sortValueBy || 'INDEX'
+              sortValueBy: props?.sortValueBy || 'INDEX',
             },
             fieldComponent: {
               outlined: true,
               dense: true,
               ...props,
               clearable: false,
-              loading: props.loading || this.loading
-            }
+              loading: props.loading || this.loading,
+            },
           };
           break;
-        case'html':
+        case 'html':
           props = {
             field: {
               toolbar: this.editorText.toolbar,
               contentClass: 'text-grey-9',
               toolbarTextColor: 'grey-9',
-              ...props
+              ...props,
             },
             fieldComponent: {
               outlined: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'multiSelect':
+        case 'multiSelect':
           props = {
             field: {
-              ...props
+              ...props,
             },
             fieldComponent: {
               outlined: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'checkbox':
+        case 'checkbox':
           props = {
             field: {
               trueValue: this.field.emitBoolean ? true : 1,
               falseValue: this.field.emitBoolean ? false : 0,
-              ...props
+              ...props,
             },
             fieldComponent: {
               dense: true,
               borderless: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'image':
+        case 'image':
           props = {
             field: {
-              ...props
+              ...props,
             },
             fieldComponent: {
               outlined: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'media':
+        case 'media':
           props = {
             field: {
-              multiple: (this.field.props.zone == 'gallery') ? true : false,
+              multiple: this.field.props.zone == 'gallery' ? true : false,
               ...props,
-              entityId: this.$clone(this.itemId)
+              entityId: this.$clone(this.itemId),
             },
             fieldComponent: {
               borderless: true,
               dense: true,
               tag: 'div',
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'permissions':
+        case 'permissions':
           props = {
-            ...props
+            ...props,
           };
           break;
-        case'settings':
+        case 'settings':
           props = {
-            ...props
+            ...props,
           };
           break;
-        case'inputColor':
+        case 'inputColor':
           //Instance color
           let bgColor = this.responseValue || '#FFFFFF';
-          let textColorClass = this.$helper.pickTextColor(bgColor) == '#000000' ? 'text-t-dark' : 'text-t-light';
+          let textColorClass =
+            this.$helper.pickTextColor(bgColor) == '#000000'
+              ? 'text-t-dark'
+              : 'text-t-light';
 
           //Set bg color to input
           setTimeout(() => {
@@ -1095,8 +1455,13 @@ export default {
 
             //Set input bg color
             if (inputElement) {
-              let fieldControl = inputElement.$el.getElementsByClassName('q-field__control')[0];
-              fieldControl.style.setProperty('background-color', bgColor, 'important');
+              let fieldControl =
+                inputElement.$el.getElementsByClassName('q-field__control')[0];
+              fieldControl.style.setProperty(
+                'background-color',
+                bgColor,
+                'important'
+              );
             }
           }, 200);
 
@@ -1107,138 +1472,140 @@ export default {
               dense: true,
               readonly: true,
               class: `dynamic-field__color q-mb-md ${textColorClass}`,
-              ...props
+              ...props,
             },
             slot: {
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'toggle':
+        case 'toggle':
           props = {
             field: {
               falseValue: this.field.emitBoolean ? false : '0',
               trueValue: this.field.emitBoolean ? true : '1',
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'positionMarkerMap':
+        case 'positionMarkerMap':
           props = {
             field: {
-              ...props
+              ...props,
             },
             fieldComponent: {
               borderless: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'signature':
+        case 'signature':
           props = {
             field: {
-              ...props
+              ...props,
             },
             fieldComponent: {
               borderless: true,
               dense: true,
               tag: 'div',
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'uploader':
+        case 'uploader':
           props = {
             field: {
               emitFile: true,
-              ...props
+              ...props,
             },
             fieldComponent: {
               borderless: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'rating':
+        case 'rating':
           props = {
             field: {
               max: 5,
               color: 'amber',
               size: '3em',
-              ...props
+              ...props,
             },
             fieldComponent: {
               borderless: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'selectIcon':
+        case 'selectIcon':
           props = {
-            ...props
+            ...props,
           };
           break;
-        case'optionGroup':
+        case 'optionGroup':
           props = {
             field: {
               options: [],
               color: 'primary',
-              ...props
+              ...props,
             },
             fieldComponent: {
               outlined: false,
               borderless: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'captcha':
+        case 'captcha':
           const ref = props?.ref || 'captcha';
           props = {
             field: {
               ref,
-              ...props
+              ...props,
             },
             fieldComponent: {
               outlined: false,
               borderless: true,
               dense: true,
               ...props,
-              rules: [val => !!val || this.$tr('isite.cms.message.fieldRequired')]
-            }
+              rules: [
+                (val) => !!val || this.$tr('isite.cms.message.fieldRequired'),
+              ],
+            },
           };
           break;
-        case'schedulable':
+        case 'schedulable':
           props = {
-            ...props
+            ...props,
           };
           break;
-        case'json':
+        case 'json':
           props = {
             field: {
               ...props,
-              mode: 'tree'
+              mode: 'tree',
             },
             fieldComponent: {
               outlined: false,
               borderless: true,
               dense: true,
-              ...props
-            }
+              ...props,
+            },
           };
           break;
-        case'banner':
+        case 'banner':
           const { getPaletteColor } = colors;
           let color = props.color || 'info';
 
           props = {
             icon: 'fas fa-info-circle',
             ...props,
-            actions: (props.actions || []).map(item => {
+            actions: (props.actions || []).map((item) => {
               return {
                 ...item,
                 props: {
@@ -1247,31 +1614,31 @@ export default {
                   padding: 'xs sm',
                   noCaps: true,
                   color: 'info',
-                  ...(item.props || [])
-                }
+                  ...(item.props || []),
+                },
               };
             }),
-            colorValue: getPaletteColor(color)
+            colorValue: getPaletteColor(color),
           };
           break;
-        case'copy':
+        case 'copy':
           props = {
             bgColor: 'white',
             readonly: true,
             outlined: true,
             dense: true,
             inputClass: 'ellipsis',
-            ...props
+            ...props,
           };
           break;
-        case'previewFile':
+        case 'previewFile':
           props = {
             imgProps: {
               height: '100vh',
-              class: 'img-file full-height'
+              class: 'img-file full-height',
             },
             fileClass: props.class,
-            ...props
+            ...props,
           };
           break;
       }
@@ -1293,7 +1660,7 @@ export default {
     formatOptions() {
       //Convert value/id to string
       const toString = (items) => {
-        items.forEach(item => {
+        items.forEach((item) => {
           //Convert value and id to string
           if (item.value || item.value >= 0) item.value = item.value.toString();
           if (item.id || item.id >= 0) item.id = item.id.toString();
@@ -1320,7 +1687,9 @@ export default {
       //Filter the unique options
       var response = toString(this.$clone(this.options));
       //response the unique options
-      return [...new Map(response.map(item => [item['value'], item])).values()];
+      return [
+        ...new Map(response.map((item) => [item['value'], item])).values(),
+      ];
     },
     //Return info fields readOnly
     infoReadOnly() {
@@ -1329,16 +1698,18 @@ export default {
 
       //Function to get value from select
       let valueFromSelect = () => {
-        if (currenResponse && (typeof currenResponse == 'object')) {
+        if (currenResponse && typeof currenResponse == 'object') {
           response = [];
-          currenResponse.forEach(itemValue => {
-            let value = this.formatOptions.find(item => item.value == itemValue);
+          currenResponse.forEach((itemValue) => {
+            let value = this.formatOptions.find(
+              (item) => item.value == itemValue
+            );
             if (value && value.label) response.push(value.label);
           });
           response = response.length ? response.join(', ') : false;
         } else {
-          response = this.formatOptions.find(item => item.value == response);
-          response ? response = response.label : false;
+          response = this.formatOptions.find((item) => item.value == response);
+          response ? (response = response.label) : false;
         }
       };
 
@@ -1355,13 +1726,17 @@ export default {
             response = response ? this.$trd(response) : false;
             break;
           case 'hour':
-            let date = this.field.withFullDate ? '' : this.$moment().format('Y-MM-DD');
-            response = response ? this.$trd(`${date} ${response}`, { type: 'time' }) : '';
+            let date = this.field.withFullDate
+              ? ''
+              : this.$moment().format('Y-MM-DD');
+            response = response
+              ? this.$trd(`${date} ${response}`, { type: 'time' })
+              : '';
             break;
         }
       }
 
-      return response;//Response
+      return response; //Response
     },
     //Crud info
     crudInfo() {
@@ -1370,7 +1745,10 @@ export default {
 
       //Get crud info
       if (this.field.validateField && this.field.validateField.crudId)
-        response = this.$store.state.qcrudComponent.component[this.field.validateField.crudId] || {};
+        response =
+          this.$store.state.qcrudComponent.component[
+            this.field.validateField.crudId
+          ] || {};
 
       //Response
       return response;
@@ -1378,7 +1756,7 @@ export default {
     //Validate if field is password
     isFieldPassword() {
       let field = this.$clone(this.field);
-      return (field.props.type && (field.props.type == 'password')) ? true : false;
+      return field.props.type && field.props.type == 'password' ? true : false;
     },
     //Help custom class and styles
     helpLoad() {
@@ -1387,133 +1765,133 @@ export default {
         crud: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         input: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         inputStandard: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         quantity: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         search: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         date: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         hour: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         fullDate: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         timeSpent: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         dateRange: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         dateViewToggle: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         select: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         treeSelect: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         html: {
           class: 'absolute-right',
           margin: '3.8em 1.5em',
-          load: true
+          load: true,
         },
         checkbox: {
           class: 'absolute-left',
           margin: '1em 17em',
-          load: true
+          load: true,
         },
         media: {
           class: 'absolute-right',
           margin: '2em 18em 0 0',
-          load: true
+          load: true,
         },
         inputColor: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         toggle: {
           class: 'absolute-left',
           margin: '1.3em 20em',
-          load: true
+          load: true,
         },
         signature: {
           class: 'absolute-bottom-right',
           margin: '21.5em 12.5em',
-          load: true
+          load: true,
         },
         rating: {
           class: 'absolute-left',
           margin: '0 9em',
-          load: true
+          load: true,
         },
         selectIcon: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         optionGroup: {
           class: 'absolute-left',
           margin: '1.3em 16em',
-          load: true
+          load: true,
         },
         schedulable: {
           class: 'absolute-left',
           margin: '3.6em 12.5em',
-          load: true
+          load: true,
         },
         json: {
           class: 'absolute-right',
           margin: '3.7em 1em',
-          load: true
+          load: true,
         },
         expression: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
+          load: true,
         },
         positionMarkerMap: {
           class: 'absolute-right',
           margin: '1em',
-          load: true
-        }
+          load: true,
+        },
       };
       return objectOptions[this.field.type] || result;
     },
@@ -1525,16 +1903,21 @@ export default {
       };
     },
     allSelected() {
-      return this.formatOptions?.length > 0 && this.formatOptions.length === this.responseValue?.length;
-    }
+      return (
+        this.formatOptions?.length > 0 &&
+        this.formatOptions.length === this.responseValue?.length
+      );
+    },
   },
   methods: {
     //init
     async init() {
       if (this.field.type) {
-        this.setDefaultVModel((this.modelValue != undefined) ? this.modelValue : this.field.value);//Set default values by field type
-        this.listenEventCrud();//config dynamic component
-        this.success = true;//sucess
+        this.setDefaultVModel(
+          this.modelValue != undefined ? this.modelValue : this.field.value
+        ); //Set default values by field type
+        this.listenEventCrud(); //config dynamic component
+        this.success = true; //sucess
         //Set options if is type select
         this.setOptions();
         this.initializeSpeechRecognition();
@@ -1546,31 +1929,41 @@ export default {
       switch (this.field.type) {
         case 'crud':
           //Get crudProps
-          let crudProps = (this.field.props && this.field.props.crudProps) ? this.field.props.crudProps : {};
+          let crudProps =
+            this.field.props && this.field.props.crudProps
+              ? this.field.props.crudProps
+              : {};
           //Validate if select is multiple
           if (crudProps.multiple) {
             this.responseValue = [];
             //Get filter options
-            let filterField = (crudProps.config && crudProps.config.options) ?
-              crudProps.config.options : { label: 'title', value: 'id' };
+            let filterField =
+              crudProps.config && crudProps.config.options
+                ? crudProps.config.options
+                : { label: 'title', value: 'id' };
             //if value is array, get id option
             if (propValue && Array.isArray(propValue)) {
-              propValue.forEach(item => {
-                if (item[filterField.value]) this.responseValue.push(item[filterField.value]);
+              propValue.forEach((item) => {
+                if (item[filterField.value])
+                  this.responseValue.push(item[filterField.value]);
                 else this.responseValue.push(item);
               });
             }
-          } else this.responseValue = (propValue && propValue.id) ? propValue.id : propValue;
+          } else
+            this.responseValue =
+              propValue && propValue.id ? propValue.id : propValue;
           break;
         case 'input':
-          let inputValue = (propValue != undefined) ? propValue : null;
-          this.responseValue = this.field.mapValue ? this.field.mapValue(inputValue) : inputValue
+          let inputValue = propValue != undefined ? propValue : null;
+          this.responseValue = this.field.mapValue
+            ? this.field.mapValue(inputValue)
+            : inputValue;
           break;
         case 'inputStandard':
-          this.responseValue = (propValue != undefined) ? propValue : null;
+          this.responseValue = propValue != undefined ? propValue : null;
           break;
         case 'quantity':
-          this.responseValue = (propValue != undefined) ? propValue : null;
+          this.responseValue = propValue != undefined ? propValue : null;
           break;
         case 'html':
           this.responseValue = propValue || '';
@@ -1586,16 +1979,19 @@ export default {
           break;
         case 'checkbox':
           if (this.emitBoolean) {
-            this.responseValue = (propValue === true || propValue === 1 || propValue === '1') ? true : false;
+            this.responseValue =
+              propValue === true || propValue === 1 || propValue === '1'
+                ? true
+                : false;
           } else {
-            this.responseValue = (propValue !== undefined) ? propValue : null;
+            this.responseValue = propValue !== undefined ? propValue : null;
           }
           break;
         case 'media':
           this.responseValue = propValue || {};
           break;
         case 'permissions':
-          this.responseValue = (propValue.length == undefined) ? propValue : {};
+          this.responseValue = propValue.length == undefined ? propValue : {};
           break;
         case 'settings':
           this.responseValue = propValue || {};
@@ -1605,7 +2001,10 @@ export default {
           break;
         case 'toggle':
           if (this.field.emitBoolean) {
-            this.responseValue = (propValue === true || propValue === 1 || propValue === '1') ? true : false;
+            this.responseValue =
+              propValue === true || propValue === 1 || propValue === '1'
+                ? true
+                : false;
           } else {
             this.responseValue = (propValue || 0).toString();
           }
@@ -1614,29 +2013,31 @@ export default {
           this.responseValue = propValue || false;
           break;
         case 'uploader':
-          this.responseValue = (propValue !== undefined) ? propValue : null;
+          this.responseValue = propValue !== undefined ? propValue : null;
           break;
         case 'rating':
-          this.responseValue = (propValue !== undefined) ? propValue : 1;
+          this.responseValue = propValue !== undefined ? propValue : 1;
           break;
         case 'selectIcon':
-          this.responseValue = (propValue !== undefined) ? propValue : null;
+          this.responseValue = propValue !== undefined ? propValue : null;
           break;
         case 'optionGroup':
-          this.responseValue = (propValue !== undefined) ? propValue : null;
+          this.responseValue = propValue !== undefined ? propValue : null;
           break;
         case 'captcha':
-          this.responseValue = (propValue !== undefined) ? propValue : null;
+          this.responseValue = propValue !== undefined ? propValue : null;
           break;
         case 'json':
-          this.responseValue = (propValue !== undefined) ? propValue : {};
+          this.responseValue = propValue !== undefined ? propValue : {};
           break;
         case 'multiplier':
-          this.responseValue = (Array.isArray(propValue)) ? propValue : [];
+          this.responseValue = Array.isArray(propValue) ? propValue : [];
           break;
-        default :
+        default:
           let value = propValue || null;
-          this.responseValue = this.field.mapValue ? this.field.mapValue(value) : value;
+          this.responseValue = this.field.mapValue
+            ? this.field.mapValue(value)
+            : value;
           break;
       }
     },
@@ -1645,11 +2046,15 @@ export default {
       if (propValue !== undefined) {
         if (Array.isArray(propValue)) {
           this.responseValue = [];
-          propValue.forEach(item => {
+          propValue.forEach((item) => {
             if (this.fieldProps['emit-value']) {
               //Map the value
-              let value = (typeof item != 'object') ? item :
-                (this.field.mapValue ? this.field.mapValue(item) : item.id);
+              let value =
+                typeof item != 'object'
+                  ? item
+                  : this.field.mapValue
+                  ? this.field.mapValue(item)
+                  : item.id;
               //Set the value to response
               this.responseValue.push(value.toString());
             } else {
@@ -1657,7 +2062,14 @@ export default {
             }
           });
         } else {
-          this.responseValue = propValue || propValue == 0 ? this.$clone(this.fieldProps['emit-value'] ? propValue.toString() : propValue) : propValue;
+          this.responseValue =
+            propValue || propValue == 0
+              ? this.$clone(
+                  this.fieldProps['emit-value']
+                    ? propValue.toString()
+                    : propValue
+                )
+              : propValue;
         }
       }
     },
@@ -1668,9 +2080,12 @@ export default {
           let componentCrud = this.$refs.crudComponent;
           if (componentCrud) {
             //Activate listen to chanel
-            eventBus.on(`crudForm${componentCrud.params.apiRoute}Created`, async () => {
-              this.getOptions();//Get options
-            });
+            eventBus.on(
+              `crudForm${componentCrud.params.apiRoute}Created`,
+              async () => {
+                this.getOptions(); //Get options
+              }
+            );
           }
         }
       }, 500);
@@ -1678,15 +2093,17 @@ export default {
     //Get options if is load options
     getOptions(query = false) {
       return new Promise((resolve, reject) => {
-        this.loading = true;//Open loading
+        this.loading = true; //Open loading
         let loadOptions = this.$clone(this.field.loadOptions || {});
         //Instance default options keeping the options for the selected values
         let defaultOptions = this.$clone([
           ...(this.field.props?.options || []),
-          ...this.rootOptions.filter(opt => {
-              const value = this.fieldProps['emit-value'] ? this.responseValue : (this.responseValue.value || this.responseValue.id)
-              return value && value.includes((opt.value || opt.id).toString())
-          })
+          ...this.rootOptions.filter((opt) => {
+            const value = this.fieldProps['emit-value']
+              ? this.responseValue
+              : this.responseValue.value || this.responseValue.id;
+            return value && value.includes((opt.value || opt.id).toString());
+          }),
         ]);
 
         //==== Request options
@@ -1696,12 +2113,17 @@ export default {
           let fieldSelect = { label: 'title', id: 'id' };
 
           //enable cache by isite setting
-          let enableCache = this.$getSetting('isite::enableDynamicFieldsCache')
+          let enableCache = this.$getSetting('isite::enableDynamicFieldsCache');
           //enable cache by params
           if (this.enableCache) enableCache = 1;
-          let params = {//Params to request
-            refresh: loadOptions?.refresh ? loadOptions?.refresh : (enableCache == '1' ? false : true),
-            params: loadOptions.requestParams || {}
+          let params = {
+            //Params to request
+            refresh: loadOptions?.refresh
+              ? loadOptions?.refresh
+              : enableCache == '1'
+              ? false
+              : true,
+            params: loadOptions.requestParams || {},
           };
 
           //add filter
@@ -1710,7 +2132,7 @@ export default {
 
           //Add Params to get options by query
           if (loadOptions && loadOptions.filterByQuery) {
-            if (query && (query.length >= 2) && (this.lastQuery != query)) {
+            if (query && query.length >= 2 && this.lastQuery != query) {
               params.params.filter.search = query;
               params.params.take = 25;
             } else {
@@ -1719,55 +2141,79 @@ export default {
               return resolve(false);
             }
           }
-          const parametersUrl = Object.keys(loadOptions?.parametersUrl ?? {}).length ? loadOptions.parametersUrl : false;
+          const parametersUrl = Object.keys(loadOptions?.parametersUrl ?? {})
+            .length
+            ? loadOptions.parametersUrl
+            : false;
           const crud = parametersUrl ? this.$crud.get : this.$crud.index;
           //Request
-          crud(loadOptions.apiRoute, params, parametersUrl).then(response => {
-            this.lastQuery = query
-            if (this.keyField !== '') {
-              const keyData = { [this.keyField]: response.data };
-              this.$helper.setDynamicSelectList(keyData);
-            }
-            this.rootOptionsData = this.$clone(response.data);
+          crud(loadOptions.apiRoute, params, parametersUrl)
+            .then((response) => {
+              this.lastQuery = query;
+              if (this.keyField !== '') {
+                const keyData = { [this.keyField]: response.data };
+                this.$helper.setDynamicSelectList(keyData);
+              }
+              this.rootOptionsData = this.$clone(response.data);
 
-            //Emit the loadedOptions
-            if (loadOptions.loadedOptions) loadOptions.loadedOptions(response.data);
+              //Emit the loadedOptions
+              if (loadOptions.loadedOptions)
+                loadOptions.loadedOptions(response.data);
 
-            this.rootOptionsData.forEach(item => {
-              this.addImageField(item);
-            });
+              this.rootOptionsData.forEach((item) => {
+                this.addImageField(item);
+              });
 
-            let formatedOptions = [];
-            //Format response
-            response.data = response.data.map((item, index) => ({ ...item, id: item.id >= 0 ? item.id : (index + 1) }));
-            if (loadOptions.format) formatedOptions = loadOptions.format(response.data);
-            else if (['select', 'expression'].includes(this.field.type))
-              formatedOptions = this.$array.select(response.data, loadOptions.select || fieldSelect);
-            else
-              formatedOptions = this.$array.tree(response.data, loadOptions.select || fieldSelect);
+              let formatedOptions = [];
+              //Format response
+              response.data = response.data.map((item, index) => ({
+                ...item,
+                id: item.id >= 0 ? item.id : index + 1,
+              }));
+              if (loadOptions.format)
+                formatedOptions = loadOptions.format(response.data);
+              else if (['select', 'expression'].includes(this.field.type))
+                formatedOptions = this.$array.select(
+                  response.data,
+                  loadOptions.select || fieldSelect
+                );
+              else
+                formatedOptions = this.$array.tree(
+                  response.data,
+                  loadOptions.select || fieldSelect
+                );
 
-            //Assign options
-            this.rootOptions = this.$clone(defaultOptions.concat(formatedOptions));
-            this.loading = false;
-            resolve(true);
-          }).catch(error => {
-            this.$apiResponse.handleError(error, () => {
-              this.$alert.error({ message: this.$tr('isite.cms.message.errorRequest'), pos: 'bottom' });
+              //Assign options
+              this.rootOptions = this.$clone(
+                defaultOptions.concat(formatedOptions)
+              );
               this.loading = false;
-              reject(true);
+              resolve(true);
+            })
+            .catch((error) => {
+              this.$apiResponse.handleError(error, () => {
+                this.$alert.error({
+                  message: this.$tr('isite.cms.message.errorRequest'),
+                  pos: 'bottom',
+                });
+                this.loading = false;
+                reject(true);
+              });
             });
-          });
           //==== Delayed loading options
         } else if (loadOptions.delayed) {
-          loadOptions.delayed().then(response => {
-            this.rootOptions = this.$clone([...defaultOptions, ...response]);
+          loadOptions
+            .delayed()
+            .then((response) => {
+              this.rootOptions = this.$clone([...defaultOptions, ...response]);
 
-            this.loading = false;
-            resolve(true);
-          }).catch(error => {
-            this.loading = false;
-            resolve(true);
-          });
+              this.loading = false;
+              resolve(true);
+            })
+            .catch((error) => {
+              this.loading = false;
+              resolve(true);
+            });
         } else {
           this.rootOptions = this.$clone(defaultOptions);
           this.loading = false;
@@ -1777,13 +2223,19 @@ export default {
     },
     //Set options
     async setOptions() {
-      if (['treeSelect', 'select', 'multiSelect', 'expression'].includes(this.field.type)) {
+      if (
+        ['treeSelect', 'select', 'multiSelect', 'expression'].includes(
+          this.field.type
+        )
+      ) {
         //Instance sortOrder from field props
-        if (this.field.props?.sortOptions != undefined) this.sortOptions = this.$clone(this.field.props.sortOptions);
+        if (this.field.props?.sortOptions != undefined)
+          this.sortOptions = this.$clone(this.field.props.sortOptions);
         //Load options
         if (this.field.loadOptions) await this.getOptions();
         //Set options
-        else if (this.field.props && this.field.props.options) this.rootOptions = this.field.props.options;
+        else if (this.field.props && this.field.props.options)
+          this.rootOptions = this.field.props.options;
       }
     },
     //Regex to tags
@@ -1792,8 +2244,8 @@ export default {
         let tags = [];
         //only letters and spaces
         this.responseValue.forEach((tag, index) => {
-          let tagString = tag.trim();//Trim
-          tagString = tagString.match(/^[a-zA-Z\-\s]*$/);//Regex
+          let tagString = tag.trim(); //Trim
+          tagString = tagString.match(/^[a-zA-Z\-\s]*$/); //Regex
           if (tagString && tagString.length) tags.push(tagString.join(''));
         });
         this.responseValue = this.$clone(tags);
@@ -1806,7 +2258,7 @@ export default {
 
       if (JSON.stringify(value) !== JSON.stringify(response)) {
         //decode when is json
-        if (this.field.type == 'json' && (typeof response == 'string'))
+        if (this.field.type == 'json' && typeof response == 'string')
           response = JSON.parse(response);
         //Emit input data
         this.$emit('update:modelValue', response);
@@ -1816,7 +2268,10 @@ export default {
       this.loadOptionForValue();
 
       //Emit info read only data
-      this.$emit('inputReadOnly', this.$clone({ label: this.fieldLabel, value: this.infoReadOnly }));
+      this.$emit(
+        'inputReadOnly',
+        this.$clone({ label: this.fieldLabel, value: this.infoReadOnly })
+      );
     },
     //Validate if show  field
     loadField(name) {
@@ -1825,41 +2280,55 @@ export default {
       //Validate type field
       if (field.type !== name) response = false;
       //Validate permission
-      if (field.permission && !this.$hasAccess(field.permission)) response = false;
+      if (field.permission && !this.$hasAccess(field.permission))
+        response = false;
       //Validate vIf prop
-      if (response && field.props && (field.props?.vIf != undefined)) response = field.props?.vIf;
+      if (response && field.props && field.props?.vIf != undefined)
+        response = field.props?.vIf;
       //Response
       return response;
     },
     //Validate fields
     validateField(val) {
       return new Promise((resolve, reject) => {
-        let ruleResponse = true || 'update';//Default rule response
-        let crudInfo = this.$store.state.qcrudComponent.component[this.crudId] || {};
+        let ruleResponse = true || 'update'; //Default rule response
+        let crudInfo =
+          this.$store.state.qcrudComponent.component[this.crudId] || {};
         //Request Params
         let requestParams = {
           refresh: true,
-          params: this.field.validateField.requestParams || {}
+          params: this.field.validateField.requestParams || {},
         };
         //Set default filter
-        requestParams.params.filter = { field: 'title', ...(requestParams.params.filter || {}) };
+        requestParams.params.filter = {
+          field: 'title',
+          ...(requestParams.params.filter || {}),
+        };
 
         //Request
-        this.$crud.show(this.field.validateField.apiRoute, val, requestParams).then(response => {
-          if (response.status == 200) {
-            //Already exist
-            ruleResponse = false || this.$tr('isite.cms.message.fieldAlreadyExist');
-            //Validate if compare with crudInfo
-            if (this.crudInfo && (this.crudInfo.typeForm == 'update') && (this.crudInfo.id == response.data.id))
-              ruleResponse = true || 'update';
-          }
-          resolve(ruleResponse);
-        }).catch(error => {
-          this.$apiResponse.handleError(error, () => {
-            console.error(error);
+        this.$crud
+          .show(this.field.validateField.apiRoute, val, requestParams)
+          .then((response) => {
+            if (response.status == 200) {
+              //Already exist
+              ruleResponse =
+                false || this.$tr('isite.cms.message.fieldAlreadyExist');
+              //Validate if compare with crudInfo
+              if (
+                this.crudInfo &&
+                this.crudInfo.typeForm == 'update' &&
+                this.crudInfo.id == response.data.id
+              )
+                ruleResponse = true || 'update';
+            }
             resolve(ruleResponse);
+          })
+          .catch((error) => {
+            this.$apiResponse.handleError(error, () => {
+              console.error(error);
+              resolve(ruleResponse);
+            });
           });
-        });
       });
     },
     //filter Select
@@ -1871,9 +2340,14 @@ export default {
       if (loadOptions && loadOptions.filterByQuery) {
         await this.getOptions(val);
         update();
-      } else {//Filter current options
+      } else {
+        //Filter current options
         update(async () => {
-          this.options = this.$helper.filterOptions(val, this.rootOptions, this.responseValue);
+          this.options = this.$helper.filterOptions(
+            val,
+            this.rootOptions,
+            this.responseValue
+          );
         });
       }
 
@@ -1881,7 +2355,9 @@ export default {
       if (loadOptions && loadOptions.filterByQuery) {
         if (val.length >= 2) {
           if (!this.rootOptions.length) {
-            this.fieldProps.hint = `${this.$tr('isite.cms.message.noResultsFoundTryAnotherSearchValue')}`;
+            this.fieldProps.hint = `${this.$tr(
+              'isite.cms.message.noResultsFoundTryAnotherSearchValue'
+            )}`;
           }
         }
       }
@@ -1891,22 +2367,31 @@ export default {
     },
     //Load the option for default value when is loadOptions
     loadOptionForValue() {
-      if (this.loadField('select') ) {
+      if (this.loadField('select')) {
         let loadOptions = this.field.loadOptions;
         if (loadOptions && loadOptions.apiRoute) {
           //Valudate if the response values is not in the root options
-          let responseValueTmp = (this.responseValue || []);
-          responseValueTmp = Array.isArray(responseValueTmp) ? responseValueTmp : [responseValueTmp];
-          const includeAll = responseValueTmp.every(val => {
-              const value = this.fieldProps['emit-value'] ? val : (val.value || val.id)
-              return this.rootOptions.map(val => (val.value || val.id || '').toString()).includes(value.toString())
-            }
-          );
+          let responseValueTmp = this.responseValue || [];
+          responseValueTmp = Array.isArray(responseValueTmp)
+            ? responseValueTmp
+            : [responseValueTmp];
+          const includeAll = responseValueTmp.every((val) => {
+            const value = this.fieldProps['emit-value']
+              ? val
+              : val.value || val.id;
+            return this.rootOptions
+              .map((val) => (val.value || val.id || '').toString())
+              .includes(value.toString());
+          });
 
-          if(this.loading) return
+          if (this.loading) return;
           //Validate if there is the option for the value
           if (loadOptions.filterByQuery && !includeAll) {
-            let fieldSelect = loadOptions.select || { label: 'title', id: 'id', img: 'mainImage' };
+            let fieldSelect = loadOptions.select || {
+              label: 'title',
+              id: 'id',
+              img: 'mainImage',
+            };
             //Instance request params
             let requestParams = {
               refresh: true,
@@ -1914,36 +2399,45 @@ export default {
                 ...(loadOptions.requestParams || {}),
                 filter: {
                   ...(loadOptions.requestParams?.filter || {}),
-                  [fieldSelect.id]: (this.responseValue.id || this.responseValue.value || this.responseValue)
-                }
-              }
+                  [fieldSelect.id]:
+                    this.responseValue.id ||
+                    this.responseValue.value ||
+                    this.responseValue,
+                },
+              },
             };
-            this.loading = true
+            this.loading = true;
             //Request
-            this.$crud.index(loadOptions.apiRoute, requestParams).then(response => {
-              this.loading = false
-              const responseData = response.data;
-              if (responseData.length) {
-                if (Array.isArray(this.modelValue)) {
+            this.$crud
+              .index(loadOptions.apiRoute, requestParams)
+              .then((response) => {
+                this.loading = false;
+                const responseData = response.data;
+                if (responseData.length) {
+                  if (Array.isArray(this.modelValue)) {
+                    //Remove value if isn't on response.data
+                    const keyForValue = loadOptions?.select?.id || 'id';
+                    const results =
+                      this.modelValue.filter((value) =>
+                        responseData.find((data) => data[keyForValue] == value)
+                      ) || null;
+                    this.setDefaultVModel(results);
+                  }
+                  this.rootOptions = [
+                    ...this.rootOptions,
+                    ...this.$array.select(responseData, fieldSelect),
+                  ];
+                  //Emit the loadedOptions
+                  if (loadOptions.loadedOptions)
+                    loadOptions.loadedOptions(responseData);
+                } else {
                   //Remove value if isn't on response.data
-                  const keyForValue = loadOptions?.select?.id || 'id';
-                  const results = this.modelValue.filter((value) => responseData.find((data) => data[keyForValue] == value)) || null;
-                  this.setDefaultVModel(results);
+                  this.setDefaultVModel(null);
                 }
-                this.rootOptions = [
-                  ...this.rootOptions,
-                  ...this.$array.select(responseData, fieldSelect)
-                ];
-                //Emit the loadedOptions
-                if (loadOptions.loadedOptions) loadOptions.loadedOptions(responseData);
-              } else {
-                //Remove value if isn't on response.data
-                this.setDefaultVModel(null);
-              }
-            }).catch(error => {
-              this.$apiResponse.handleError(error, () => {
+              })
+              .catch((error) => {
+                this.$apiResponse.handleError(error, () => {});
               });
-            });
           }
         }
       }
@@ -1975,16 +2469,22 @@ export default {
         isAdd,
         format: this.fieldProps.slot.mask,
         unit: this.fieldProps.field.navigation?.unit || 'day',
-        amount: this.fieldProps.field.navigation?.amount || 1
+        amount: this.fieldProps.field.navigation?.amount || 1,
       };
 
-      if (this.modelValue) this.$emit('update:modelValue', this.$date.calculateNewDate(this.modelValue, params));
+      if (this.modelValue)
+        this.$emit(
+          'update:modelValue',
+          this.$date.calculateNewDate(this.modelValue, params)
+        );
     },
     getRef() {
       return this.$refs[this.fieldProps.field.ref];
     },
     selectAllOptions() {
-      this.responseValue = this.allSelected ? [] : this.formatOptions.map(opt => opt.value);
+      this.responseValue = this.allSelected
+        ? []
+        : this.formatOptions.map((opt) => opt.value);
     },
     initializeSpeechRecognition() {
       const SpeechRecognition =
@@ -2017,7 +2517,7 @@ export default {
     },
     startRecording() {
       if (!this.recognition) return;
-      this.lastTranscript = "";
+      this.lastTranscript = '';
       this.recognition.start();
       this.isRecording = true;
     },
@@ -2029,8 +2529,8 @@ export default {
     },
     toggleRecording() {
       this.isRecording ? this.stopRecording() : this.startRecording();
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss">
@@ -2102,13 +2602,17 @@ export default {
     }
 
     &.text-t-dark {
-      .q-icon, .q-field__label, input {
+      .q-icon,
+      .q-field__label,
+      input {
         color: $dark;
       }
     }
 
     &.text-t-light {
-      .q-icon, .q-field__label, input {
+      .q-icon,
+      .q-field__label,
+      input {
         color: white;
       }
     }
