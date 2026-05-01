@@ -188,18 +188,23 @@
           </div>
         </div>
       </div>
-      <div class="c-plus" v-if="cardPermissions.create">
-        <q-btn
-          flat
-          class="
-            tw-w-full
-            hover:tw-text-white
-            hover:tw-bg-gray-200"
-          @click=" () => openModal()"
-          :disabled="allowCreateCard"
-          >
-          <i class="fa-solid fa-plus"></i>
-        </q-btn>
+      <!--column header -->
+      <div class="tw-py-[10px]" v-if="cardPermissions.create">
+         <div v-if="$slots.header">
+            <slot name="header" />
+          </div>
+          <q-btn
+            v-else
+            flat
+            class="
+              tw-w-full
+              hover:tw-text-white
+              hover:tw-bg-gray-200"
+            @click=" () => openModal()"
+            :disabled="allowCreateCard"
+            >
+            <i class="fa-solid fa-plus"></i>
+          </q-btn>
       </div>
       <div
         class="

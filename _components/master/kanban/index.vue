@@ -77,7 +77,19 @@
               @columnEvents="value => columnEventshandler(value)"
               @revertCard="revertCard"
               class="tw-flex-none tw-space-y-0 "
-            />
+            >
+            <template #header>
+              <component 
+                ref="columnHeaderComponent"
+                v-if="columnHeaderComponent"
+                :is="columnHeaderComponent"
+                :col="element"
+                :dynamicFilterValues="dynamicFilterValues"
+                @openModal="(value) => openModal(value)"
+              >
+              </component>
+            </template>
+            </kanbanColumn>
           </div>
         </template>
         <template #footer>
@@ -232,6 +244,7 @@ export default {
 
       cardComponent: null,
       modalComponent: null,
+      columnHeaderComponent: null,
 
       stateModal: {
         show: false,
@@ -384,8 +397,8 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-
       this.modalComponent = markRaw(this?.kanban?.cardComponent?.modal)
+      this.columnHeaderComponent = markRaw(this?.kanban?.columnComponent?.header)      
     },
 
 
