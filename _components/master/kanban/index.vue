@@ -85,6 +85,7 @@
                 :is="columnHeaderComponent"
                 :col="element"
                 :dynamicFilterValues="dynamicFilterValues"
+                :search="search"
                 @openModal="(value) => openModal(value)"
               >
               </component>
@@ -241,6 +242,7 @@ export default {
       expiresIn: null,
       tourName: 'admin_crud_index_tour',
       dynamicFilterValues: {},
+      search: null,
 
       cardComponent: null,
       modalComponent: null,
