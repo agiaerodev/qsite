@@ -16,13 +16,23 @@ export function useFileUploadController(props, emit) {
   const activeFile = ref(null);
   const wordPreviewContainer = ref(null);
   const excelHtml = ref('');
-
+  const showComponent = ref(true);
+  const labelAtt = ref(null);
+  const maxFilesLocal = ref(null);
   /* ---------------------------------------------
    * Computed
    --------------------------------------------- */
   const localFields = computed({
     get: () => props.modelValue,
     set: val => emit('update:modelValue', val)
+  });
+
+  const label = computed(() => {
+    return labelAtt.value || props.label;
+  })
+
+  const maxFiles = computed(() => {
+    return maxFilesLocal.value || props.maxFiles;
   });
 
   const isPdf = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.pdf'));
@@ -98,8 +108,10 @@ export function useFileUploadController(props, emit) {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (selectedFiles.value.length >= props.maxFiles) {
-      alert.warning(`You can only upload a maximum of ${props.maxFiles} files.`);
+    if (selectedFiles.value.length >= maxFiles.value) {
+      alert.warning(
+        `You can only upload a maximum of ${maxFiles.value} files.`
+      );
       event.target.value = '';
       return;
     }
@@ -147,6 +159,8 @@ export function useFileUploadController(props, emit) {
 
       const form = new FormData();
       form.append('file', finalFile);
+      form.append('zone', props?.zone);
+      form.append('entityType', props?.entityType);
 
       const response = await baseService.post('apiRoutes.qsite.filesUploadWithDetails', form);
 
@@ -167,10 +181,34 @@ export function useFileUploadController(props, emit) {
    * Backend Sync
    --------------------------------------------- */
   async function getFields() {
+    if (!props?.entityType) {
+      alert.warning('It does not have an entity type defined in the props');
+      showComponent.value = false;
+      return;
+    }
+
+    const responseZone = await baseService.show(
+      'apiRoutes.qsite.zone',
+      props?.entityType,
+      {
+        refresh: true,
+        params: { filter: { field: 'entity_type', zone: props?.zone } },
+      }
+    );
+
+    if (!responseZone) {
+      alert.warning('the zone needs to be configured');
+      showComponent.value = false;
+      return;
+    }
+    labelAtt.value = responseZone.data?.description || 'Attach File';
+    maxFilesLocal.value = responseZone.data.maxFiles || null;
+
     if (!localFields.value?.length) {
       selectedFiles.value = [];
       return;
     }
+
 
     const response = await baseService.index('apiRoutes.qsite.files', {
       refresh: true,
@@ -193,6 +231,7 @@ export function useFileUploadController(props, emit) {
         path: file.path
       };
     });
+    showComponent.value = true;
   }
 
   /* ---------------------------------------------
@@ -274,7 +313,8 @@ export function useFileUploadController(props, emit) {
       const id = selectedFiles.value[index]?.id;
       selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index);
       localFields.value = selectedFiles.value.map(f => f.id);
-      await baseService.delete('apiRoutes.qsite.files', id);
+      // se cambio soft delete
+      //await baseService.delete('apiRoutes.qsite.files', id);
       alert.success('File removed successfully.');
     } catch (e) {
       alert.error(e);
@@ -299,6 +339,8 @@ export function useFileUploadController(props, emit) {
     onFileChange,
     getFields,
     removeFile,
-    permissionMedia
+    permissionMedia,
+    showComponent,
+    label,
   };
 }
