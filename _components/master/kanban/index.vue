@@ -77,7 +77,20 @@
               @columnEvents="value => columnEventshandler(value)"
               @revertCard="revertCard"
               class="tw-flex-none tw-space-y-0 "
-            />
+            >
+            <template #header>
+              <component 
+                ref="columnHeaderComponent"
+                v-if="columnHeaderComponent"
+                :is="columnHeaderComponent"
+                :col="element"
+                :dynamicFilterValues="dynamicFilterValues"
+                :search="search"
+                @openModal="(value) => openModal(value)"
+              >
+              </component>
+            </template>
+            </kanbanColumn>
           </div>
         </template>
         <template #footer>
@@ -229,9 +242,11 @@ export default {
       expiresIn: null,
       tourName: 'admin_crud_index_tour',
       dynamicFilterValues: {},
+      search: null,
 
       cardComponent: null,
       modalComponent: null,
+      columnHeaderComponent: null,
 
       stateModal: {
         show: false,
@@ -384,8 +399,8 @@ export default {
     getCardComponent(){
       if(!this.kanban) return
       this.cardComponent =  markRaw(this?.kanban?.cardComponent?.content)
-
       this.modalComponent = markRaw(this?.kanban?.cardComponent?.modal)
+      this.columnHeaderComponent = markRaw(this?.kanban?.columnComponent?.header)      
     },
 
 
@@ -687,11 +702,18 @@ export default {
     },
 
 
-    openModal({col, row, tab, isCreate = true, event = null }){
+    openModal({col, row, tab, isCreate = true, event = null}){
       this.stateModal.col = col
       this.stateModal.row = row
       this.stateModal.isCreate = isCreate
-      this.$refs.modalComponentRef.init(tab, event)
+      row.loading = true
+      this.$refs.modalComponentRef.init(tab, event).then(response => {
+        row.loading = false
+      }).catch(error => {
+        this.$alert.error(`Error Opening card, reservation id: ${row.id}`)
+        this.closeModal()
+        row.loading = false
+      })
       this.stateModal.show = true
     },
     closeModal(){
