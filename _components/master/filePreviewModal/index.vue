@@ -1,11 +1,13 @@
 <template>
+  <Teleport to="body">
+  <Transition name="modal">
   <div
     v-if="modelValue"
-    class="tw-fixed tw-inset-0 tw-z-[999] tw-flex tw-items-center tw-justify-center tw-bg-black/70 tw-p-4"
+    class="tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-black/70 tw-backdrop-blur-sm tw-p-4"
     @click.self="close"
   >
     <div
-      class="tw-relative tw-bg-white tw-rounded-xl tw-shadow-2xl tw-w-full tw-max-w-6xl tw-h-[90vh] tw-flex tw-flex-col tw-overflow-hidden"
+      class="tw-relative tw-bg-white tw-rounded-xl tw-shadow-2xl tw-w-full tw-max-w-6xl tw-h-[90vh] tw-flex tw-flex-col tw-overflow-hidden modal-panel"
     >
       <!-- Header -->
       <div class="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-border-b">
@@ -72,6 +74,8 @@
       </div>
     </div>
   </div>
+  </Transition>
+  </Teleport>
 </template>
 
 
@@ -97,6 +101,46 @@ const {
 </script>
 
 <style>
+/* Modal overlay transition */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.25s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+/* Panel slide-up + scale */
+.modal-enter-active .modal-panel {
+  animation: modalPanelIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.modal-leave-active .modal-panel {
+  animation: modalPanelOut 0.2s ease both;
+}
+
+@keyframes modalPanelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalPanelOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.94) translateY(16px);
+  }
+}
+
 #excel-preview-table {
   border-collapse: collapse;
   width: 100%;
