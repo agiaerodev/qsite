@@ -116,7 +116,7 @@
               size="6px"
               @click="columnData.new = true"
             >
-              <q-tooltip> Editar Columna </q-tooltip>
+              <q-tooltip> Edita Column </q-tooltip>
             </q-btn>
           </div>
           <div
@@ -189,22 +189,23 @@
         </div>
       </div>
       <!--column header -->
-      <div class="tw-py-[10px]" v-if="cardPermissions.create">
-         <div v-if="$slots.header && !columnData.loading">
+      <div class="tw-py-[10px]" v-if="$slots?.header">
+          <div>
             <slot name="header" />
           </div>
-          <q-btn
-            v-else
-            flat
-            class="
-              tw-w-full
-              hover:tw-text-white
-              hover:tw-bg-gray-200"
-            @click=" () => openModal()"
-            :disabled="allowCreateCard"
-            >
-            <i class="fa-solid fa-plus"></i>
-          </q-btn>
+      </div>
+      <div class="tw-py-[10px]" v-if="cardPermissions.create && !$slots?.header">
+        <q-btn
+          flat
+          class="
+            tw-w-full
+            hover:tw-text-white
+            hover:tw-bg-gray-200"
+          @click=" () => openModal()"
+          :disabled="allowCreateCard"
+          >
+          <i class="fa-solid fa-plus"></i>
+        </q-btn>
       </div>
       <div
         class="
