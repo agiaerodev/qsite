@@ -3,6 +3,7 @@
     <!-- Avatar -->
     <div
       class="tw-relative tw-w-12 tw-h-12 tw-cursor-pointer group"
+      :class="classComponent"
       @click="handleClick"
     >
       <img
@@ -10,6 +11,7 @@
         :src="url"
         alt="avatar"
         class="tw-w-12 tw-h-12 tw-rounded-full tw-object-cover tw-border-2 tw-border-white tw-shadow-md tw-transition group-hover:tw-scale-110"
+        :class="classComponent"
         @error="onError"
       />
 
@@ -17,6 +19,7 @@
       <div
         v-else
         class="tw-w-12 tw-h-12 tw-rounded-full tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-text-gray-500 tw-shadow"
+        :class="classComponent"
       >
         <i class="fas fa-user"></i>
       </div>
@@ -48,16 +51,16 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  classComponent: {
+    type: String,
+    default: '',
+  },
 });
 
 const fallback = ref(false);
 
-const {
-  isModalVisible,
-  selectedFile,
-  handleClick,
-  handleUpdateModal
-} = useAvatarController(props);
+const { isModalVisible, selectedFile, handleClick, handleUpdateModal } =
+  useAvatarController(props);
 
 function onError(e) {
   e.target.src = 'https://via.placeholder.com/150';
