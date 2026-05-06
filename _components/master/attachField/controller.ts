@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, onMounted } from 'vue';
+import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import baseService from 'modules/qcrud/_services/baseService.js';
@@ -180,7 +180,34 @@ export function useFileUploadController(props, emit) {
   /* ---------------------------------------------
    * Backend Sync
    --------------------------------------------- */
+  async function loadFilesFromIds(ids) {
+    try {
+      const response = await baseService.index('apiRoutes.qsite.files', {
+        refresh: true,
+        params: { filter: { id: ids } }
+      });
+      selectedFiles.value = response.data.map(file => {
+        const ext = file.extension?.toLowerCase() || '';
+        const isImage = ['.png', '.jpg', '.jpeg'].includes(ext);
+        return {
+          name: file.name,
+          isImage,
+          previewUrl: isImage || ext === '.pdf' ? file.path : null,
+          icon: resolveIconByExtension(ext),
+          color: resolveColorByExtension(ext),
+          rawFile: null,
+          uploading: false,
+          id: file.id,
+          path: file.path
+        };
+      });
+    } catch (e) {
+      alert.error(e);
+    }
+  }
+
   async function getFields() {
+    console.log(props);
     if (!props?.entityType) {
       alert.warning('It does not have an entity type defined in the props');
       showComponent.value = false;
@@ -195,8 +222,7 @@ export function useFileUploadController(props, emit) {
         params: { filter: { field: 'entity_type', zone: props?.zone } },
       }
     );
-
-    if (!responseZone) {
+    if (!responseZone?.data) {
       alert.warning('the zone needs to be configured');
       showComponent.value = false;
       return;
@@ -206,31 +232,11 @@ export function useFileUploadController(props, emit) {
 
     if (!localFields.value?.length) {
       selectedFiles.value = [];
+      showComponent.value = true;
       return;
     }
 
-
-    const response = await baseService.index('apiRoutes.qsite.files', {
-      refresh: true,
-      params: { filter: { id: localFields.value } }
-    });
-
-    selectedFiles.value = response.data.map(file => {
-      const ext = file.extension?.toLowerCase() || '';
-      const isImage = ['.png', '.jpg', '.jpeg'].includes(ext);
-
-      return {
-        name: file.name,
-        isImage,
-        previewUrl: isImage || ext === '.pdf' ? file.path : null,
-        icon: resolveIconByExtension(ext),
-        color: resolveColorByExtension(ext),
-        rawFile: null,
-        uploading: false,
-        id: file.id,
-        path: file.path
-      };
-    });
+    await loadFilesFromIds(localFields.value);
     showComponent.value = true;
   }
 
@@ -324,6 +330,28 @@ export function useFileUploadController(props, emit) {
   onMounted(async () => {
     await getFields();
   });
+
+  watch(
+    () => props.modelValue,
+    async (newVal, oldVal) => {
+      const newIds = JSON.stringify(newVal ?? []);
+      const oldIds = JSON.stringify(oldVal ?? []);
+      if (newIds === oldIds) return;
+
+      const currentIds = selectedFiles.value.map(f => f.id);
+      const incoming = newVal ?? [];
+      const alreadyLoaded = incoming.length > 0 &&
+        incoming.every(id => currentIds.includes(id));
+      if (alreadyLoaded) return;
+
+      if (incoming.length > 0) {
+        await loadFilesFromIds(incoming);
+      } else {
+        selectedFiles.value = [];
+      }
+    },
+    { deep: true }
+  );
   return {
     uploading,
     selectedFiles,

@@ -80,6 +80,8 @@
                     v-if="permissionMedia.index"
                     v-model="files"
                     :maxFiles="maxFiles"
+                    zone="attachments"
+                    entityType="Idata.Entities.Comments.Comments"
                     @uploading="val => uploadFile = val"
                   />
                 </div>
@@ -309,6 +311,8 @@
                           v-if="permissionMedia.edit"
                           v-model="item.options.attachments"
                           :maxFiles="maxFiles"
+                          zone="attachments"
+                          entityType="Idata.Entities.Comments.Comments"
                           @uploading="val => item.uploading = val"
                         />
                       </div>
