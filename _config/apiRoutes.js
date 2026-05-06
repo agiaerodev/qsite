@@ -28,4 +28,5 @@ export default {
   filesUploadWithDetails: `${urlBaseMedia}/files/upload-with-details`,
   files: `${urlBaseMedia}/files`,
   cruds: `${urlBase}/cruds`,
+  zone: `${urlBaseMedia}/zones`,
 };

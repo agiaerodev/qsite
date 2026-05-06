@@ -67,6 +67,7 @@ export default function controller(props: any, emit: any) {
         if (props.configName) {
           refs.settings.value = await service.getConfig(props.configName);
         } else {
+          if (!module || !entity) return
           const configName = `${module}.config.quickCards.${entity}`;
           refs.settings.value = await service.getConfig(configName);
         }

@@ -116,7 +116,7 @@
               size="6px"
               @click="columnData.new = true"
             >
-              <q-tooltip> Editar Columna </q-tooltip>
+              <q-tooltip> Edita Column </q-tooltip>
             </q-btn>
           </div>
           <div
@@ -188,7 +188,13 @@
           </div>
         </div>
       </div>
-      <div class="c-plus" v-if="cardPermissions.create">
+      <!--column header -->
+      <div class="tw-py-[10px]" v-if="$slots?.header">
+          <div>
+            <slot name="header" />
+          </div>
+      </div>
+      <div class="tw-py-[10px]" v-if="cardPermissions.create && !$slots?.header">
         <q-btn
           flat
           class="

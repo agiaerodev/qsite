@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, onMounted } from 'vue';
+import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import baseService from 'modules/qcrud/_services/baseService.js';
@@ -16,13 +16,23 @@ export function useFileUploadController(props, emit) {
   const activeFile = ref(null);
   const wordPreviewContainer = ref(null);
   const excelHtml = ref('');
-
+  const showComponent = ref(true);
+  const labelAtt = ref(null);
+  const maxFilesLocal = ref(null);
   /* ---------------------------------------------
    * Computed
    --------------------------------------------- */
   const localFields = computed({
     get: () => props.modelValue,
     set: val => emit('update:modelValue', val)
+  });
+
+  const label = computed(() => {
+    return labelAtt.value || props.label || 'Attach File';
+  })
+
+  const maxFiles = computed(() => {
+    return maxFilesLocal.value || props.maxFiles;
   });
 
   const isPdf = computed(() => activeFile.value?.name?.toLowerCase().endsWith('.pdf'));
@@ -98,8 +108,10 @@ export function useFileUploadController(props, emit) {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (selectedFiles.value.length >= props.maxFiles) {
-      alert.warning(`You can only upload a maximum of ${props.maxFiles} files.`);
+    if (selectedFiles.value.length >= maxFiles.value) {
+      alert.warning(
+        `You can only upload a maximum of ${maxFiles.value} files.`
+      );
       event.target.value = '';
       return;
     }
@@ -147,6 +159,8 @@ export function useFileUploadController(props, emit) {
 
       const form = new FormData();
       form.append('file', finalFile);
+      form.append('zone', props?.zone);
+      form.append('entityType', props?.entityType);
 
       const response = await baseService.post('apiRoutes.qsite.filesUploadWithDetails', form);
 
@@ -166,33 +180,66 @@ export function useFileUploadController(props, emit) {
   /* ---------------------------------------------
    * Backend Sync
    --------------------------------------------- */
+  async function loadFilesFromIds(ids) {
+    try {
+      const response = await baseService.index('apiRoutes.qsite.files', {
+        refresh: true,
+        params: { filter: { id: ids } }
+      });
+      selectedFiles.value = response.data.map(file => {
+        const ext = file.extension?.toLowerCase() || '';
+        const isImage = ['.png', '.jpg', '.jpeg'].includes(ext);
+        return {
+          name: file.name,
+          isImage,
+          previewUrl: isImage || ext === '.pdf' ? file.path : null,
+          icon: resolveIconByExtension(ext),
+          color: resolveColorByExtension(ext),
+          rawFile: null,
+          uploading: false,
+          id: file.id,
+          path: file.path
+        };
+      });
+    } catch (e) {
+      alert.error(e);
+    }
+  }
+
   async function getFields() {
+    if(props.version !== 1) {
+      if (!props?.entityType) {
+        alert.warning('It does not have an entity type defined in the props');
+        showComponent.value = false;
+        return;
+      }
+
+      const responseZone = await baseService.show(
+        'apiRoutes.qsite.zone',
+        props?.entityType,
+        {
+          refresh: true,
+          params: { filter: { field: 'entity_type', zone: props?.zone } },
+        }
+      );
+      if (!responseZone?.data) {
+        alert.warning('the zone needs to be configured');
+        showComponent.value = false;
+        return;
+      }
+      labelAtt.value = responseZone.data?.description || 'Attach File';
+      maxFilesLocal.value = responseZone.data.maxFiles || null;
+    }
+
+
     if (!localFields.value?.length) {
       selectedFiles.value = [];
+      showComponent.value = true;
       return;
     }
 
-    const response = await baseService.index('apiRoutes.qsite.files', {
-      refresh: true,
-      params: { filter: { id: localFields.value } }
-    });
-
-    selectedFiles.value = response.data.map(file => {
-      const ext = file.extension?.toLowerCase() || '';
-      const isImage = ['.png', '.jpg', '.jpeg'].includes(ext);
-
-      return {
-        name: file.name,
-        isImage,
-        previewUrl: isImage || ext === '.pdf' ? file.path : null,
-        icon: resolveIconByExtension(ext),
-        color: resolveColorByExtension(ext),
-        rawFile: null,
-        uploading: false,
-        id: file.id,
-        path: file.path
-      };
-    });
+    await loadFilesFromIds(localFields.value);
+    showComponent.value = true;
   }
 
   /* ---------------------------------------------
@@ -274,7 +321,8 @@ export function useFileUploadController(props, emit) {
       const id = selectedFiles.value[index]?.id;
       selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index);
       localFields.value = selectedFiles.value.map(f => f.id);
-      await baseService.delete('apiRoutes.qsite.files', id);
+      // se cambio soft delete
+      //await baseService.delete('apiRoutes.qsite.files', id);
       alert.success('File removed successfully.');
     } catch (e) {
       alert.error(e);
@@ -284,6 +332,28 @@ export function useFileUploadController(props, emit) {
   onMounted(async () => {
     await getFields();
   });
+
+  watch(
+    () => props.modelValue,
+    async (newVal, oldVal) => {
+      const newIds = JSON.stringify(newVal ?? []);
+      const oldIds = JSON.stringify(oldVal ?? []);
+      if (newIds === oldIds) return;
+
+      const currentIds = selectedFiles.value.map(f => f.id);
+      const incoming = newVal ?? [];
+      const alreadyLoaded = incoming.length > 0 &&
+        incoming.every(id => currentIds.includes(id));
+      if (alreadyLoaded) return;
+
+      if (incoming.length > 0) {
+        await loadFilesFromIds(incoming);
+      } else {
+        selectedFiles.value = [];
+      }
+    },
+    { deep: true }
+  );
   return {
     uploading,
     selectedFiles,
@@ -299,6 +369,8 @@ export function useFileUploadController(props, emit) {
     onFileChange,
     getFields,
     removeFile,
-    permissionMedia
+    permissionMedia,
+    showComponent,
+    label,
   };
 }
