@@ -1,6 +1,5 @@
 <template>
   <component
-    class="tw-py-4"
     :class="class"
     :is="currentComponent"
     :selected-files="selectedFiles"
@@ -35,6 +34,7 @@ const props = defineProps({
   label: { type: String, default: null },
   type: { type: String, default: null },
   class: { type: String, default: null },
+  version: { type: Number, default: null }
 });
 const emit = defineEmits(['update:modelValue', 'uploading']);
 const {

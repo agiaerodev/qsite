@@ -28,7 +28,7 @@ export function useFileUploadController(props, emit) {
   });
 
   const label = computed(() => {
-    return labelAtt.value || props.label;
+    return labelAtt.value || props.label || 'Attach File';
   })
 
   const maxFiles = computed(() => {
@@ -207,28 +207,30 @@ export function useFileUploadController(props, emit) {
   }
 
   async function getFields() {
-    console.log(props);
-    if (!props?.entityType) {
-      alert.warning('It does not have an entity type defined in the props');
-      showComponent.value = false;
-      return;
+    if(props.version !== 1) {
+      if (!props?.entityType) {
+        alert.warning('It does not have an entity type defined in the props');
+        showComponent.value = false;
+        return;
+      }
+
+      const responseZone = await baseService.show(
+        'apiRoutes.qsite.zone',
+        props?.entityType,
+        {
+          refresh: true,
+          params: { filter: { field: 'entity_type', zone: props?.zone } },
+        }
+      );
+      if (!responseZone?.data) {
+        alert.warning('the zone needs to be configured');
+        showComponent.value = false;
+        return;
+      }
+      labelAtt.value = responseZone.data?.description || 'Attach File';
+      maxFilesLocal.value = responseZone.data.maxFiles || null;
     }
 
-    const responseZone = await baseService.show(
-      'apiRoutes.qsite.zone',
-      props?.entityType,
-      {
-        refresh: true,
-        params: { filter: { field: 'entity_type', zone: props?.zone } },
-      }
-    );
-    if (!responseZone?.data) {
-      alert.warning('the zone needs to be configured');
-      showComponent.value = false;
-      return;
-    }
-    labelAtt.value = responseZone.data?.description || 'Attach File';
-    maxFilesLocal.value = responseZone.data.maxFiles || null;
 
     if (!localFields.value?.length) {
       selectedFiles.value = [];
