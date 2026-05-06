@@ -35,7 +35,6 @@
         type="button"
         @click="fileInputRef.click()"
         class="tw-absolute tw-bottom-0 tw-right-0 tw-w-8 tw-h-8 tw-bg-white tw-border tw-border-gray-200 tw-rounded-xl tw-shadow-md tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-bg-gray-50 tw-transition-all"
-        title="Cambiar imagen"
       >
         <i class="fa-solid fa-pen tw-text-gray-600 tw-text-xs"></i>
       </button>
