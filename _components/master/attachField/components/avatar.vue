@@ -37,7 +37,7 @@
       <button
         v-if="
           permissionMedia.create &&
-          props?.readonly &&
+          !props?.readonly &&
           (!selectedFiles[0] || !selectedFiles[0].uploading)
         "
         type="button"
@@ -87,7 +87,7 @@ const props = defineProps({
   showComponent: { type: Boolean, default: true },
   label: { type: String, default: null },
   acceptedExtensions: { type: String, default: '' },
-  readonly: { type: String, default: false },
+  readonly: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:showModal']);
