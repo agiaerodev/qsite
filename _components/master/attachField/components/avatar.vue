@@ -6,7 +6,11 @@
     <div class="tw-relative tw-w-24 tw-h-24">
       <div
         class="tw-w-full tw-h-full tw-rounded-full tw-overflow-hidden tw-border-2 tw-border-gray-100 tw-shadow-sm tw-bg-gray-50 tw-flex tw-items-center tw-justify-center tw-cursor-pointer transition-all hover:tw-opacity-95"
-        @click="selectedFiles[0] && !selectedFiles[0].uploading && openPreview(selectedFiles[0])"
+        @click="
+          selectedFiles[0] &&
+            !selectedFiles[0].uploading &&
+            openPreview(selectedFiles[0])
+        "
       >
         <div
           v-if="selectedFiles[0]?.uploading"
@@ -31,7 +35,11 @@
       </div>
 
       <button
-        v-if="permissionMedia.create && (!selectedFiles[0] || !selectedFiles[0].uploading)"
+        v-if="
+          permissionMedia.create &&
+          props?.readonly &&
+          (!selectedFiles[0] || !selectedFiles[0].uploading)
+        "
         type="button"
         @click="fileInputRef.click()"
         class="tw-absolute tw-bottom-0 tw-right-0 tw-w-8 tw-h-8 tw-bg-white tw-border tw-border-gray-200 tw-rounded-xl tw-shadow-md tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-bg-gray-50 tw-transition-all"
@@ -59,7 +67,8 @@
     class="tw-bg-red-50 tw-text-red-700 tw-p-3 tw-rounded-xl tw-border tw-border-red-100 tw-text-sm"
     v-else
   >
-    The field cannot be displayed: zone or entity type missing from configuration.
+    The field cannot be displayed: zone or entity type missing from
+    configuration.
   </div>
 </template>
 
@@ -78,6 +87,7 @@ const props = defineProps({
   showComponent: { type: Boolean, default: true },
   label: { type: String, default: null },
   acceptedExtensions: { type: String, default: '' },
+  readonly: { type: String, default: false },
 });
 
 const emit = defineEmits(['update:showModal']);

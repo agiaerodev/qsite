@@ -13,6 +13,7 @@
     @update:show-modal="showModal = $event"
     :label="label"
     :accepted-extensions="acceptedExtensions"
+    :readonly="readonly"
   />
 </template>
 
@@ -34,7 +35,8 @@ const props = defineProps({
   label: { type: String, default: null },
   type: { type: String, default: null },
   class: { type: String, default: null },
-  version: { type: Number, default: null }
+  version: { type: Number, default: null },
+  readonly: { type: Boolean, default: false },
 });
 const emit = defineEmits(['update:modelValue', 'uploading']);
 const {
