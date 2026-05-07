@@ -33,11 +33,7 @@
     </div>
 
     <!-- Modal preview -->
-    <filePreviewModal
-      :model-value="isModalVisible"
-      @update:model-value="handleUpdateModal"
-      :file="selectedFile"
-    />
+    <avatar-image class="tw-hidden" ref="refavatarImage" :src="url" noPreview />
   </div>
 </template>
 
@@ -59,8 +55,13 @@ const props = defineProps({
 
 const fallback = ref(false);
 
-const { isModalVisible, selectedFile, handleClick, handleUpdateModal } =
-  useAvatarController(props);
+const {
+  isModalVisible,
+  selectedFile,
+  handleClick,
+  handleUpdateModal,
+  refavatarImage,
+} = useAvatarController(props);
 
 function onError(e) {
   e.target.src = 'https://via.placeholder.com/150';
