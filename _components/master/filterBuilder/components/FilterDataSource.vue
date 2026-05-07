@@ -40,7 +40,7 @@
             label="Endpoint URL"
             outlined
             dense
-            placeholder="/api/v1/options"
+            placeholder="/v1/options"
             prefix="GET"
           />
           <div class="tw-grid tw-grid-cols-2 tw-gap-4">
