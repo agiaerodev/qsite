@@ -9,7 +9,7 @@
         :title="title"
         @search="val => setSearch(val)"
         @new="openModal({col: null, row: {}, isCreate: true})"
-        @refresh="init"
+        @refresh="init(true)"
         ref="pageActionRef"
         :tour-name="tourName"
         :help="help"
