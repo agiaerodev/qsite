@@ -33,7 +33,12 @@
     </div>
 
     <!-- Modal preview -->
-    <avatar-image class="tw-hidden" ref="refavatarImage" :src="url" noPreview />
+    <avatar-image
+      class="tw-hidden"
+      ref="refavatarImage"
+      :src="url"
+      noPreview
+    />
   </div>
 </template>
 
@@ -67,3 +72,13 @@ function onError(e) {
   e.target.src = 'https://via.placeholder.com/150';
 }
 </script>
+<style>
+.img-file {
+  position: relative;
+  margin: 0 auto;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  max-width: 100%;
+}
+</style>
