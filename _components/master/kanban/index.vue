@@ -2,6 +2,7 @@
   <div>
     <div>
       <page-actions
+        v-if="dynamicCrudLoaded"
         :extra-actions="tableActions"
         :excludeActions="excludeActions"
         :searchAction="crudData.read?.searchAction"
@@ -15,12 +16,11 @@
         :expires-in="expiresIn"
         @activateTour="$tour.start(tourName)"
         :systemName="systemName"
-        :dynamicFilter="dynamicFilter"
+        :dynamicFilter="dynamicCrudFilters"
         :speech="crudData.read?.speech"
         @updateDynamicFilterValues="filters => updateDynamicFilterValues(filters)"
       />
     </div>
-
     <!-- dynamicList: table mode -->
     <div>
       <dynamicList
@@ -30,7 +30,6 @@
         :listConfig="crudData"
       />
     </div>
-
     <!--Kanban-->
     <div
       v-if="iskanbanMode"
@@ -194,6 +193,7 @@ import testColumns from './test/columns'
 import testCards from './test/cards'
 import services from "modules/qsite/_components/master/kanban/services";
 import columns from "./test/columns";
+import { getDynamicCrud } from "./helper";
 
 const modelPayload = {
   id: null,
@@ -250,6 +250,9 @@ export default {
       modalComponent: null,
       columnHeaderComponent: null,
 
+      dynamicCrudFilters: {},
+      dynamicCrudLoaded: false,
+
       stateModal: {
         show: false,
         isCreate: true,
@@ -258,6 +261,12 @@ export default {
       }
     };
   },
+
+  async created(){
+    await this.getDynamicCrudFilters()
+    this.dynamicCrudLoaded = true
+  },
+
   mounted() {
     this.$nextTick(async function() {
       //await this.init();
@@ -395,7 +404,16 @@ export default {
   methods: {
     async init(refresh = false) {
       this.getCardComponent()
-      await this.buildColumns(true);
+      await this.buildColumns(refresh);
+    },
+
+    async getDynamicCrudFilters(){
+       if(this.crudData?.dynamicCrudKey){
+        const response = await getDynamicCrud(this.crudData?.dynamicCrudKey)
+        if(response?.filters){
+          this.dynamicCrudFilters = {...response.filters}
+        }
+      }
     },
 
     getCardComponent(){
@@ -542,7 +560,7 @@ export default {
         if(Object.keys(this.dynamicFilterValues).length) params.filter = {...params.filter, ...this.dynamicFilterValues}
 
         column[loadingKey] = true;
-        let response = await services.getCards(this.kanban.cards.apiRoute, params, true)
+        let response = await services.getCards(this.kanban.cards.apiRoute, params, refresh)
         /* test  */
         /*
         const response = testCards.findByStatusId(column.id, page);
