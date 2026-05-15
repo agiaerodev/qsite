@@ -190,9 +190,9 @@
       </div>
       <!--column header -->
       <div class="tw-py-[10px]" v-if="$slots?.header">
-          <div>
-            <slot name="header" />
-          </div>
+        <div v-if="!columnData.loading">
+          <slot name="header" />
+        </div>
       </div>
       <div class="tw-py-[10px]" v-if="cardPermissions.create && !$slots?.header">
         <q-btn

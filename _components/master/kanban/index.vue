@@ -82,7 +82,7 @@
               #header
             >
               <component
-                ref="columnHeaderComponent"
+                :ref="`columnHeaderComponent-${element.id}`"
                 :is="columnHeaderComponent"
                 :col="element"
                 :dynamicFilterValues="dynamicFilterValues"
@@ -487,6 +487,7 @@ export default {
             column.loading = false;
           });
         });
+        this.reloadColumnHeader(column.id, refresh)
       }));
     },
 
@@ -524,14 +525,23 @@ export default {
       })
     },
 
+    async reloadColumnHeader(columnId, refresh = false){
+      const column = `columnHeaderComponent-${columnId}` 
+      if(this.$refs[column]){
+        this.$refs[column].init(refresh)
+      }      
+    },
 
     /* reload column*/
     async reloadColumn(columnId, page = 1) {
+      const refresh = true
+      
 
       const column = this.kanbanColumns.find(item => item.id == columnId);
       if (column) {
         const loadingKey = page == 1  ? 'loading' : 'infiniteLoading'
-        const kanbanCard = await this.getKanbanCardList(column, page, true, loadingKey);
+        this.reloadColumnHeader(columnId, refresh)
+        const kanbanCard = await this.getKanbanCardList(column, page, refresh, loadingKey);
 
         if(page == 1){
           column.data = kanbanCard.data;
@@ -712,6 +722,7 @@ export default {
       this.scrollTotal = content.scrollLeft;
     },
     updateCardColumn(columId) {
+      this.reloadColumnHeader(columId, true)
       this.kanbanColumns.forEach(item => {
         if (item.id == columId) {
           item.data.forEach(card => {
