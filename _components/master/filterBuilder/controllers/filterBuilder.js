@@ -25,9 +25,11 @@ export default function useFilterBuilder(emit, props = {}) {
       filtersList.value = [];
       return;
     }
+
     if (dataToLoad.value && Object.keys(dataToLoad.value).length > 0) {
       const loadedFilters = Object.entries(dataToLoad.value).map(
         ([key, value]) => {
+
           const filter = {
             key,
             value: value.value ?? null,
@@ -36,28 +38,59 @@ export default function useFilterBuilder(emit, props = {}) {
             quickFilter: value.quick_filter ?? false,
           };
 
-          // For select type, reconstruct optionsSource and options
+          // SELECT
           if (filter.type === 'select') {
-            // Priority 1: Check if props.options exists (static list)
-            if (value.props?.options && Array.isArray(value.props.options) && value.props.options.length > 0) {
+
+            // STATIC OPTIONS
+            if (
+              value.props?.options &&
+              Array.isArray(value.props.options) &&
+              value.props.options.length > 0
+            ) {
+
               filter.optionsSource = 'static';
+
               filter.staticOptions = value.props.options.map(opt => ({
                 label: opt.label,
-                value: String(opt.value) // Convert to string for editing
+                value: String(opt.value),
               }));
-              filter.loadOptions = { apiRoute: '', select: { label: 'name', id: 'id' }, requestParams: [] };
+
+              filter.loadOptions = {
+                apiRoute: '',
+                select: { label: 'name', id: 'id' },
+                requestParams: [],
+              };
             }
-            // Priority 2: Check if loadOptions exists (API)
-            else if (value.loadOptions) {
+
+            // API OPTIONS
+            else if (value.load_options) {
+
               filter.optionsSource = 'api';
-              filter.loadOptions = value.loadOptions;
+
+              filter.loadOptions = {
+                apiRoute: value.load_options.api_route ?? '',
+                select: value.load_options.select ?? {
+                  label: 'name',
+                  id: 'id',
+                },
+                requestParams: value.load_options.request_params ?? [],
+              };
+
               filter.staticOptions = [];
             }
-            // Priority 3: Default to API
+
+            // DEFAULT
             else {
+
               filter.optionsSource = 'api';
+
               filter.staticOptions = [];
-              filter.loadOptions = { apiRoute: '', select: { label: 'name', id: 'id' }, requestParams: [] };
+
+              filter.loadOptions = {
+                apiRoute: '',
+                select: { label: 'name', id: 'id' },
+                requestParams: [],
+              };
             }
           }
 

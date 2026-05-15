@@ -1,28 +1,48 @@
 <template>
-  <div id="pageActionscomponent" class="row q-col-gutter-y-sm full-width items-center justify-between">
+  <div
+    id="pageActionscomponent"
+    class="row q-col-gutter-y-sm full-width items-center justify-between"
+  >
     <!--Title-->
-    <div :class="`row text-primary text-weight-bold ellipsis title-content items-center`">
+    <div
+      :class="`row text-primary text-weight-bold ellipsis title-content items-center`"
+    >
       <q-icon v-if="icon" :name="icon" size="22px" class="q-mr-sm" />
       <label id="titleCrudTable" v-if="title">{{ title }}</label>
       <!--Help Text: Page documentation-->
       <help-text v-if="pageDocumentation && title" v-bind="pageDocumentation" />
     </div>
     <!--Actions-->
-    <div :class="`actions-content row q-gutter-${gutter} items-center justify-end items-start`">
+    <div
+      :class="`actions-content row q-gutter-${gutter} items-center justify-end items-start`"
+    >
       <!--Search-->
-      <q-input v-model="search" bg-color="white" debounce="800" rounded outlined dense clearable
-               :placeholder="$tr('isite.cms.label.search')" class="page-input-search"
-               v-if="extraActions && extraActions.includes('search') && searchAction"
-               @update:modelValue="$emit('search', $clone(search))">
+      <q-input
+        v-model="search"
+        bg-color="white"
+        debounce="800"
+        rounded
+        outlined
+        dense
+        clearable
+        :placeholder="$tr('isite.cms.label.search')"
+        class="page-input-search"
+        v-if="extraActions && extraActions.includes('search') && searchAction"
+        @update:modelValue="$emit('search', $clone(search))"
+      >
         <template v-slot:prepend>
-          <q-icon color="tertiary" size="xs" name="fa-light fa-magnifying-glass" />
+          <q-icon
+            color="tertiary"
+            size="xs"
+            name="fa-light fa-magnifying-glass"
+          />
         </template>
       </q-input>
       <!--Button Actions-->
       <div v-for="(btn, keyAction) in actions()" :key="keyAction">
         <!-- if the button is dropdown -->
         <q-btn-dropdown
-          v-bind="{...buttonProps}"
+          v-bind="{ ...buttonProps }"
           v-if="btn.type == 'btn-dropdown'"
           class="btn-border-dropdown-custom"
           :label="btn.props.label"
@@ -30,8 +50,14 @@
           :data-testid="`${btn.type}-${btn.props.label || ''}-${keyAction}`"
         >
           <q-list>
-            <q-item v-for="(item, index) in btn.items" :key="index" clickable v-close-popup
-                    @click="item.action != undefined ? item.action() : null" class="tw-px-4">
+            <q-item
+              v-for="(item, index) in btn.items"
+              :key="index"
+              clickable
+              v-close-popup
+              @click="item.action != undefined ? item.action() : null"
+              class="tw-px-4"
+            >
               <q-item-section avatar v-if="item.icon">
                 <q-avatar :icon="item.icon" />
               </q-item-section>
@@ -41,15 +67,19 @@
             </q-item>
           </q-list>
         </q-btn-dropdown>
-        <q-btn v-else-if="btn.type === 'recommendation'" class="animated" v-bind="{...buttonProps, ...btn.props}"
-               @click="btn.action !=    undefined ? btn.action() : null">
+        <q-btn
+          v-else-if="btn.type === 'recommendation'"
+          class="animated"
+          v-bind="{ ...buttonProps, ...btn.props }"
+          @click="btn.action != undefined ? btn.action() : null"
+        >
           <q-tooltip v-if="btn.label">{{ btn.label }}</q-tooltip>
         </q-btn>
         <!-- menu dropdown-->
         <q-btn-dropdown
           v-else-if="btn.type == 'columns'"
           :icon="btn.props.icon"
-          v-bind="{...buttonProps, ...btn.props}"
+          v-bind="{ ...buttonProps, ...btn.props }"
         >
           <q-list dense>
             <template v-for="(action, key) in btn.actions" :key="key">
@@ -63,27 +93,35 @@
                     <q-checkbox
                       v-model="visibleColumns"
                       :val="action.name"
-                      @update:model-value="(value) => this.$emit('visibleColumns', value)"
+                      @update:model-value="
+                        (value) => this.$emit('visibleColumns', value)
+                      "
                     />
-                    {{action.label}}
+                    {{ action.label }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
             </template>
           </q-list>
         </q-btn-dropdown>
-        <q-btn v-else v-bind="{...buttonProps, ...btn.props}" @click="btn.action != undefined ? btn.action() : null">
-          <q-badge v-if="btn?.badge?.vIf" v-bind="{...btn?.badge }" />
-          <q-tooltip v-if="btn.label && btn.badge?.show" v-model="showExpires" class="tw-z-10">{{ btn.label }}</q-tooltip>
+        <q-btn
+          v-else
+          v-bind="{ ...buttonProps, ...btn.props }"
+          @click="btn.action != undefined ? btn.action() : null"
+        >
+          <q-badge v-if="btn?.badge?.vIf" v-bind="{ ...btn?.badge }" />
+          <q-tooltip
+            v-if="btn.label && btn.badge?.show"
+            v-model="showExpires"
+            class="tw-z-10"
+            >{{ btn.label }}</q-tooltip
+          >
           <q-tooltip v-else-if="btn.label">{{ btn.label }}</q-tooltip>
         </q-btn>
       </div>
     </div>
     <!--Description-->
-    <span
-      v-if="description"
-      class="col-12 description-content"
-    >
+    <span v-if="description" class="col-12 description-content">
       {{ description }}
     </span>
     <!-- dynamicFilter -->
@@ -97,13 +135,17 @@
         :modelValue="showDynamicFilterModal"
         @showModal="showDynamicFilterModal = true"
         @hideModal="showDynamicFilterModal = false"
-        @update:summary="summary => updateDynamicSummary(summary)"
-        @update:modelValue="filters => updateDynamicFilterValues(filters)"
+        @update:summary="(summary) => updateDynamicSummary(summary)"
+        @update:modelValue="(filters) => updateDynamicFilterValues(filters)"
       />
-    </div> 
+    </div>
     <!-- Export Component -->
     <master-export
-      v-if="!this.isAppOffline && Array.isArray(excludeActions) ? !excludeActions.includes('export') : true"
+      v-if="
+        !this.isAppOffline && Array.isArray(excludeActions)
+          ? !excludeActions.includes('export')
+          : true
+      "
       v-model="exportParams"
       ref="exportComponent"
       :dynamicFilterValues="dynamicFilterValues"
@@ -113,7 +155,7 @@
       v-if="bulkActionsPermission"
       :dynamicFilterValues="dynamicFilterValues"
       :dynamicFilterSummary="dynamicFilterSummary"
-      @bulkActionsConfig="(value) => bulkActionsConfig = value"
+      @bulkActionsConfig="(value) => (bulkActionsConfig = value)"
       ref="bulkActions"
     />
 
@@ -130,8 +172,8 @@ import masterExport from 'modules/qsite/_components/master/masterExport';
 import masterSynchronizable from 'modules/qsite/_components/master/masterSynchronizable';
 //import masterFilter from 'modules/qsite/_components/master/masterFilter';
 import { eventBus } from 'src/plugins/utils';
-import appConfig from 'src/setup/app'
-import bulkActions from "modules/qsite/_components/master/bulkActions"
+import appConfig from 'src/setup/app';
+import bulkActions from 'modules/qsite/_components/master/bulkActions';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 
 export default {
@@ -150,47 +192,51 @@ export default {
     searchAction: { default: true },
     multipleRefresh: {
       type: Boolean,
-      default: () => false
+      default: () => false,
     },
     tourName: { default: null },
     help: {
       required: false,
       type: Object,
-      default: () => {
-      }
+      default: () => {},
     },
-    expiresIn: {type: Number},
+    expiresIn: { type: Number },
     /*dynamic filter*/
     systemName: null,
     dynamicFilter: {
       required: false,
       type: Object,
       default: () => {
-        return {}
-      }
+        return {};
+      },
     },
     tableColumns: { default: [] },
     showColumnsButton: {
       type: Boolean,
-      default: () => false
+      default: () => false,
     },
     speech: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   emits: [
-    'search', 
-    'new', 
-    'refresh', 
-    'activateTour', 
-    'updateDynamicFilterValues', 
-    'updateDynamicSummary',  
+    'search',
+    'new',
+    'refresh',
+    'activateTour',
+    'updateDynamicFilterValues',
+    'updateDynamicSummary',
     'visibleColumns',
   ],
-  components: { masterExport, masterSynchronizable, bulkActions, dynamicFilter },
+  components: {
+    masterExport,
+    masterSynchronizable,
+    bulkActions,
+    dynamicFilter,
+  },
   mounted() {
-    this.$nextTick(function() {
+    this.$nextTick(function () {
       this.init();
     });
   },
@@ -203,26 +249,26 @@ export default {
       titleRefresh: this.$tr('isite.cms.label.refreshAtOnce'),
       timeRefresh: 0,
       drawer: {
-        filter: false
+        filter: false,
       },
       showExpires: false,
       badgeAppear: false,
       timeOuts: [],
       bulkActionsConfig: false,
-      enableTourAction: false, 
-      
+      enableTourAction: false,
+
       /* dynamic filters */
-      showDynamicFilterModal: false, 
+      showDynamicFilterModal: false,
       dynamicFilterValues: {},
       dynamicFilterSummary: null,
-      visibleColumns: []
+      visibleColumns: [],
     };
   },
   watch: {
     expiresIn(newValue) {
-      this.timeOuts.forEach(timeId => clearTimeout(timeId))
-      this.showBadgeRefresh(newValue)
-    }
+      this.timeOuts.forEach((timeId) => clearTimeout(timeId));
+      this.showBadgeRefresh(newValue);
+    },
   },
   computed: {
     isAppOffline() {
@@ -242,7 +288,7 @@ export default {
         textColor: 'primary',
         style: 'border: 1px solid rgb(229 229 229)', //text-neutral-200
         class: `btn-${this.size}`,
-        noCaps: true
+        noCaps: true,
       };
     },
     //Page Documentation
@@ -253,13 +299,15 @@ export default {
           title: this.help.title,
           description: this.help.description,
           icon: this.help?.icon || this.$route.meta.icon,
-          class: this.help?.class || 'q-ml-sm'
+          class: this.help?.class || 'q-ml-sm',
         };
       }
 
       let response = null;
       //Get params from page permission
-      let params = this.$helper.getInfoFromPermission(this.$route.meta.permission);
+      let params = this.$helper.getInfoFromPermission(
+        this.$route.meta.permission
+      );
       if (params) {
         //instance the config name
         let configName = `${params.module}.documentation.${params.entity}`;
@@ -272,40 +320,46 @@ export default {
           title: this.title,
           description: response,
           icon: this.$route.meta.icon,
-          class: 'q-ml-sm'
+          class: 'q-ml-sm',
         };
       }
       return false;
     },
     bulkActionsPermission() {
-      const routeParams = this.$helper.getInfoFromPermission(this.$route.meta?.permission)
-      const bulkActionsPermission = `${routeParams?.module}.${routeParams?.entity}.bulk-actions`
-      return this.$hasAccess(bulkActionsPermission)
-    }
+      const routeParams = this.$helper.getInfoFromPermission(
+        this.$route.meta?.permission
+      );
+      const bulkActionsPermission = `${routeParams?.module}.${routeParams?.entity}.bulk-actions`;
+      return this.$hasAccess(bulkActionsPermission);
+    },
   },
   methods: {
     init() {
-      this.showBadgeRefresh(this.expiresIn)
+      this.showBadgeRefresh(this.expiresIn);
       this.validateEnableTour();
-      this.getVisibleColumns()
+      this.getVisibleColumns();
     },
     async validateEnableTour() {
-      if(this.tourName && !config('app.disableTours') &&
-        (this.$store.getters['qsiteApp/getConfigApp']('igamification') != undefined) &&
+      if (
+        this.tourName &&
+        !config('app.disableTours') &&
+        this.$store.getters['qsiteApp/getConfigApp']('igamification') !=
+          undefined &&
         !this.excludeActions.includes('tour')
-      ){
-        let tour = await this.$tour.getTourData(this.tourName, true)
-        if(tour) {
-          this.enableTourAction = true
+      ) {
+        let tour = await this.$tour.getTourData(this.tourName, true);
+        if (tour) {
+          this.enableTourAction = true;
           this.$emit('activateTour');
         }
       }
     },
     refreshByTime(time) {
       this.timeRefresh = time;
-      this.titleRefresh = time === 0
-        ? this.$tr('isite.cms.label.refreshAtOnce')
-        : this.$tr('isite.cms.label.refreshEveryMinutes', { min: time });
+      this.titleRefresh =
+        time === 0
+          ? this.$tr('isite.cms.label.refreshAtOnce')
+          : this.$tr('isite.cms.label.refreshEveryMinutes', { min: time });
       this.clearInterval();
       const interval = 1000 * 60 * time;
       this.emitRefresh();
@@ -321,8 +375,8 @@ export default {
       eventBus.emit('page.data.refresh');
       eventBus.emit('crud.data.refresh');
       eventBus.emit('export.data.refresh');
-      this.badgeAppear = false
-    },    
+      this.badgeAppear = false;
+    },
     clearInterval() {
       if (this.refreshIntervalId) {
         clearInterval(this.refreshIntervalId);
@@ -337,36 +391,45 @@ export default {
           {
             icon: 'fa-duotone fa-shoe-prints',
             title: this.$tr('igamification.cms.activities.repeatAction'),
-            content: this.$tr('igamification.cms.activities.repeatActionDescription'),
+            content: this.$tr(
+              'igamification.cms.activities.repeatActionDescription'
+            ),
             element: '#actionStartTour',
-            position: 'top'
-          }
-        ]
+            position: 'top',
+          },
+        ],
       });
     },
     getDiffCacheTime() {
       // Helper function to add a leading zero if the number is less than 10
-      const addZero = (num) => num < 10 ? `0${num}` : num;
-      const diffCache = this.expiresIn - appConfig.cacheTime
+      const addZero = (num) => (num < 10 ? `0${num}` : num);
+      const diffCache = this.expiresIn - appConfig.cacheTime;
       const cacheDate = new Date(diffCache * 1000);
-      const hours = cacheDate.getHours() > 12 ? cacheDate.getHours() - 12 : cacheDate.getHours();
+      const hours =
+        cacheDate.getHours() > 12
+          ? cacheDate.getHours() - 12
+          : cacheDate.getHours();
       const minutes = cacheDate.getMinutes();
       const ampm = cacheDate.getHours() >= 12 ? 'pm' : 'am';
       // Formatear la fecha en formato dd/mm/yyyy
       const day = cacheDate.getDate();
       const month = cacheDate.getMonth() + 1;
       const year = cacheDate.getFullYear();
-      return `${addZero(hours)}:${addZero(minutes)}${ampm}, ${addZero(day)}/${addZero(month)}/${year}`
+      return `${addZero(hours)}:${addZero(minutes)}${ampm}, ${addZero(
+        day
+      )}/${addZero(month)}/${year}`;
     },
     //Show badge
     showBadgeRefresh(expires) {
       if (expires) {
-        this.showExpires = true
+        this.showExpires = true;
         //Disappear in 7sec
-        this.timeOuts.push(setTimeout(() => {
-          this.showExpires = false
-        }, 7000));
-        const diffCache = expires - appConfig.cacheTime
+        this.timeOuts.push(
+          setTimeout(() => {
+            this.showExpires = false;
+          }, 7000)
+        );
+        const diffCache = expires - appConfig.cacheTime;
 
         const cacheDate = diffCache * 1000;
         const currentTimeMillis = Date.now();
@@ -375,48 +438,58 @@ export default {
         // Check if 15 minutes have passed
         const fifteenMinutesInMillis = 15 * 60 * 1000;
         if (timeDifferenceMillis >= fifteenMinutesInMillis) {
-          this.badgeAppear = true
+          this.badgeAppear = true;
         } else {
-          this.badgeAppear = false
-          const timeToAppear = fifteenMinutesInMillis - timeDifferenceMillis
+          this.badgeAppear = false;
+          const timeToAppear = fifteenMinutesInMillis - timeDifferenceMillis;
           //Appear bagde
-          this.timeOuts.push(setTimeout(() => {
-            this.badgeAppear = true
-          }, timeToAppear));
+          this.timeOuts.push(
+            setTimeout(() => {
+              this.badgeAppear = true;
+            }, timeToAppear)
+          );
         }
       }
     },
     actions() {
       //Instance excludeActions prop
-      let excludeActions = this.$clone(Array.isArray(this.excludeActions) ? this.excludeActions : []);
+      let excludeActions = this.$clone(
+        Array.isArray(this.excludeActions) ? this.excludeActions : []
+      );
 
       let response = [
         //Export Icommerce
         {
           label: this.$tr('isite.cms.label.migration'),
-          vIf: (this.syncParams && !excludeActions.includes('sync')),
+          vIf: this.syncParams && !excludeActions.includes('sync'),
           props: {
-            icon: 'fa-light fa-folder-tree'
+            icon: 'fa-light fa-folder-tree',
           },
-          action: () => this.$refs.syncComponent.show()
+          action: () => this.$refs.syncComponent.show(),
         },
         //Export
         {
           label: this.$tr('isite.cms.label.export'),
-          vIf: (this.exportParams && !excludeActions.includes('export')) && !this.isAppOffline,
+          vIf:
+            this.exportParams &&
+            !excludeActions.includes('export') &&
+            !this.isAppOffline,
           props: {
-            icon: 'fa-light fa-file-arrow-down'
+            icon: 'fa-light fa-file-arrow-down',
           },
-          action: () => this.$refs.exportComponent.showReport()
+          action: () => this.$refs.exportComponent.showReport(),
         },
         // Bulk Actions
         {
           label: this.$tr('isite.cms.label.newBulkAction'),
-          vIf: this.bulkActionsPermission && this.bulkActionsConfig && !this.isAppOffline,
+          vIf:
+            this.bulkActionsPermission &&
+            this.bulkActionsConfig &&
+            !this.isAppOffline,
           props: {
-            icon: 'fa-light fa-boxes-packing'
+            icon: 'fa-light fa-boxes-packing',
           },
-          action: () => this.$refs.bulkActions.showReport()
+          action: () => this.$refs.bulkActions.showReport(),
         },
         //Tour
         {
@@ -424,86 +497,121 @@ export default {
           vIf: this.enableTourAction,
           props: {
             icon: 'fa-light fa-shoe-prints',
-            id: 'actionStartTour'
+            id: 'actionStartTour',
           },
-          action: () => this.startTour(true)
+          action: () => this.startTour(true),
         },
         //recommendations
         {
           type: 'recommendation',
           label: this.$trp('isite.cms.label.recommendation'),
-          vIf: (this.params.recommendations && !excludeActions.includes('recommendations')) ? true : false,
+          vIf:
+            this.params.recommendations &&
+            !excludeActions.includes('recommendations')
+              ? true
+              : false,
           props: {
-            icon: 'fas fa-hat-wizard'
+            icon: 'fas fa-hat-wizard',
           },
-          action: () => eventBus.emit('toggleMasterDrawer', 'recommendation')
+          action: () => eventBus.emit('toggleMasterDrawer', 'recommendation'),
         },
         //visibleColumns
         {
-          type: "columns",
-          vIf: this.showColumnsButton && (!config('app.disableColumnsButton')),
+          type: 'columns',
+          vIf: this.showColumnsButton && !config('app.disableColumnsButton'),
           actions: this.tableColumns,
           props: {
-            icon: "fa-duotone fa-line-columns",
-          }
+            icon: 'fa-duotone fa-line-columns',
+          },
         },
         //Filter
         {
           label: this.$tr('isite.cms.label.filter'),
-          vIf: ( Object.keys(this.dynamicFilter).length && !excludeActions.includes('filter') && !this.isAppOffline),
+          vIf:
+            Object.keys(this.dynamicFilter).length &&
+            !excludeActions.includes('filter') &&
+            !this.isAppOffline,
           props: {
             icon: 'fa-light fa-filter',
-            id: 'filter-button-crud'
+            id: 'filter-button-crud',
           },
-          action: () => this.showDynamicFilterModal = true
+          action: () => (this.showDynamicFilterModal = true),
         },
 
         //Refresh
         {
-          label: !!this.expiresIn ? this.$tr('isite.cms.dateCache', { date: this.getDiffCacheTime() }) : this.$trp('isite.cms.label.refresh'),
+          label: !!this.expiresIn
+            ? this.$tr('isite.cms.dateCache', { date: this.getDiffCacheTime() })
+            : this.$trp('isite.cms.label.refresh'),
           type: this.multipleRefresh ? 'btn-dropdown' : '',
-          vIf: (this.params.refresh && !excludeActions.includes('refresh') && !this.isAppOffline),
+          vIf:
+            this.params.refresh &&
+            !excludeActions.includes('refresh') &&
+            !this.isAppOffline,
           props: {
             icon: 'fa-light fa-rotate-right',
-            id: 'refresh-button-crud'
+            id: 'refresh-button-crud',
           },
           badge: {
-            vIf: (!!this.expiresIn && this.badgeAppear),
+            vIf: !!this.expiresIn && this.badgeAppear,
             floating: true,
             color: 'warning',
             rounded: true,
-            show: true
+            show: true,
           },
           items: [
             {
               label: this.$tr('isite.cms.label.refreshAtOnce'),
-              action: () => {this.refreshByTime(0)}
+              action: () => {
+                this.refreshByTime(0);
+              },
             },
             {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', { min: 1 }),
-              action: () => {this.refreshByTime(1)}
+              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                min: 1,
+              }),
+              action: () => {
+                this.refreshByTime(1);
+              },
             },
             {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', { min: 5 }),
-              action: () => {this.refreshByTime(5)}
+              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                min: 5,
+              }),
+              action: () => {
+                this.refreshByTime(5);
+              },
             },
             {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', { min: 10 }),
-              action: () => {this.refreshByTime(10)}
+              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                min: 10,
+              }),
+              action: () => {
+                this.refreshByTime(10);
+              },
             },
             {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', { min: 15 }),
-              action: () => {this.refreshByTime(15)}
-            }
+              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                min: 15,
+              }),
+              action: () => {
+                this.refreshByTime(15);
+              },
+            },
           ],
-          action: () => {this.emitRefresh()}
-        }
+          action: () => {
+            this.emitRefresh();
+          },
+        },
       ];
 
       //Validate extra actions
       if (this.extraActions) {
         //Prepend actions
-        response = [...this.extraActions.filter(action => typeof action != 'string'), ...response];
+        response = [
+          ...this.extraActions.filter((action) => typeof action != 'string'),
+          ...response,
+        ];
         //New button action
         if (this.extraActions.includes('new'))
           response.unshift({
@@ -515,31 +623,43 @@ export default {
               round: false,
               rounded: true,
               padding: '5px 15px',
-              id: 'new-button-crud'
+              id: 'new-button-crud',
             },
-            action: () => this.$emit('new')
+            action: () => this.$emit('new'),
           });
       }
 
       //force styles
-      response = response.map(item => ({ ...item, props: { ...(item.props.label ? { padding: '5px 15px' } : {}), ...item.props, color: 'white', outline: false } }));
+      response = response.map((item) => ({
+        ...item,
+        props: {
+          ...(item.props.label ? { padding: '5px 15px' } : {}),
+          ...item.props,
+          color: 'white',
+          outline: false,
+        },
+      }));
 
       //Response
-      return response.filter(item => item.vIf !== undefined ? item.vIf : true);
+      return response.filter((item) =>
+        item.vIf !== undefined ? item.vIf : true
+      );
     },
     updateDynamicFilterValues(filters) {
       this.dynamicFilterValues = filters;
-      this.$emit('updateDynamicFilterValues', filters)
+      this.$emit('updateDynamicFilterValues', filters);
     },
     updateDynamicSummary(summary) {
-      this.dynamicFilterSummary = summary
-      this.$emit('updateDynamicSummary', summary)
+      this.dynamicFilterSummary = summary;
+      this.$emit('updateDynamicSummary', summary);
     },
-    getVisibleColumns(){
-      this.visibleColumns = this.tableColumns.length ? this.tableColumns.map(item => item.name) : []
-      this.$emit('visibleColumns', this.visibleColumns)
-    }
-  }
+    getVisibleColumns() {
+      this.visibleColumns = this.tableColumns.length
+        ? this.tableColumns.map((item) => item.name)
+        : [];
+      this.$emit('visibleColumns', this.visibleColumns);
+    },
+  },
 };
 </script>
 <style lang="scss">
@@ -553,7 +673,7 @@ export default {
   }
 
   .animated {
-    animation: ring 10s .7s ease-in-out infinite;
+    animation: ring 10s 0.7s ease-in-out infinite;
   }
 
   .title-content {
@@ -592,12 +712,17 @@ export default {
       width: 100%;
     }
 
-    .q-field__control, .q-field__control:after, .q-field__control-container, .q-field__append {
+    .q-field__control,
+    .q-field__control:after,
+    .q-field__control-container,
+    .q-field__append {
       //min-height: 34px;
       //max-height: 34px;
     }
 
-    .q-field__control, .q-field__prepend, .q-field__append {
+    .q-field__control,
+    .q-field__prepend,
+    .q-field__append {
       height: 34px;
     }
   }

@@ -68,7 +68,10 @@ export default function controller(props: any, emit: any) {
     }),
     isMobile: computed(() => Screen.width < '500' ),
     //hide on mobile by default
-    showFilters: computed(() => computeds.isMobile.value ? props.showOnMobile : true)
+    showFilters: computed(() => computeds.isMobile.value ? props.showOnMobile : true),
+    propsFilters: computed(() => {
+      return state.props.filters
+    })
   }
 
   // Methods
@@ -80,9 +83,9 @@ export default function controller(props: any, emit: any) {
 
     async init(options = { runGetUrlFilter: true }) {
       state.userData = clone(store.state.quserAuth.userData)
-      state.props = clone(props)
-      state.props.filters = methods.removeNullValues(state.props.filters)
-      state.systemName = state.props?.systemName || ''
+      state.props.filters = methods.removeNullValues(clone(props.filters))
+      state.systemName = props?.systemName || ''
+      state.props.systemName = state.systemName
       state.useAdminFilter = state.userData.hasOwnProperty('fields')
       await methods.setFilterValues()
 
@@ -105,7 +108,7 @@ export default function controller(props: any, emit: any) {
       if(Object.keys(state.props.filters).length !== 0){
         Object.keys(state.props.filters).forEach(key => {
           //returns if initial value is null or an empty array
-          if(!state.props.filters[key]?.value ) return 
+          if(!state.props.filters[key]?.value ) return
           if( Array.isArray(state.props.filters[key]?.value)){
             if(!state.props.filters[key]?.value.length) return
           }
@@ -218,8 +221,8 @@ export default function controller(props: any, emit: any) {
               })
               result[key].option = options.join(', ')
             }
-          } else if(field?.type == 'dateRange'){            
-            result[key].option  = methods.setReadValuesTypeDateRange(key)            
+          } else if(field?.type == 'dateRange'){
+            result[key].option  = methods.setReadValuesTypeDateRange(key)
           } else if(field?.type == 'crud'){
             result[key] = methods.setReadValuesTypeCrud(result[key], key)
           }
@@ -321,9 +324,9 @@ export default function controller(props: any, emit: any) {
       })
       // add props field
       Object.keys(filters).forEach(key => {
-        if(state.props.filters[key]?.props?.field){          
+        if(state.props.filters[key]?.props?.field){
           filters[key] = {...filters[key], field: state.props.filters[key].props.field}
-          delete filters[key]?.label 
+          delete filters[key]?.label
         }
       })
       state.hasAppliedFilters = (Object.keys(filters).length > 0)
@@ -525,8 +528,30 @@ export default function controller(props: any, emit: any) {
     if(model) {
       methods.restoreFilterValues()
     }
-
   }, {deep: true})
+
+  // Watch - Sincronizar cambios dinámicos en props.filters
+  watch(
+    () => props.filters,
+    (newFilters) => {
+      state.props.filters = methods.removeNullValues(clone(newFilters))
+      if (Object.keys(state.props.filters).length > 0) {
+        methods.setFilterValues()
+        methods.addLoadedOptionsCallback()
+        methods.setQuickFilters()
+      }
+    },
+    { deep: true }
+  )
+
+  // Watch - Sincronizar cambios en systemName
+  watch(
+    () => props.systemName,
+    (newSystemName) => {
+      state.systemName = newSystemName
+    }
+  )
+
 
   return {...refs, ...(toRefs(state)), ...computeds, ...methods}
 }

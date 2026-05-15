@@ -39,7 +39,7 @@ export function generateJson(filtersList) {
       if (filter.optionsSource === 'api') {
         const lo = filter.loadOptions;
         config.loadOptions = {
-          apiRoute: lo?.apiRoute || '',
+          apiRoute: lo?.apiRoute || lo?.api_route || '',
           select: { label: lo?.select?.label || 'name', id: lo?.select?.id || 'id' }
         };
         // Safety check for requestParams array

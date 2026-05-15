@@ -90,9 +90,8 @@ import {
   titleModal,
 } from './controllers/modalBuildFilter';
 
-
 onMounted(() => {
-  init();
+  if (showModal.value) init();
 });
 
 watch(

@@ -57,13 +57,14 @@ function buildFileObjectFromUrl(url: string): FileObject {
 export default function useAvatarController(props: AvatarProps) {
   const isModalVisible = ref(false);
   const selectedFile = ref<FileObject | null>(null);
-
+  const refavatarImage = ref(null);
   /** Opens the preview modal with the file built from the current URL prop. */
   const handleClick = (): void => {
     if (!props.url) return;
 
-    selectedFile.value = buildFileObjectFromUrl(props.url);
-    isModalVisible.value = true;
+
+    if (refavatarImage.value)
+      refavatarImage.value.open(props.url);
   };
 
   /** Syncs the modal visibility state with the child component's emitted value. */
@@ -76,5 +77,6 @@ export default function useAvatarController(props: AvatarProps) {
     selectedFile,
     handleClick,
     handleUpdateModal,
+    refavatarImage,
   };
 }
