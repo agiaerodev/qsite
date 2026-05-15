@@ -571,8 +571,8 @@ export default {
       } else {
         const data = { id: elm.clone.id, statusId: elm.to.id };
         row.loading = true
-
-        await services.updateCard(this.kanban.cards.apiRoute, data.id, data).catch(error => {
+        const apiRoute = this.kanban.cards?.apiRoutes && this.kanban.cards?.apiRoutes?.update ? this.kanban.cards.apiRoutes.update : this.kanban.cards.apiRoute
+        await services.updateCard(apiRoute, data.id, data).catch(error => {
           this.$emit('revertCard', from.id, to.id, row, this.columnSnapshot)
           row.loading = false
           this.columnSnapshot = null
