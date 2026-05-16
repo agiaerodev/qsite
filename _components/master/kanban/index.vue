@@ -176,6 +176,7 @@
       @reloadCard="value => reloadCard(value)"
       @openModal="(value) => openModal(value)"
       @revertCard="revertCard"
+      @reloadTable="$emit('reloadTable')"
     />
 </div>
 
@@ -526,16 +527,16 @@ export default {
     },
 
     async reloadColumnHeader(columnId, refresh = false){
-      const column = `columnHeaderComponent-${columnId}` 
+      const column = `columnHeaderComponent-${columnId}`
       if(this.$refs[column]){
         this.$refs[column].init(refresh)
-      }      
+      }
     },
 
     /* reload column*/
     async reloadColumn(columnId, page = 1) {
       const refresh = true
-      
+
 
       const column = this.kanbanColumns.find(item => item.id == columnId);
       if (column) {
