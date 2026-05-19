@@ -408,11 +408,20 @@ export default {
       await this.buildColumns(refresh);
     },
 
+    /* setup filters from crud file and dynamicCrudFilters */
     async getDynamicCrudFilters(){
+
+      if(this.dynamicFilter){
+        this.dynamicCrudFilters = {...this.dynamicFilter}
+      }
+
        if(this.crudData?.dynamicCrudKey){
         const response = await getDynamicCrud(this.crudData?.dynamicCrudKey)
         if(response?.filters){
-          this.dynamicCrudFilters = {...response.filters}
+          this.dynamicCrudFilters = {
+            ...this.dynamicCrudFilters,
+            ...response.filters
+          }
         }
       }
     },
