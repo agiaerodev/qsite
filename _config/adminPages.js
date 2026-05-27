@@ -125,6 +125,7 @@ export default {
     },
   },
   dynamicCruds: {
+    permission: 'isite.cruds.manage',
     activated: true,
     path: '/site/dynamic-cruds',
     name: 'Dynamic Crud',
