@@ -17,7 +17,7 @@ export default {
   //Organization Page
   organizationsAll: {
     permission: 'isite.organizations.index-all',
-    activated: true,
+    activated: false,
     path: '/site/organizations',
     name: 'qsite.admin.organizations.index-all',
     crud: import('modules/qsite/_crud/organizations'),
@@ -32,7 +32,7 @@ export default {
   },
   organizations: {
     permission: 'isite.organizations.index',
-    activated: true,
+    activated: false,
     path: '/site/my-organizations',
     name: 'qsite.admin.organizations.index',
     page: () => import('modules/qsite/_pages/admin/organizations/index'),
@@ -47,7 +47,7 @@ export default {
   //Organization form
   organizationForm: {
     permission: 'isite.organizations.edit',
-    activated: true,
+    activated: false,
     path: '/site/organizations/:id',
     name: 'qsite.admin.organizations.update',
     page: () => import('modules/qsite/_pages/admin/organizations/form'),
@@ -63,7 +63,7 @@ export default {
   //Organization Page
   categories: {
     permission: 'isite.categories.manage',
-    activated: true,
+    activated: false,
     path: '/site/categories',
     name: 'qsite.admin.catgeories.index',
     crud: import('modules/qsite/_crud/categories'),
@@ -111,7 +111,7 @@ export default {
   //Layouts
   layouts: {
     permission: 'isite.layouts.manage',
-    activated: true,
+    activated: false,
     path: '/site/layouts',
     name: 'qsite.admin.ayouts.index',
     crud: import('modules/qsite/_crud/layouts'),
