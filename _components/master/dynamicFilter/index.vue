@@ -98,6 +98,7 @@
       <div v-if="Object.keys(hidenFields).length" v-show="false">
         <template v-for="(field, keyField) in hidenFields" :key="keyField">
           <dynamic-field
+            v-model="filterValues[field.name || keyField]"
             :field="field"
             :keyField="keyField"
           />
