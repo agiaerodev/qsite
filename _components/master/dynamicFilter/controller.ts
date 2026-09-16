@@ -1,11 +1,11 @@
 import {computed, reactive, ref, onMounted, toRefs, watch} from "vue";
 import { debounce } from 'quasar'
 import _ from "lodash";
-import service from 'modules/qsite/_components/master/dynamicFilter/services'
 import { i18n, clone, store, router } from 'src/plugins/utils';
 import moment from "moment";
 import { Screen } from 'quasar'
 import dateRangePickerRanges from 'modules/qsite/_components/master/dateRangePicker/constants'
+import { updateOrCreateUserPreferences } from 'modules/quser/_services/userPreferences';
 
 
 export default function controller(props: any, emit: any) {
@@ -32,7 +32,7 @@ export default function controller(props: any, emit: any) {
     readValues: {},
     hidenFields: {},
     systemName: '',
-    useAdminFilter: false,
+    useUserPreferences: false,
     hasAppliedFilters: false,
     userData: {
       fields: [{
@@ -71,7 +71,8 @@ export default function controller(props: any, emit: any) {
     showFilters: computed(() => computeds.isMobile.value ? props.showOnMobile : true),
     propsFilters: computed(() => {
       return state.props.filters
-    })
+    }),
+    userPreferencesKey: computed(() => `${state.systemName}-table-filters-values` )
   }
 
   // Methods
@@ -86,7 +87,7 @@ export default function controller(props: any, emit: any) {
       state.props.filters = methods.removeNullValues(clone(props.filters))
       state.systemName = props?.systemName || ''
       state.props.systemName = state.systemName
-      state.useAdminFilter = state.userData.hasOwnProperty('fields')
+      state.useUserPreferences = state.userData.hasOwnProperty('preferences')
       await methods.setFilterValues()
 
       if (options.runGetUrlFilter) await methods.getUrlFilters()
@@ -333,7 +334,7 @@ export default function controller(props: any, emit: any) {
       methods.setReadValues()
       methods.mutateURLFilters({...filters})
       methods.emitModelValue(filters)
-      if(updateUserData && state.useAdminFilter){
+      if(updateUserData && state.useUserPreferences){
         methods.setAdminFilter(filters)
       }
       methods.hideModal()
@@ -385,9 +386,10 @@ export default function controller(props: any, emit: any) {
         }
       }
 
-      if(state.useAdminFilter){
+      if(state.useUserPreferences){
         if(Object.keys(filterValues).length === 0){
           const filters = methods.getAdminFilter()
+          console.log('loaded =>', filters)
           filterValues = {...filters[state.systemName]}
         }
       }
@@ -414,54 +416,35 @@ export default function controller(props: any, emit: any) {
     },
 
     getAdminFilter(){
+      const userData = clone(store.state.quserAuth.userData)
       let filters = {}
+      if(userData?.preferences?.length){
+        const preferences = userData.preferences.find(item => item.key == computeds.userPreferencesKey.value) 
+        if(preferences) filters = preferences.value
 
-      if(state.userData?.fields){
-        if (Array.isArray(state.userData.fields)){
-          if(state.userData.fields.length > 0){
-            const adminFilters = state.userData.fields.find((element) => element.name == 'adminFilters') || false
-            if(adminFilters && adminFilters?.value){
-              return adminFilters.value
-            }
-          }
-        }
       }
+      console.log('GET ==>', computeds.userPreferencesKey.value, filters)
       return filters
     },
 
     async setAdminFilter(filters){
       if(!state.systemName) return
-      const adminFilters = methods.getAdminFilter()
+      /* compares the emited filters vs the state to prevent multiple api calls */
+      const areEqual = _.isEqual(filters, state.filterValues)
+      console.log(state.filterValues)
+      console.log(areEqual)
+      if(areEqual) return
 
-      if(Object.keys(adminFilters).length !== 0){
-        state.userData.fields.find((element) => {
-          if(element.name == 'adminFilters'){
-            element.value[state.systemName] = filters
-          }
-        })
-      } else {
-        const valueFilter = {}
-        valueFilter[state.systemName] = filters
-        const fields = {
-          name: 'adminFilters',
-          value: {
-            ...valueFilter,
-          }
-        }
-        state.userData.fields.push(fields)
+      const preferences = {
+        key: computeds.userPreferencesKey.value,
+        value: filters
       }
-
-      const data = {
-        email: state.userData.email,
-        fields: state.userData.fields,
-        first_name: state.userData.firstName,
-        full_name: state.userData.fullName,
-        id: state.userData.id,
-        is_activated: state.userData.isActivated,
-        last_name: state.userData.lastName,
-      }
-      //update value on backend...
-      const response = service.updateUserData(false, state.userData.id, data)
+      console.log('SET ==>', state.systemName, filters)
+      console.log('SET ==> pref', preferences)      
+      updateOrCreateUserPreferences(preferences).then( (response) => {
+        store.dispatch('quserAuth/AUTH_UPDATE')
+        state.userData = clone(store.state.quserAuth.userData)
+      })
     },
 
     getUrlQueries(){
