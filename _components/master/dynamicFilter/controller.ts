@@ -83,7 +83,7 @@ export default function controller(props: any, emit: any) {
     },
 
     async init(options = { runGetUrlFilter: true }) {
-      state.userData = clone(store.state.quserAuth.userData)
+      state.userData = clone(store.state.quserAuth.userData)      
       state.props.filters = methods.removeNullValues(clone(props.filters))
       state.systemName = props?.systemName || ''
       state.props.systemName = state.systemName
@@ -130,6 +130,30 @@ export default function controller(props: any, emit: any) {
             }
           }
         })
+
+        /*
+          setup values for filters from dynamicCruds
+        */
+        const filterValues = await methods.getAdminFilter()
+        if(Object.keys(filterValues).length !== 0){
+          Object.keys(filterValues).forEach(key => {
+            if(!state.props.filters[key]) return
+
+            state.filterValues[key] = filterValues[key]
+            state.readOnlyData[key] = {
+              label: state.props?.filters[key].props?.label || '',
+              value: filterValues[key]
+            }
+
+            if(state.props.filters[key]?.quickFilter){
+              state.quickFilterValues[key] = filterValues[key]
+            } else {
+              if(state.props.filters[key]?.loadOptions){
+                state.hidenFields[key] = {...state.props.filters[key]}
+              }
+            }
+          })
+        }
       }
     },
 
@@ -390,9 +414,8 @@ export default function controller(props: any, emit: any) {
 
       if(state.useUserPreferences){
         if(Object.keys(filterValues).length === 0){
-          const filters = methods.getAdminFilter()
-          console.log('loaded =>', filters)
-          filterValues = {...filters[state.systemName]}
+          const filters = methods.getAdminFilter()          
+          filterValues = filters
         }
       }
 
@@ -429,12 +452,10 @@ export default function controller(props: any, emit: any) {
       return filters
     },
 
-    async setAdminFilter(filters){
+    async setAdminFilter(filters){      
       if(!state.systemName) return
       /* compares the emited filters vs the state to prevent multiple api calls */
-      const areEqual = _.isEqual(filters, state.filterValues)
-      console.log(state.filterValues)
-      console.log(areEqual)
+      const areEqual = _.isEqual(filters, state.filterValues)      
       if(areEqual) return
 
       const preferences = {
@@ -442,7 +463,6 @@ export default function controller(props: any, emit: any) {
         value: filters
       }
       console.log('SET ==>', state.systemName, filters)
-      console.log('SET ==> pref', preferences)      
       updateOrCreateUserPreferences(preferences).then( (response) => {
         store.dispatch('quserAuth/AUTH_UPDATE')
         state.userData = clone(store.state.quserAuth.userData)
@@ -519,6 +539,7 @@ export default function controller(props: any, emit: any) {
   watch(
     () => props.filters,
     (newFilters) => {
+      console.log('newFilters', newFilters)
       state.props.filters = methods.removeNullValues(clone(newFilters))
       if (Object.keys(state.props.filters).length > 0) {
         methods.setFilterValues()
