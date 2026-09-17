@@ -110,7 +110,7 @@
             v-model="quickFilterValues[keyField]"
             :keyField="keyField"
             :field="field"
-            :class="[field?.quickFilterClass ? field.quickFilterClass : 'col-12 col-md-3']"
+            :class="[field?.quickFilterClass ? field.quickFilterClass : 'col-12 col-md-2']"
             @update:modelValue="quickFilterHandler(keyField)"
           />
         </template>

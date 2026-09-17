@@ -2,6 +2,12 @@ import { i18n, clone } from 'src/plugins/utils'
 import moment from "moment";
 
 export default {
+  /*
+    keyname and value must to be the same ie:
+    nextDate: {
+      value: 'nexDate'
+    },
+  */
   getDateRanges(dateFormat) {
     return {
       customRange: {
@@ -61,6 +67,24 @@ export default {
         from: moment().add(1, 'weeks').startOf('week').format(dateFormat),
         to: moment().add(1, 'weeks').endOf('week').format(dateFormat),
         value: 'nextWeek'
+      },
+      nextFifteenDays: {
+        label: 'Next 15 Days',
+        from: moment().startOf('day').format(dateFormat),
+        to: moment().add(14, 'days').endOf('day').format(dateFormat),
+        value: 'nextFifteenDays'
+      },
+      nextThirtyDays: {
+        label: 'Next 30 Days',
+        from: moment().startOf('day').format(dateFormat),
+        to: moment().add(29, 'days').endOf('day').format(dateFormat),
+        value: 'nextThirtyDays'
+      },
+      nextNinetyDays: {
+        label: 'Next 90 Days',
+        from: moment().startOf('day').format(dateFormat),
+        to: moment().add(89, 'days').endOf('day').format(dateFormat),
+        value: 'nextNinetyDays'
       },
       nextMonth: {
         label: i18n.tr('isite.cms.label.nextMonth'),
