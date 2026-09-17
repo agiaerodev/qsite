@@ -81,25 +81,50 @@
           :icon="btn.props.icon"
           v-bind="{ ...buttonProps, ...btn.props }"
         >
+          <div class="tw-flex tw-justify-end">
+            <q-btn
+              label="Reset Columns"
+              class="tw-py-0"
+              no-caps
+              color="primary"
+              size="md"
+              flat
+              @click="resetVisibleColumns()"
+            />
+          </div>
           <q-list dense>
-            <template v-for="(action, key) in btn.actions" :key="key">
+            <draggable
+              v-model="tableColumnsState"
+              item-key="name"
+              handle=".drag-handle"
+              :animation="200"
+              @change="updateVisibleColumns()"
+            >
+            <template #item="{element}" >
               <q-item
-                v-if="action.name != 'id' && action.name != 'actions'"
+                v-if="element.name != 'id' && element.name != 'actions'"
+                :key="element.name"
                 tag="label"
                 v-ripple
+                dense
               >
                 <q-item-section>
                   <q-item-label>
+                    <q-icon
+                      name="fa-light fa-grip-dots-vertical"
+                      class="drag-handle tw-text-[18px]"
+                    />
                     <q-checkbox
                       v-model="visibleColumnsState"
-                      :val="action.name"
-                      @update:model-value="(value) => updateVisibleColumns(value)"
+                      :val="element.name"
+                      @update:model-value="updateVisibleColumns()"
                     />
-                    {{ action.label }}
+                    {{ element.label }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
             </template>
+            </draggable>
           </q-list>
         </q-btn-dropdown>
         <q-btn
@@ -174,6 +199,7 @@ import appConfig from 'src/setup/app';
 import bulkActions from 'modules/qsite/_components/master/bulkActions';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 import { debounce } from 'quasar'
+import draggable from 'vuedraggable'
 
 export default {
   beforeUnmount() {
@@ -228,13 +254,16 @@ export default {
     'updateDynamicFilterValues',
     'updateDynamicSummary',
     'visibleColumns',
-    'updateVisibleColumns'
+    'updateVisibleColumns',
+    'sortTableColumns',
+    'resetVisibleColumns'
   ],
   components: {
     masterExport,
     masterSynchronizable,
     bulkActions,
     dynamicFilter,
+    draggable
   },
   mounted() {
     this.$nextTick(function () {
@@ -263,6 +292,7 @@ export default {
       dynamicFilterValues: {},
       dynamicFilterSummary: null,
       visibleColumnsState: [],
+      tableColumnsState: []
     };
   },
   watch: {
@@ -271,7 +301,18 @@ export default {
       this.showBadgeRefresh(newValue);
     },
     visibleColumns(newValue) {
-      this.visibleColumnsState = newValue
+     this.visibleColumnsState = newValue
+    },
+    /* sort table columns */
+    tableColumns(newValue) {
+      this.tableColumnsState = this.tableColumns.length
+        ? this.tableColumns.map((item) => {
+          return {
+            name: item.name,
+            label: item.label
+          }
+        })
+        : [];
     },
   },
   computed: {
@@ -657,19 +698,38 @@ export default {
       this.dynamicFilterSummary = summary;
       this.$emit('updateDynamicSummary', summary);
     },
-    getVisibleColumns() {
+    getVisibleColumns(){
       this.visibleColumnsState = this.tableColumns.length
         ? this.tableColumns.map((item) => item.name)
         : [];
 
-      if(this.visibleColumns.length){
-        this.visibleColumnsState = this.visibleColumns
-      }
+      this.tableColumnsState = this.tableColumns.length
+        ? this.tableColumns.map((item) => {
+          return {
+            name: item.name,
+            label: item.label
+          }
+        })
+        : [];
       this.$emit('visibleColumns', this.visibleColumnsState);
     },
-    updateVisibleColumns: debounce(function (cols) {
-      this.$emit('updateVisibleColumns', cols)
-    }, 600)
+    updateVisibleColumns: debounce(function () {
+      const order = this.$clone(this.tableColumnsState)
+      const newCols = []
+      order.forEach((tableCol) => {
+        const show = this.visibleColumnsState.includes(tableCol.name) ? true : false
+          newCols.push({
+            name: tableCol.name,
+            show
+          })
+      })
+
+      this.$emit('sortTableColumns', order)
+      this.$emit('updateVisibleColumns', newCols)
+    }, 600),
+    resetVisibleColumns(){
+      this.$emit('resetVisibleColumns')
+    }
   },
 };
 </script>
