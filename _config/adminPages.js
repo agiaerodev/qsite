@@ -155,7 +155,7 @@ export default {
     },
   },
   authProviders: {
-    // permission: 'isite.app-contexts.manage',
+    permission: 'isite.app-contexts.manage',
     activated: true,
     path: '/site/auth-providers',
     name: 'authProviders',
