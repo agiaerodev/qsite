@@ -112,18 +112,20 @@ export default function controller(props: any, emit: any) {
           if( Array.isArray(state.props.filters[key]?.value)){
             if(!state.props.filters[key]?.value.length) return
           }
+          /* prevents the overwrite loop when props.filters changes */ 
+          if(!state.filterValues[key]){
+            state.filterValues[key] = state.props.filters[key]
+            state.readOnlyData[key] = {
+              label: state.props.filters[key]?.props?.label || '',
+              value: state.props.filters[key].value
+            }
 
-          state.filterValues[key] = state.props.filters[key]
-          state.readOnlyData[key] = {
-            label: state.props.filters[key]?.props?.label || '',
-            value: state.props.filters[key].value
-          }
-
-          if(state.props.filters[key]?.quickFilter){
-            state.quickFilterValues[key] = state.props.filters[key].value
-          } else {
-            if(state.props.filters[key]?.loadOptions){
-              state.hidenFields[key] = {...state.props.filters[key]}
+            if(state.props.filters[key]?.quickFilter){
+              state.quickFilterValues[key] = state.props.filters[key].value
+            } else {
+              if(state.props.filters[key]?.loadOptions){
+                state.hidenFields[key] = {...state.props.filters[key]}
+              }
             }
           }
         })
