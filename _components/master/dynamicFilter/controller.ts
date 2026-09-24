@@ -17,6 +17,7 @@ export default function controller(props: any, emit: any) {
   // States
   const state = reactive({
     // Key: Default Value
+    loading: false,
     props: {
       filters: {},
       systemName: ''
@@ -83,6 +84,7 @@ export default function controller(props: any, emit: any) {
     },
 
     async init(options = { runGetUrlFilter: true }) {
+      state.loading = true
       state.userData = clone(store.state.quserAuth.userData)      
       state.props.filters = methods.removeNullValues(clone(props.filters))
       state.systemName = props?.systemName || ''
@@ -93,6 +95,7 @@ export default function controller(props: any, emit: any) {
       if (options.runGetUrlFilter) await methods.getUrlFilters()
       await methods.addLoadedOptionsCallback()
       await methods.setQuickFilters()
+      state.loading = false
       methods.emitValues()
     },
 
@@ -134,7 +137,7 @@ export default function controller(props: any, emit: any) {
         /*
           setup values for filters from dynamicCruds
         */
-        const filterValues = await methods.getAdminFilter()
+        const filterValues = await methods.getUserPreferences()
         if(Object.keys(filterValues).length !== 0){
           Object.keys(filterValues).forEach(key => {
             if(!state.props.filters[key]) return
@@ -360,8 +363,8 @@ export default function controller(props: any, emit: any) {
       methods.setReadValues()
       methods.mutateURLFilters({...filters})
       methods.emitModelValue(filters)
-      if(updateUserData && state.useUserPreferences){
-        methods.setAdminFilter(filters)
+      if(updateUserData && state.useUserPreferences && !state.loading){
+        methods.setUserPreferences(filters)
       }
       methods.hideModal()
     },
@@ -414,7 +417,7 @@ export default function controller(props: any, emit: any) {
 
       if(state.useUserPreferences){
         if(Object.keys(filterValues).length === 0){
-          const filters = methods.getAdminFilter()          
+          const filters = methods.getUserPreferences()          
           filterValues = filters
         }
       }
@@ -440,7 +443,7 @@ export default function controller(props: any, emit: any) {
       }
     },
 
-    getAdminFilter(){
+    getUserPreferences(){
       const userData = clone(store.state.quserAuth.userData)
       let filters = {}
       if(userData?.preferences?.length){
@@ -451,7 +454,7 @@ export default function controller(props: any, emit: any) {
       return filters
     },
 
-    async setAdminFilter(filters){      
+    async setUserPreferences(filters){      
       if(!state.systemName) return
       /* compares the emited filters vs the state to prevent multiple api calls */
       const areEqual = _.isEqual(filters, state.filterValues)      
@@ -536,12 +539,15 @@ export default function controller(props: any, emit: any) {
   // Watch - Sincronizar cambios dinámicos en props.filters
   watch(
     () => props.filters,
-    (newFilters) => {
+    async (newFilters) => {
       state.props.filters = methods.removeNullValues(clone(newFilters))
       if (Object.keys(state.props.filters).length > 0) {
+        state.loading = true
+        await methods.getUserPreferences()
         methods.setFilterValues()
         methods.addLoadedOptionsCallback()
         methods.setQuickFilters()
+        state.loading = false
       }
     },
     { deep: true }
