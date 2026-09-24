@@ -448,7 +448,6 @@ export default function controller(props: any, emit: any) {
         if(preferences) filters = preferences.value
 
       }
-      console.log('GET ==>', computeds.userPreferencesKey.value, filters)
       return filters
     },
 
@@ -462,7 +461,6 @@ export default function controller(props: any, emit: any) {
         key: computeds.userPreferencesKey.value,
         value: filters
       }
-      console.log('SET ==>', state.systemName, filters)
       updateOrCreateUserPreferences(preferences).then( (response) => {
         store.dispatch('quserAuth/AUTH_UPDATE')
         state.userData = clone(store.state.quserAuth.userData)
@@ -539,7 +537,6 @@ export default function controller(props: any, emit: any) {
   watch(
     () => props.filters,
     (newFilters) => {
-      console.log('newFilters', newFilters)
       state.props.filters = methods.removeNullValues(clone(newFilters))
       if (Object.keys(state.props.filters).length > 0) {
         methods.setFilterValues()
