@@ -91,9 +91,11 @@
                 <q-item-section>
                   <q-item-label>
                     <q-checkbox
-                      v-model="visibleColumnsState"
+                      v-model="visibleColumns"
                       :val="action.name"
-                      @update:model-value="(value) => updateVisibleColumns(value)"
+                      @update:model-value="
+                        (value) => this.$emit('visibleColumns', value)
+                      "
                     />
                     {{ action.label }}
                   </q-item-label>
@@ -173,7 +175,6 @@ import { eventBus } from 'src/plugins/utils';
 import appConfig from 'src/setup/app';
 import bulkActions from 'modules/qsite/_components/master/bulkActions';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
-import { debounce } from 'quasar'
 
 export default {
   beforeUnmount() {
@@ -210,7 +211,6 @@ export default {
       },
     },
     tableColumns: { default: [] },
-    visibleColumns: { default: [] },
     showColumnsButton: {
       type: Boolean,
       default: () => false,
@@ -228,7 +228,6 @@ export default {
     'updateDynamicFilterValues',
     'updateDynamicSummary',
     'visibleColumns',
-    'updateVisibleColumns'
   ],
   components: {
     masterExport,
@@ -262,16 +261,13 @@ export default {
       showDynamicFilterModal: false,
       dynamicFilterValues: {},
       dynamicFilterSummary: null,
-      visibleColumnsState: [],
+      visibleColumns: [],
     };
   },
   watch: {
     expiresIn(newValue) {
       this.timeOuts.forEach((timeId) => clearTimeout(timeId));
       this.showBadgeRefresh(newValue);
-    },
-    visibleColumns(newValue) {
-      this.visibleColumnsState = newValue
     },
   },
   computed: {
@@ -658,18 +654,11 @@ export default {
       this.$emit('updateDynamicSummary', summary);
     },
     getVisibleColumns() {
-      this.visibleColumnsState = this.tableColumns.length
+      this.visibleColumns = this.tableColumns.length
         ? this.tableColumns.map((item) => item.name)
         : [];
-
-      if(this.visibleColumns.length){
-        this.visibleColumnsState = this.visibleColumns
-      }
-      this.$emit('visibleColumns', this.visibleColumnsState);
+      this.$emit('visibleColumns', this.visibleColumns);
     },
-    updateVisibleColumns: debounce(function (cols) {
-      this.$emit('updateVisibleColumns', cols)
-    }, 600)
   },
 };
 </script>
