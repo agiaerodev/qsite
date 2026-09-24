@@ -28,6 +28,10 @@ export default function controller(props: any, emit: any) {
     currentUrlFilter: '',
     dynamicFieldCache: true,
     quickFilters: {},
+    filterItems: [],
+    quickFilterItems: [],
+    draggingFilter: false,
+    draggedFilter: null,
     quickFilterValues: {},
     loadedOptions: {},
     readValues: {},
@@ -325,12 +329,95 @@ export default function controller(props: any, emit: any) {
     },
 
     /* quickFiltres*/
+    setFilterItems(){
+      state.filterItems = Object.keys(state.props.filters).map(key => ({
+        key,
+        field: state.props.filters[key]
+      }))
+    },
+
     async setQuickFilters(){
+      state.quickFilters = {}
       Object.keys(state.props.filters).forEach(key => {
         if(state.props.filters[key]?.quickFilter){
           state.quickFilters[key] = state.props.filters[key]
         }
       })
+      state.quickFilterItems = Object.keys(state.quickFilters).map(key => ({
+        key,
+        field: state.quickFilters[key]
+      }))
+      methods.setFilterItems()
+    },
+
+    cloneFilterItem(item){
+      return {
+        key: item.key,
+        field: item.field
+      }
+    },
+
+    handleFilterDragStart(change){
+      state.draggedFilter = methods.cloneFilterItem(state.filterItems[change?.oldIndex])
+      state.draggingFilter = true
+    },
+
+    handleFilterDragEnd(change){
+      const dropTarget = change?.to
+      const droppedOnQuickFilters = dropTarget?.classList?.contains('quick-filters-dropzone')
+      if(droppedOnQuickFilters && state.draggedFilter){
+        const exists = state.quickFilterItems.some(item => item.key === state.draggedFilter.key)
+        if(!exists) state.quickFilterItems.push(state.draggedFilter)
+        methods.addQuickFilter(state.draggedFilter)
+      }
+      state.draggedFilter = null
+      state.draggingFilter = false
+      methods.hideModal()
+    },
+
+    addQuickFilter(item){
+      const key = item?.key
+      const field = state.props.filters[key]
+      if(!key || !field) return
+
+      field.quickFilter = true
+      item.field = field
+      state.quickFilters[key] = field
+      if(state.quickFilterValues[key] === undefined){
+        state.quickFilterValues[key] = state.filterValues[key] ?? field.value ?? null
+      }
+    },
+
+    handleQuickFilterAdd(change){
+      const addedItem = state.quickFilterItems[change?.newIndex]
+      if(!addedItem) return
+      methods.addQuickFilter(addedItem)
+    },
+
+    handleQuickFilterChange(change){
+      const addedItem = change?.added?.element
+      if(!addedItem){
+        return
+      }
+
+      const key = addedItem.key
+      const field = state.props.filters[key]
+      if(!field){
+        return
+      }
+
+      const duplicateIndex = state.quickFilterItems.findIndex(item => item.key === key && item !== addedItem)
+      if(duplicateIndex !== -1){
+        state.quickFilterItems.splice(change.added.newIndex, 1)
+        return
+      }
+
+      field.quickFilter = true
+      addedItem.field = field
+      state.quickFilters[key] = field
+      if(state.quickFilterValues[key] === undefined){
+        state.quickFilterValues[key] = state.filterValues[key] ?? field.value ?? null
+      }
     },
     /* quickFiltres*/
     quickFilterHandler(key){
