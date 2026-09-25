@@ -146,13 +146,16 @@
         @change="handleQuickFilterChange"
       >
         <template #item="{ element }">
-          <div class="dynamic-quick-filter-draggable row no-wrap items-start">
+          <div
+            class="dynamic-quick-filter-draggable row no-wrap items-start"
+            :class="element.field?.quickFilterClass || 'col-12 col-md-2'"
+          >
             <q-icon
               name="fa-light fa-grip-dots-vertical"
               class="dynamic-quick-filter-drag-handle text-blue-grey-5 q-mr-xs q-mt-sm cursor-grab"
               size="16px"
             />
-            <div :class="element.field?.quickFilterClass ? element.field.quickFilterClass : 'col-12 col-md-2'">
+            <div class="col">
               <dynamic-field
                 v-model="quickFilterValues[element.key]"
                 :keyField="element.key"
@@ -160,6 +163,15 @@
                 @update:modelValue="quickFilterHandler(element.key)"
               />
             </div>
+            <q-btn
+              flat
+              round
+              dense
+              size="sm"
+              icon="fa-light fa-times"
+              class="dynamic-quick-filter-remove"
+              @click.stop="removeQuickFilter(element.key)"
+            />
           </div>
         </template>
       </draggable>
@@ -223,4 +235,23 @@ export default defineComponent({
 .dynamic-quick-filter-drag-handle:active {
   cursor: grabbing;
 }
+
+.dynamic-quick-filter-draggable {
+  position: relative;
+}
+
+.dynamic-quick-filter-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.dynamic-quick-filter-draggable:hover .dynamic-quick-filter-remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 </style>

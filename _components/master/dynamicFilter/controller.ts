@@ -388,6 +388,21 @@ export default function controller(props: any, emit: any) {
       }
     },
 
+    removeQuickFilter(key){
+      const field = state.props.filters[key]
+      if(!field) return
+
+      field.quickFilter = false
+      delete state.quickFilters[key]
+      delete state.quickFilterValues[key]
+
+      const quickFilterIndex = state.quickFilterItems.findIndex(item => item.key === key)
+      if(quickFilterIndex !== -1){
+        state.quickFilterItems.splice(quickFilterIndex, 1)
+      }
+      methods.setReadValues()
+    },
+
     handleQuickFilterAdd(change){
       const addedItem = state.quickFilterItems[change?.newIndex]
       if(!addedItem) return
