@@ -27,6 +27,16 @@
                 v-bind="speech"
                 :label="$trp('isite.cms.label.filter', {capitalize: true})"
               />
+              <q-btn
+                flat
+                round
+                dense
+                size="sm"
+                class="q-ml-sm"
+                :icon="editingModalFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+                :aria-label="editingModalFilters ? 'Finish editing filters' : 'Edit filters'"
+                @click="toggleModalFiltersEdit"
+              />
             </div>
             <!-- Close icon -->
             <q-icon name="fas fa-times" color="blue-grey" size="20px" class="cursor-pointer" @click="hideModal()"/>
@@ -41,10 +51,10 @@
             <draggable
               :list="filterItems"
               item-key="key"
-              :group="{ name: 'dynamic-filters', pull: 'clone', put: false }"
+              :group="{ name: 'dynamic-filters', pull: editingModalFilters ? 'clone' : false, put: false }"
               :sort="false"
-              draggable=".dynamic-filter-draggable"
-              handle=".dynamic-filter-drag-handle"
+              :draggable="editingModalFilters ? '.dynamic-filter-draggable' : null"
+              :handle="editingModalFilters ? '.dynamic-filter-drag-handle' : null"
               :clone="cloneFilterItem"
               @start="handleFilterDragStart"
               @end="handleFilterDragEnd"
@@ -52,10 +62,10 @@
               <template #item="{ element }">
                 <div
                   class="dynamic-filter-item row no-wrap items-start"
-                  :class="{ 'dynamic-filter-draggable': !element.field.quickFilter }"
+                  :class="{ 'dynamic-filter-draggable': editingModalFilters && !element.field.quickFilter }"
                 >
                   <q-icon
-                    v-if="!element.field.quickFilter"
+                    v-if="editingModalFilters && !element.field.quickFilter"
                     name="fa-light fa-grip-dots-vertical"
                     class="dynamic-filter-drag-handle text-blue-grey-5 q-mr-xs q-mt-sm cursor-grab"
                     size="16px"
@@ -103,7 +113,7 @@
     </div>
 
     <!-- Summary --->
-    <div class="col-12 tw-mt-1" v-if="showFilters || (Object.keys(readValues).length > 0) || (Object.keys(quickFilters).length > 0)" >
+    <div class="col-12 tw-mt-1 quick-filters-container" v-if="showFilters || (Object.keys(readValues).length > 0) || (Object.keys(quickFilters).length > 0)" >
       <!-- show only desktop -->
       <div class="text-blue-grey ellipsis text-caption items-center row" v-if="showFilters">
         <!-- summary button -->
@@ -134,11 +144,33 @@
         </template>
       </div>
       <!-- Quick Filters-->
+      <div v-if="showFilters" class="row justify-end items-center q-pt-sm q-gutter-xs">
+        <q-btn
+          flat
+          round
+          dense
+          size="sm"
+          :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+          class="quick-filters-edit-button"
+          :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
+          @click="toggleQuickFiltersEdit"
+        />
+        <q-btn
+          v-if="editingQuickFilters"
+          flat
+          round
+          dense
+          size="sm"
+          icon="fa-light fa-plus"
+          aria-label="Add quick filter"
+          @click="showModal"
+        />
+      </div>
       <draggable
         v-model="quickFilterItems"
         item-key="key"
-        :class="['row', 'q-col-gutter-md', 'q-pt-sm', 'quick-filters-dropzone', { 'quick-filters-dropzone--active': draggingFilter }]"
-        :group="{ name: 'dynamic-filters', pull: false, put: true }"
+        :class="['row', 'q-col-gutter-md', 'q-pt-sm', 'quick-filters-dropzone', { 'quick-filters-dropzone--active': editingQuickFilters }]"
+        :group="{ name: 'dynamic-filters', pull: false, put: editingQuickFilters }"
         draggable=".dynamic-quick-filter-draggable"
         handle=".dynamic-quick-filter-drag-handle"
         v-show="showFilters"
@@ -148,9 +180,13 @@
         <template #item="{ element }">
           <div
             class="dynamic-quick-filter-draggable row no-wrap items-start"
-            :class="element.field?.quickFilterClass || 'col-12 col-md-2'"
+            :class="[
+              element.field?.quickFilterClass || 'col-12 col-md-2',
+              { 'dynamic-quick-filter-draggable--editing': editingQuickFilters }
+            ]"
           >
             <q-icon
+              v-if="editingQuickFilters"
               name="fa-light fa-grip-dots-vertical"
               class="dynamic-quick-filter-drag-handle text-blue-grey-5 q-mr-xs q-mt-sm cursor-grab"
               size="16px"
@@ -164,6 +200,7 @@
               />
             </div>
             <q-btn
+              v-if="editingQuickFilters"
               flat
               round
               dense
@@ -240,16 +277,23 @@ export default defineComponent({
   position: relative;
 }
 
+.dynamic-quick-filter-draggable--editing {
+  padding-right: 14px;
+}
+
 .dynamic-quick-filter-remove {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.quick-filters-edit-button {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
-.dynamic-quick-filter-draggable:hover .dynamic-quick-filter-remove {
+.quick-filters-container:hover .quick-filters-edit-button {
   opacity: 1;
   pointer-events: auto;
 }
