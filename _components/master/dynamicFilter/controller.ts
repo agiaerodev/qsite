@@ -401,7 +401,7 @@ export default function controller(props: any, emit: any) {
       item.field = field
       state.quickFilters[key] = field
       if(state.quickFilterValues[key] === undefined){
-        state.quickFilterValues[key] = state.filterValues[key] ?? field.value ?? null
+        state.quickFilterValues[key] = state.readOnlyData[key]?.value ?? state.filterValues[key]?.value ?? field.value ?? null
       }
     },
 
@@ -410,7 +410,8 @@ export default function controller(props: any, emit: any) {
       const field = state.props.filters[key]
       if(!field) return
 
-      const value = state.quickFilterValues[key] ?? state.readOnlyData[key]?.value ?? state.filterValues[key] ?? null
+      const hasQuickFilterValue = Object.prototype.hasOwnProperty.call(state.quickFilterValues, key)
+      const value = hasQuickFilterValue ? state.quickFilterValues[key] : state.readOnlyData[key]?.value ?? state.filterValues[key]?.value ?? state.filterValues[key] ?? field.value ?? null
       field.quickFilter = false
       state.filterValues[key] = value
       state.readOnlyData[key] = {
@@ -425,11 +426,38 @@ export default function controller(props: any, emit: any) {
 
       methods.setFilterItems()
       methods.setReadValues()
+      if(state.useUserPreferences) methods.setUserPreferences(methods.getCurrentFilterValues())
     },
 
     // Toggle quickfilter editing controls and drag support.
     toggleQuickFiltersEdit(){
       state.editingQuickFilters = !state.editingQuickFilters
+    },
+
+    // Collect each filter's current value for preference persistence.
+    getCurrentFilterValues(fallbackValues = {}){
+      const values = {}
+      Object.keys(state.props.filters).forEach(key => {
+        const field = state.props.filters[key]
+        const fieldValue = state.filterValues[key]
+        const hasQuickFilterValue = Object.prototype.hasOwnProperty.call(state.quickFilterValues, key)
+        const hasReadValue = state.readOnlyData[key] && Object.prototype.hasOwnProperty.call(state.readOnlyData[key], 'value')
+        const hasFallbackValue = Object.prototype.hasOwnProperty.call(fallbackValues, key)
+        const hasStoredFieldValue = fieldValue && typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, 'value')
+
+        if(field.quickFilter && hasQuickFilterValue){
+          values[key] = state.quickFilterValues[key]
+        } else if(hasReadValue){
+          values[key] = state.readOnlyData[key].value
+        } else if(hasFallbackValue){
+          values[key] = fallbackValues[key]
+        } else if(Object.prototype.hasOwnProperty.call(state.filterValues, key)){
+          values[key] = hasStoredFieldValue ? fieldValue.value : fieldValue
+        } else {
+          values[key] = field.value ?? null
+        }
+      })
+      return values
     },
 
     handleQuickFilterAdd(change){
@@ -583,19 +611,44 @@ export default function controller(props: any, emit: any) {
         if(preferences) filters = preferences.value
 
       }
-      return filters
+      const values = {}
+      Object.keys(filters || {}).forEach(key => {
+        const preference = filters[key]
+        const hasQuickFilterState = preference && typeof preference === 'object' && typeof preference.quickFilter === 'boolean' && Object.prototype.hasOwnProperty.call(preference, 'value')
+
+        if(hasQuickFilterState){
+          values[key] = preference.value
+          if(state.props.filters[key]) state.props.filters[key].quickFilter = preference.quickFilter
+        } else {
+          values[key] = preference
+        }
+      })
+      return values
     },
 
     async setUserPreferences(filters){      
       if(!state.systemName) return
-      /* compares the emited filters vs the state to prevent multiple api calls */
-      const areEqual = _.isEqual(filters, state.filterValues)
+
+      const currentValues = methods.getCurrentFilterValues(filters)
+      const filterPreferences = {}
+      Object.keys(state.props.filters).forEach(key => {
+        const field = state.props.filters[key]
+
+        filterPreferences[key] = {
+          value: currentValues[key],
+          quickFilter: Boolean(field.quickFilter)
+        }
+      })
+
+      const userData = clone(store.state.quserAuth.userData)
+      const currentPreferences = userData?.preferences?.find(item => item.key == computeds.userPreferencesKey.value)
+      const areEqual = _.isEqual(filterPreferences, currentPreferences?.value)
       if(areEqual) return
       const preferences = {
         key: computeds.userPreferencesKey.value,
-        value: filters
+        value: filterPreferences
       }
-      updateOrCreateUserPreferences(preferences).then( (response) => {
+      return updateOrCreateUserPreferences(preferences).then( (response) => {
         store.dispatch('quserAuth/AUTH_UPDATE')
         state.userData = clone(store.state.quserAuth.userData)
       })
