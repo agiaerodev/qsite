@@ -33,9 +33,9 @@
                 dense
                 size="sm"
                 class="q-ml-sm"
-                :icon="editingModalFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
-                :aria-label="editingModalFilters ? 'Finish editing filters' : 'Edit filters'"
-                @click="toggleModalFiltersEdit"
+                :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+                :aria-label="editingQuickFilters ? 'Finish editing filters' : 'Edit filters'"
+                @click="toggleQuickFiltersEdit"
               />
             </div>
             <!-- Close icon -->
@@ -51,10 +51,10 @@
             <draggable
               :list="filterItems"
               item-key="key"
-              :group="{ name: 'dynamic-filters', pull: editingModalFilters ? 'clone' : false, put: false }"
+              :group="{ name: 'dynamic-filters', pull: editingQuickFilters ? 'clone' : false, put: false }"
               :sort="false"
-              :draggable="editingModalFilters ? '.dynamic-filter-draggable' : null"
-              :handle="editingModalFilters ? '.dynamic-filter-drag-handle' : null"
+              :draggable="editingQuickFilters ? '.dynamic-filter-draggable' : null"
+              :handle="editingQuickFilters ? '.dynamic-filter-drag-handle' : null"
               :clone="cloneFilterItem"
               @start="handleFilterDragStart"
               @end="handleFilterDragEnd"
@@ -62,10 +62,10 @@
               <template #item="{ element }">
                 <div
                   class="dynamic-filter-item row no-wrap items-start"
-                  :class="{ 'dynamic-filter-draggable': editingModalFilters && !element.field.quickFilter }"
+                  :class="{ 'dynamic-filter-draggable': editingQuickFilters && !element.field.quickFilter }"
                 >
                   <q-icon
-                    v-if="editingModalFilters && !element.field.quickFilter"
+                    v-if="editingQuickFilters && !element.field.quickFilter"
                     name="fa-light fa-grip-dots-vertical"
                     class="dynamic-filter-drag-handle text-blue-grey-5 q-mr-xs q-mt-sm cursor-grab"
                     size="16px"
