@@ -33,7 +33,6 @@ export default function controller(props: any, emit: any) {
     draggingFilter: false,
     draggedFilter: null,
     editingQuickFilters: false,
-    editingModalFilters: false,
     quickFilterValues: {},
     loadedOptions: {},
     readValues: {},
@@ -112,7 +111,6 @@ export default function controller(props: any, emit: any) {
     },
 
     hideModal(){
-      state.editingModalFilters = false
       emit('hideModal')
     },
 
@@ -343,7 +341,18 @@ export default function controller(props: any, emit: any) {
 
     async setQuickFilters(){
       state.quickFilters = {}
-      Object.keys(state.props.filters).forEach(key => {
+      const quickFilterKeys = Object.keys(state.props.filters).filter(key => {
+        return state.props.filters[key]?.quickFilter
+      })
+      quickFilterKeys.sort((firstKey, secondKey) => {
+        const firstOrder = state.props.filters[firstKey]?.quickFilterOrder
+        const secondOrder = state.props.filters[secondKey]?.quickFilterOrder
+        if(Number.isFinite(firstOrder) && Number.isFinite(secondOrder)) return firstOrder - secondOrder
+        if(Number.isFinite(firstOrder)) return -1
+        if(Number.isFinite(secondOrder)) return 1
+        return 0
+      })
+      quickFilterKeys.forEach(key => {
         if(state.props.filters[key]?.quickFilter){
           state.quickFilters[key] = state.props.filters[key]
         }
@@ -361,11 +370,6 @@ export default function controller(props: any, emit: any) {
         key: item.key,
         field: item.field
       }
-    },
-
-    // Toggle editing controls in the modal filter list.
-    toggleModalFiltersEdit(){
-      state.editingModalFilters = !state.editingModalFilters
     },
 
     // Store the filter being dragged and activate the quick filter editor.
@@ -423,6 +427,7 @@ export default function controller(props: any, emit: any) {
 
       const itemIndex = state.quickFilterItems.findIndex(item => item.key === key)
       if(itemIndex !== -1) state.quickFilterItems.splice(itemIndex, 1)
+      delete field.quickFilterOrder
 
       methods.setFilterItems()
       methods.setReadValues()
@@ -468,6 +473,11 @@ export default function controller(props: any, emit: any) {
 
     // Keep quickfilter state synchronized after a drag operation changes the list.
     handleQuickFilterChange(change){
+      if(change?.moved){
+        if(state.useUserPreferences) methods.setUserPreferences(methods.getCurrentFilterValues())
+        return
+      }
+
       const addedItem = change?.added?.element
       if(!addedItem){
         return
@@ -618,7 +628,12 @@ export default function controller(props: any, emit: any) {
 
         if(hasQuickFilterState){
           values[key] = preference.value
-          if(state.props.filters[key]) state.props.filters[key].quickFilter = preference.quickFilter
+          if(state.props.filters[key]){
+            state.props.filters[key].quickFilter = preference.quickFilter
+            if(preference.quickFilter && Number.isFinite(preference.quickFilterOrder)){
+              state.props.filters[key].quickFilterOrder = preference.quickFilterOrder
+            }
+          }
         } else {
           values[key] = preference
         }
@@ -637,6 +652,10 @@ export default function controller(props: any, emit: any) {
         filterPreferences[key] = {
           value: currentValues[key],
           quickFilter: Boolean(field.quickFilter)
+        }
+        if(field.quickFilter){
+          const quickFilterOrder = state.quickFilterItems.findIndex(item => item.key === key)
+          if(quickFilterOrder !== -1) filterPreferences[key].quickFilterOrder = quickFilterOrder
         }
       })
 
