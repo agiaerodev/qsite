@@ -32,6 +32,8 @@ export default function controller(props: any, emit: any) {
     quickFilterItems: [],
     draggingFilter: false,
     draggedFilter: null,
+    editingQuickFilters: false,
+    editingModalFilters: false,
     quickFilterValues: {},
     loadedOptions: {},
     readValues: {},
@@ -104,10 +106,13 @@ export default function controller(props: any, emit: any) {
     },
 
     showModal(){
+      state.draggingFilter = false
+      state.draggedFilter = null
       emit('showModal')
     },
 
     hideModal(){
+      state.editingModalFilters = false
       emit('hideModal')
     },
 
@@ -328,7 +333,7 @@ export default function controller(props: any, emit: any) {
       }
     },
 
-    /* quickFiltres*/
+    // Build the draggable source list from the configured filters.
     setFilterItems(){
       state.filterItems = Object.keys(state.props.filters).map(key => ({
         key,
@@ -350,6 +355,7 @@ export default function controller(props: any, emit: any) {
       methods.setFilterItems()
     },
 
+    // Clone a filter definition without changing the modal source list.
     cloneFilterItem(item){
       return {
         key: item.key,
@@ -357,11 +363,19 @@ export default function controller(props: any, emit: any) {
       }
     },
 
+    // Toggle editing controls in the modal filter list.
+    toggleModalFiltersEdit(){
+      state.editingModalFilters = !state.editingModalFilters
+    },
+
+    // Store the filter being dragged and activate the quick filter editor.
     handleFilterDragStart(change){
       state.draggedFilter = methods.cloneFilterItem(state.filterItems[change?.oldIndex])
       state.draggingFilter = true
+      state.editingQuickFilters = true
     },
 
+    // Add the dragged filter to quickfilters when it is dropped in the target.
     handleFilterDragEnd(change){
       const dropTarget = change?.to
       const droppedOnQuickFilters = dropTarget?.classList?.contains('quick-filters-dropzone')
@@ -369,12 +383,15 @@ export default function controller(props: any, emit: any) {
         const exists = state.quickFilterItems.some(item => item.key === state.draggedFilter.key)
         if(!exists) state.quickFilterItems.push(state.draggedFilter)
         methods.addQuickFilter(state.draggedFilter)
+        if(state.useUserPreferences) methods.setUserPreferences(methods.getCurrentFilterValues())
       }
       state.draggedFilter = null
       state.draggingFilter = false
+      state.editingQuickFilters = false
       methods.hideModal()
     },
 
+    // Mark a filter as a quickfilter and initialize its current value.
     addQuickFilter(item){
       const key = item?.key
       const field = state.props.filters[key]
@@ -388,19 +405,31 @@ export default function controller(props: any, emit: any) {
       }
     },
 
+    // Return a quickfilter to the modal while preserving its current value.
     removeQuickFilter(key){
       const field = state.props.filters[key]
       if(!field) return
 
+      const value = state.quickFilterValues[key] ?? state.readOnlyData[key]?.value ?? state.filterValues[key] ?? null
       field.quickFilter = false
-      delete state.quickFilters[key]
-      delete state.quickFilterValues[key]
-
-      const quickFilterIndex = state.quickFilterItems.findIndex(item => item.key === key)
-      if(quickFilterIndex !== -1){
-        state.quickFilterItems.splice(quickFilterIndex, 1)
+      state.filterValues[key] = value
+      state.readOnlyData[key] = {
+        label: field.props?.label || '',
+        value
       }
+      delete state.quickFilterValues[key]
+      delete state.quickFilters[key]
+
+      const itemIndex = state.quickFilterItems.findIndex(item => item.key === key)
+      if(itemIndex !== -1) state.quickFilterItems.splice(itemIndex, 1)
+
+      methods.setFilterItems()
       methods.setReadValues()
+    },
+
+    // Toggle quickfilter editing controls and drag support.
+    toggleQuickFiltersEdit(){
+      state.editingQuickFilters = !state.editingQuickFilters
     },
 
     handleQuickFilterAdd(change){
@@ -409,6 +438,7 @@ export default function controller(props: any, emit: any) {
       methods.addQuickFilter(addedItem)
     },
 
+    // Keep quickfilter state synchronized after a drag operation changes the list.
     handleQuickFilterChange(change){
       const addedItem = change?.added?.element
       if(!addedItem){
@@ -559,9 +589,8 @@ export default function controller(props: any, emit: any) {
     async setUserPreferences(filters){      
       if(!state.systemName) return
       /* compares the emited filters vs the state to prevent multiple api calls */
-      const areEqual = _.isEqual(filters, state.filterValues)      
+      const areEqual = _.isEqual(filters, state.filterValues)
       if(areEqual) return
-
       const preferences = {
         key: computeds.userPreferencesKey.value,
         value: filters
