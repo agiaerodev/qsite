@@ -1,9 +1,15 @@
 <template>
-  <div id="masterCaptchaComponent" v-if="captcha.key">
+  <div>
+    <pre>
+      {{ settings }}
+    </pre>
+  
+  <div id="masterCaptchaComponent" v-if="captcha.key">    
     <!--Widget V2-->
     <div v-if="captcha.version == '2'" id="g-recaptcha"></div>
     <!--Text V3-->
     <div v-if="captcha.version == '3'" class="text-info-v3" v-html="$tr('isite.cms.message.captcha')"></div>
+  </div>
   </div>
 </template>
 <script>
@@ -88,6 +94,8 @@ export default {
     },
     async getToken(){
       return new Promise((resolve, reject) => {
+        console.log('Executing grecaptcha with key:', this.captcha.key)
+        console.log('About to execute grecaptcha', grecaptcha)
         grecaptcha.execute(this.captcha.key, {action: 'submit'}).then(token => {
           const response = {version: 3, token}
           this.$emit('update:modelValue', response)
