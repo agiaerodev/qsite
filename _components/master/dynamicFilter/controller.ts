@@ -75,6 +75,15 @@ export default function controller(props: any, emit: any) {
     isMobile: computed(() => Screen.width < '500' ),
     //hide on mobile by default
     showFilters: computed(() => computeds.isMobile.value ? props.showOnMobile : true),
+    showQuickFilters: computed(() => {
+      return computeds.showFilters.value && (
+        Object.keys(state.quickFilters).length > 0 ||
+        state.editingQuickFilters
+      )
+    }),
+    showQuickFilterEditButton: computed(() => {
+      return computeds.showFilters.value && Object.keys(state.filterItems).length > 0
+    }),
     propsFilters: computed(() => {
       return state.props.filters
     }),
