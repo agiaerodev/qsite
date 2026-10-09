@@ -10,7 +10,7 @@
 export default {
   name: 'captchaComponent',
   props: {},
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'loaded'],
   mounted() {
     this.$nextTick(function () {
       this.init()
@@ -78,6 +78,7 @@ export default {
             })
           } else {//(V3)
             grecaptcha.ready(() => {
+              this.$emit('loaded')
               this.$emit('update:modelValue', {version: 3, token: null})
             })
           }
