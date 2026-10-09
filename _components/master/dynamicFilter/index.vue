@@ -115,7 +115,7 @@
     <!-- Summary --->
     <div class="col-12 tw-mt-1 quick-filters-container" v-if="showFilters || (Object.keys(readValues).length > 0) || (Object.keys(quickFilters).length > 0)" >
       <!-- show only desktop -->
-      <div class="text-blue-grey ellipsis text-caption items-center row" v-if="showFilters">
+      <div class="text-blue-grey ellipsis text-caption items-center row quick-filters-summary" v-if="showFilters">
         <!-- summary button -->
         <q-btn flat no-caps @click="showModal()">
           <q-icon name="fa-light fa-filter" class="q-mr-xs" color="amber" size="18px" />
@@ -133,6 +133,17 @@
           :summary="readValues"
           @remove="(itemKey) => removeReadValue(itemKey)"
         />
+        <q-btn
+          v-if="showQuickFilterEditButton"
+          flat
+          round
+          dense
+          size="sm"
+          :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+          class="quick-filters-edit-button"
+          :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
+          @click="toggleQuickFiltersEdit"
+        />
       </div>
       <!-- Hiden Filters -->
       <div v-if="Object.keys(hidenFields).length" v-show="false">
@@ -144,19 +155,8 @@
         </template>
       </div>
       <!-- Quick Filters-->
-      <div v-if="showFilters" class="row justify-end items-center q-pt-sm q-gutter-xs">
+      <div v-if="showQuickFilters && editingQuickFilters" class="row justify-end items-center q-pt-sm q-gutter-xs">
         <q-btn
-          flat
-          round
-          dense
-          size="sm"
-          :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
-          class="quick-filters-edit-button"
-          :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
-          @click="toggleQuickFiltersEdit"
-        />
-        <q-btn
-          v-if="editingQuickFilters"
           flat
           round
           dense
@@ -166,14 +166,14 @@
           @click="showModal"
         />
       </div>
-      <draggable
+      <draggable      
         v-model="quickFilterItems"
         item-key="key"
         :class="['row', 'q-col-gutter-md', 'q-pt-sm', 'quick-filters-dropzone', { 'quick-filters-dropzone--active': editingQuickFilters }]"
         :group="{ name: 'dynamic-filters', pull: false, put: editingQuickFilters }"
         draggable=".dynamic-quick-filter-draggable"
         handle=".dynamic-quick-filter-drag-handle"
-        v-show="showFilters"
+        v-show="showQuickFilters"
         @add="handleQuickFilterAdd"
         @change="handleQuickFilterChange"
       >
@@ -287,13 +287,14 @@ export default defineComponent({
   right: 0;
 }
 
-.quick-filters-edit-button {
+.quick-filters-summary .quick-filters-edit-button {
+  margin-left: auto;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
-.quick-filters-container:hover .quick-filters-edit-button {
+.quick-filters-summary:hover .quick-filters-edit-button {
   opacity: 1;
   pointer-events: auto;
 }
