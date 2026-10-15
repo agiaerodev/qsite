@@ -38,7 +38,9 @@
                 :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
                 :aria-label="editingQuickFilters ? 'Finish editing filters' : 'Edit filters'"
                 @click="toggleQuickFiltersEdit"
-              />
+              >
+                <q-tooltip>{{ editingQuickFilters ? 'Finish editing filters' : 'Edit filters' }}</q-tooltip>
+              </q-btn>
             </div>
             <!-- Close icon -->
             <q-icon name="fas fa-times" color="blue-grey" size="20px" class="cursor-pointer" @click="hideModal()"/>
@@ -136,7 +138,9 @@
             class="quick-filters-edit-button"
             :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
             @click="toggleQuickFiltersEdit"
-          />
+          >
+            <q-tooltip>{{ editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters' }}</q-tooltip>
+          </q-btn>
         </div>
         <speechField
           v-if="speech?.api"
@@ -171,7 +175,9 @@
           class="quick-filters-add-button"
           aria-label="Add quick filter"
           @click="showModal"
-        />
+        >
+          <q-tooltip>Add quick filter</q-tooltip>
+        </q-btn>
       </div>
       <draggable      
         v-model="quickFilterItems"
