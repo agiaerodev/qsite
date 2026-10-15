@@ -5,7 +5,10 @@ import { i18n, clone, store, router } from 'src/plugins/utils';
 import moment from "moment";
 import { Screen } from 'quasar'
 import dateRangePickerRanges from 'modules/qsite/_components/master/dateRangePicker/constants'
-import { updateOrCreateUserPreferences } from 'modules/quser/_services/userPreferences';
+import { 
+  getUserPreferences, 
+  updateOrCreateUserPreferences 
+} from 'modules/quser/_services/userPreferences';
 
 
 export default function controller(props: any, emit: any) {
@@ -622,14 +625,8 @@ export default function controller(props: any, emit: any) {
       }
     },
 
-    getUserPreferences(){
-      const userData = clone(store.state.quserAuth.userData)
-      let filters = {}
-      if(userData?.preferences?.length){
-        const preferences = userData.preferences.find(item => item.key == computeds.userPreferencesKey.value) 
-        if(preferences) filters = preferences.value
-
-      }
+    getUserPreferences(){      
+      let filters = getUserPreferences(computeds.userPreferencesKey.value) || {}
       const values = {}
       Object.keys(filters || {}).forEach(key => {
         const preference = filters[key]
@@ -672,12 +669,8 @@ export default function controller(props: any, emit: any) {
       const currentPreferences = userData?.preferences?.find(item => item.key == computeds.userPreferencesKey.value)
       const areEqual = _.isEqual(filterPreferences, currentPreferences?.value)
       if(areEqual) return
-      const preferences = {
-        key: computeds.userPreferencesKey.value,
-        value: filterPreferences
-      }
-      return updateOrCreateUserPreferences(preferences).then( (response) => {
-        store.dispatch('quserAuth/AUTH_UPDATE')
+      
+      return updateOrCreateUserPreferences(computeds.userPreferencesKey.value, filterPreferences).then( (response) => {
         state.userData = clone(store.state.quserAuth.userData)
       })
     },

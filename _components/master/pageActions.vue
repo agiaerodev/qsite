@@ -248,6 +248,7 @@ export default {
       },
     },
     tableColumns: { default: [] },
+    visibleColumns: { default: [] },
     showColumnsButton: {
       type: Boolean,
       default: () => false,
