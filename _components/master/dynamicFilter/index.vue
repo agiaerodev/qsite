@@ -28,7 +28,9 @@
                 :label="$trp('isite.cms.label.filter', {capitalize: true})"
               />
               <q-btn
-                flat
+                :flat="!editingQuickFilters"
+                :unelevated="editingQuickFilters"
+                :color="editingQuickFilters ? 'primary' : undefined"
                 round
                 dense
                 size="sm"
@@ -117,10 +119,25 @@
       <!-- show only desktop -->
       <div class="text-blue-grey ellipsis text-caption items-center row quick-filters-summary" v-if="showFilters">
         <!-- summary button -->
-        <q-btn flat no-caps @click="showModal()">
-          <q-icon name="fa-light fa-filter" class="q-mr-xs" color="amber" size="18px" />
-          <b>{{ $trp('isite.cms.label.filter') }}:</b>
-        </q-btn>
+         <div>
+          <q-btn flat no-caps @click="showModal()">
+            <q-icon name="fa-light fa-filter" class="q-mr-xs" color="amber" size="18px" />
+            <b>{{ $trp('isite.cms.label.filter') }}:</b>
+          </q-btn>
+          <q-btn
+            v-if="showQuickFilterEditButton"
+            :flat="!editingQuickFilters"
+            :unelevated="editingQuickFilters"
+            :color="editingQuickFilters ? 'primary' : undefined"
+            round
+            dense
+            size="sm"
+            :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+            class="quick-filters-edit-button"
+            :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
+            @click="toggleQuickFiltersEdit"
+          />
+        </div>
         <speechField
           v-if="speech?.api"
           class="tw-ml-1"
@@ -132,18 +149,7 @@
         <filterChip
           :summary="readValues"
           @remove="(itemKey) => removeReadValue(itemKey)"
-        />
-        <q-btn
-          v-if="showQuickFilterEditButton"
-          flat
-          round
-          dense
-          size="sm"
-          :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
-          class="quick-filters-edit-button"
-          :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
-          @click="toggleQuickFiltersEdit"
-        />
+        />        
       </div>
       <!-- Hiden Filters -->
       <div v-if="Object.keys(hidenFields).length" v-show="false">
@@ -162,6 +168,7 @@
           dense
           size="sm"
           icon="fa-light fa-plus"
+          class="quick-filters-add-button"
           aria-label="Add quick filter"
           @click="showModal"
         />
@@ -289,14 +296,11 @@ export default defineComponent({
 
 .quick-filters-summary .quick-filters-edit-button {
   margin-left: auto;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
 }
 
-.quick-filters-summary:hover .quick-filters-edit-button {
-  opacity: 1;
-  pointer-events: auto;
+.quick-filters-add-button {
+  position: relative;
+  top: -16px;
 }
 
 </style>
