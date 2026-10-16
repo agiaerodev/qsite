@@ -57,12 +57,6 @@ export default {
               align: 'left',
             },
             {
-              name: 'appleHtmlCallback',
-              label: 'Apple Callback',
-              field: 'appleHtmlCallback',
-              align: 'left',
-            },
-            {
               name: 'actions',
               label: 'Actions',
               align: 'left',
