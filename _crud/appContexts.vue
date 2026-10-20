@@ -163,6 +163,23 @@ export default {
               },
             },
           },
+          allowLocalLogin: {
+            value: null,
+            type: 'select',
+            props: {
+              label: 'Allow Local Login',
+              options: [
+                {
+                  label: 'Enabled',
+                  value: true,
+                },
+                {
+                  label: 'Disabled',
+                  value: false,
+                },
+              ],
+            },
+          },
         },
         formRight: {
           settings: {
