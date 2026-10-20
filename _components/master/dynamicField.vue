@@ -1849,7 +1849,7 @@ export default {
         },
         toggle: {
           class: 'absolute-left',
-          margin: '1.3em 20em',
+          margin: '1.0em 22em',
           load: true,
         },
         signature: {
