@@ -1848,8 +1848,8 @@ export default {
           load: true,
         },
         toggle: {
-          class: 'absolute-left',
-          margin: '1.0em 22em',
+          class: 'tw-absolute tw-inset-y-0 tw-right-0',
+          margin: '1em',
           load: true,
         },
         signature: {
