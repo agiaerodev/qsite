@@ -162,7 +162,7 @@
     <!-- dynamicFilter -->
     <div class="row col-12">
       <dynamicFilter
-        v-if="dynamicFilter"
+        v-if="dynamicFilter && loadDynamicFilter"
         ref="dynamicFilterComponent"
         :systemName="systemName"
         :filters="dynamicFilter"
@@ -241,7 +241,7 @@ export default {
     /*dynamic filter*/
     systemName: null,
     loadDynamicFilter: { 
-      type: Boolean, default: () => false 
+      type: Boolean, default: () => true 
     },
     dynamicFilter: {
       required: false,
