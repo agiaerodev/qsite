@@ -162,7 +162,7 @@
     <!-- dynamicFilter -->
     <div class="row col-12">
       <dynamicFilter
-        v-if="dynamicFilter && loadDynamicFilter"
+        v-if="dynamicFilter"
         ref="dynamicFilterComponent"
         :systemName="systemName"
         :filters="dynamicFilter"
