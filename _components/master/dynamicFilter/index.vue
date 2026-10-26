@@ -119,7 +119,7 @@
     <!-- Summary --->
     <div class="col-12 tw-mt-1 quick-filters-container" v-if="showFilters || (Object.keys(readValues).length > 0) || (Object.keys(quickFilters).length > 0)" >
       <!-- show only desktop -->
-      <div class="text-blue-grey ellipsis text-caption items-center row quick-filters-summary" v-if="showFilters">
+      <div class="text-blue-grey ellipsis text-caption items-center row quick-filters-summary" v-if="showFilters && hasFilters">
         <!-- summary button -->
          <div>
           <q-btn flat no-caps @click="showModal()">
