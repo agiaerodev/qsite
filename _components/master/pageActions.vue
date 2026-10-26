@@ -150,7 +150,7 @@
     <!-- dynamicFilter -->
     <div class="row col-12">
       <dynamicFilter
-        v-if="dynamicFilter"
+        v-if="dynamicFilter && loadDynamicFilter"
         ref="dynamicFilterComponent"
         :systemName="systemName"
         :filters="dynamicFilter"
@@ -228,6 +228,9 @@ export default {
     expiresIn: { type: Number },
     /*dynamic filter*/
     systemName: null,
+    loadDynamicFilter: { 
+      type: Boolean, default: () => false 
+    },
     dynamicFilter: {
       required: false,
       type: Object,
