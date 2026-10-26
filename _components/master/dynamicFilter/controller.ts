@@ -90,7 +90,8 @@ export default function controller(props: any, emit: any) {
     propsFilters: computed(() => {
       return state.props.filters
     }),
-    userPreferencesKey: computed(() => `${state.systemName}-table-filters-values` )
+    userPreferencesKey: computed(() => `${state.systemName}-table-filters-values` ), 
+    hasFilters: computed(() => Object.keys(state.filterItems).length > 0)
   }
 
   // Methods
@@ -160,7 +161,6 @@ export default function controller(props: any, emit: any) {
         if(Object.keys(filterValues).length !== 0){
           Object.keys(filterValues).forEach(key => {
             if(!state.props.filters[key]) return
-
             state.filterValues[key] = filterValues[key]
             state.readOnlyData[key] = {
               label: state.props?.filters[key].props?.label || '',
