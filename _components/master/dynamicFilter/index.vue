@@ -6,8 +6,13 @@
       persistent
       maximized
       position="right"
+      :seamless="draggingFilter"
     >
-      <q-card style="width: 350px;" v-if="filter">
+      <q-card
+        style="width: 350px;"
+        v-if="filter"
+        v-show="!draggingFilter"
+      >
         <!-- Header -->
         <div>
           <div class="row justify-between items-center q-pa-md">
@@ -22,6 +27,20 @@
                 v-bind="speech"
                 :label="$trp('isite.cms.label.filter', {capitalize: true})"
               />
+              <q-btn
+                :flat="!editingQuickFilters"
+                :unelevated="editingQuickFilters"
+                :color="editingQuickFilters ? 'primary' : undefined"
+                round
+                dense
+                size="sm"
+                class="q-ml-sm"
+                :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+                :aria-label="editingQuickFilters ? 'Finish editing filters' : 'Edit filters'"
+                @click="toggleQuickFiltersEdit"
+              >
+                <q-tooltip>{{ editingQuickFilters ? 'Finish editing filters' : 'Edit filters' }}</q-tooltip>
+              </q-btn>
             </div>
             <!-- Close icon -->
             <q-icon name="fas fa-times" color="blue-grey" size="20px" class="cursor-pointer" @click="hideModal()"/>
@@ -33,15 +52,40 @@
         <q-scroll-area class="tw-mt-3.5" style="height: calc(100vh - 153px)">
           <div class="q-px-sm" style="height: calc(100vh - 253px)">
             <!--Fields-->
-            <template v-for="(field, key) in filter.fields" :key="key">
-              <dynamic-field
-                v-model="filterValues[field.name || key]"
-                :field="field"
-                class="q-mb-sm"
-                :enableCache="dynamicFieldCache"
-                @inputReadOnly="data => setInputReadOnly((field.name || key), data)"
-              />
-            </template>
+            <draggable
+              :list="filterItems"
+              item-key="key"
+              :group="{ name: 'dynamic-filters', pull: editingQuickFilters ? 'clone' : false, put: false }"
+              :sort="false"
+              :draggable="editingQuickFilters ? '.dynamic-filter-draggable' : null"
+              :handle="editingQuickFilters ? '.dynamic-filter-drag-handle' : null"
+              :clone="cloneFilterItem"
+              @start="handleFilterDragStart"
+              @end="handleFilterDragEnd"
+            >
+              <template #item="{ element }">
+                <div
+                  class="dynamic-filter-item row no-wrap items-start"
+                  :class="{ 'dynamic-filter-draggable': editingQuickFilters && !element.field.quickFilter }"
+                >
+                  <q-icon
+                    v-if="editingQuickFilters && !element.field.quickFilter"
+                    name="fa-light fa-grip-dots-vertical"
+                    class="dynamic-filter-drag-handle text-blue-grey-5 q-mr-xs q-mt-sm cursor-grab"
+                    size="16px"
+                  />
+                  <div class="col">
+                    <dynamic-field
+                      v-model="filterValues[element.field.name || element.key]"
+                      :field="element.field"
+                      class="q-mb-sm"
+                      :enableCache="dynamicFieldCache"
+                      @inputReadOnly="data => setInputReadOnly((element.field.name || element.key), data)"
+                    />
+                  </div>
+                </div>
+              </template>
+            </draggable>
           </div>
         </q-scroll-area>
 
@@ -73,14 +117,31 @@
     </div>
 
     <!-- Summary --->
-    <div class="col-12 tw-mt-1" v-if="(Object.keys(readValues).length > 0) || (Object.keys(quickFilters).length > 0)" >
+    <div class="col-12 tw-mt-1 quick-filters-container" v-if="showFilters || (Object.keys(readValues).length > 0) || (Object.keys(quickFilters).length > 0)" >
       <!-- show only desktop -->
-      <div class="text-blue-grey ellipsis text-caption items-center row" v-if="showFilters">
+      <div class="text-blue-grey ellipsis text-caption items-center row quick-filters-summary" v-if="showFilters && hasFilters">
         <!-- summary button -->
-        <q-btn flat no-caps @click="showModal()">
-          <q-icon name="fa-light fa-filter" class="q-mr-xs" color="amber" size="18px" />
-          <b>{{ $trp('isite.cms.label.filter') }}:</b>
-        </q-btn>
+         <div>
+          <q-btn flat no-caps @click="showModal()">
+            <q-icon name="fa-light fa-filter" class="q-mr-xs" color="amber" size="18px" />
+            <b>{{ $trp('isite.cms.label.filter') }}:</b>
+          </q-btn>
+          <q-btn
+            v-if="showQuickFilterEditButton"
+            :flat="!editingQuickFilters"
+            :unelevated="editingQuickFilters"
+            :color="editingQuickFilters ? 'primary' : undefined"
+            round
+            dense
+            size="sm"
+            :icon="editingQuickFilters ? 'fa-light fa-check' : 'fa-light fa-pen-to-square'"
+            class="quick-filters-edit-button"
+            :aria-label="editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters'"
+            @click="toggleQuickFiltersEdit"
+          >
+            <q-tooltip>{{ editingQuickFilters ? 'Finish editing quick filters' : 'Edit quick filters' }}</q-tooltip>
+          </q-btn>
+        </div>
         <speechField
           v-if="speech?.api"
           class="tw-ml-1"
@@ -92,7 +153,7 @@
         <filterChip
           :summary="readValues"
           @remove="(itemKey) => removeReadValue(itemKey)"
-        />
+        />        
       </div>
       <!-- Hiden Filters -->
       <div v-if="Object.keys(hidenFields).length" v-show="false">
@@ -104,17 +165,66 @@
         </template>
       </div>
       <!-- Quick Filters-->
-      <div v-if="Object.keys(quickFilters).length" class="row q-col-gutter-md q-pt-sm" v-show="showFilters">
-        <template v-for="(field, keyField) in quickFilters" :key="keyField">
-          <dynamic-field
-            v-model="quickFilterValues[keyField]"
-            :keyField="keyField"
-            :field="field"
-            :class="[field?.quickFilterClass ? field.quickFilterClass : 'col-12 col-md-2']"
-            @update:modelValue="quickFilterHandler(keyField)"
-          />
-        </template>
+      <div v-if="showQuickFilters && editingQuickFilters" class="row justify-end items-center q-pt-sm q-gutter-xs">
+        <q-btn
+          flat
+          round
+          dense
+          size="sm"
+          icon="fa-light fa-plus"
+          class="quick-filters-add-button"
+          aria-label="Add quick filter"
+          @click="showModal"
+        >
+          <q-tooltip>Add quick filter</q-tooltip>
+        </q-btn>
       </div>
+      <draggable      
+        v-model="quickFilterItems"
+        item-key="key"
+        :class="['row', 'q-col-gutter-md', 'q-pt-sm', 'quick-filters-dropzone', { 'quick-filters-dropzone--active': editingQuickFilters }]"
+        :group="{ name: 'dynamic-filters', pull: false, put: editingQuickFilters }"
+        draggable=".dynamic-quick-filter-draggable"
+        handle=".dynamic-quick-filter-drag-handle"
+        v-show="showQuickFilters"
+        @add="handleQuickFilterAdd"
+        @change="handleQuickFilterChange"
+      >
+        <template #item="{ element }">
+          <div
+            class="dynamic-quick-filter-draggable row no-wrap items-start"
+            :class="[
+              element.field?.quickFilterClass || 'col-12 col-md-2',
+              { 'dynamic-quick-filter-draggable--editing': editingQuickFilters }
+            ]"
+          >
+            <q-icon
+              v-if="editingQuickFilters"
+              name="fa-light fa-grip-dots-vertical"
+              class="dynamic-quick-filter-drag-handle text-blue-grey-5 q-mr-xs q-mt-sm cursor-grab"
+              size="16px"
+            />
+            <div class="col">
+              <dynamic-field
+                v-model="quickFilterValues[element.key]"
+                :keyField="element.key"
+                :field="element.field"
+                @update:modelValue="quickFilterHandler(element.key)"
+              />
+            </div>
+            <q-btn
+              v-if="editingQuickFilters"
+              flat
+              round
+              dense
+              size="sm"
+              icon="fa-light fa-times"
+              class="dynamic-quick-filter-remove"
+              @click.stop="removeQuickFilter(element.key)"
+            />
+          </div>
+        </template>
+      </draggable>
     </div>
   </div>
 </template>
@@ -123,6 +233,7 @@ import {defineComponent} from 'vue'
 import controller from '@imagina/qsite/_components/master/dynamicFilter/controller'
 import filterChip from '@imagina/qsite/_components/master/dynamicFilter/components/filterChip'
 import speechField from '../speechField'
+import draggable from 'vuedraggable'
 
 export default defineComponent({
   props: {    
@@ -141,12 +252,61 @@ export default defineComponent({
   emits:['update:modelValue', 'hideModal', 'showModal', 'update:summary'],
   components: {
     filterChip,
-    speechField
+    speechField,
+    draggable
   },
   setup(props, {emit}) {
     return controller(props, emit)
   }
 })
 </script>
-<style lang="stylus">
+<style lang="scss">
+.quick-filters-dropzone {
+  min-height: 52px
+}
+
+.quick-filters-dropzone--active {
+  border: 1px dashed var(--q-primary);
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.dynamic-filter-drag-handle {
+  cursor: grab;
+}
+
+.dynamic-filter-drag-handle:active {
+  cursor: grabbing;
+}
+
+.dynamic-quick-filter-drag-handle {
+  cursor: grab;
+}
+
+.dynamic-quick-filter-drag-handle:active {
+  cursor: grabbing;
+}
+
+.dynamic-quick-filter-draggable {
+  position: relative;
+}
+
+.dynamic-quick-filter-draggable--editing {
+  padding-right: 14px;
+}
+
+.dynamic-quick-filter-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.quick-filters-summary .quick-filters-edit-button {
+  margin-left: auto;
+}
+
+.quick-filters-add-button {
+  position: relative;
+  top: -16px;
+}
+
 </style>

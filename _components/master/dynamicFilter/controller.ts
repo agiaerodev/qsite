@@ -1,11 +1,14 @@
 import {computed, reactive, ref, onMounted, toRefs, watch} from "vue";
 import { debounce } from 'quasar'
 import _ from "lodash";
-import service from 'modules/qsite/_components/master/dynamicFilter/services'
 import { i18n, clone, store, router } from 'src/plugins/utils';
 import moment from "moment";
 import { Screen } from 'quasar'
 import dateRangePickerRanges from 'modules/qsite/_components/master/dateRangePicker/constants'
+import { 
+  getUserPreferences, 
+  updateOrCreateUserPreferences 
+} from 'modules/quser/_services/userPreferences';
 
 
 export default function controller(props: any, emit: any) {
@@ -17,6 +20,7 @@ export default function controller(props: any, emit: any) {
   // States
   const state = reactive({
     // Key: Default Value
+    loading: false,
     props: {
       filters: {},
       systemName: ''
@@ -27,12 +31,17 @@ export default function controller(props: any, emit: any) {
     currentUrlFilter: '',
     dynamicFieldCache: true,
     quickFilters: {},
+    filterItems: [],
+    quickFilterItems: [],
+    draggingFilter: false,
+    draggedFilter: null,
+    editingQuickFilters: false,
     quickFilterValues: {},
     loadedOptions: {},
     readValues: {},
     hidenFields: {},
     systemName: '',
-    useAdminFilter: false,
+    useUserPreferences: false,
     hasAppliedFilters: false,
     userData: {
       fields: [{
@@ -69,9 +78,20 @@ export default function controller(props: any, emit: any) {
     isMobile: computed(() => Screen.width < '500' ),
     //hide on mobile by default
     showFilters: computed(() => computeds.isMobile.value ? props.showOnMobile : true),
+    showQuickFilters: computed(() => {
+      return computeds.showFilters.value && (
+        Object.keys(state.quickFilters).length > 0 ||
+        state.editingQuickFilters
+      )
+    }),
+    showQuickFilterEditButton: computed(() => {
+      return computeds.showFilters.value && Object.keys(state.filterItems).length > 0
+    }),
     propsFilters: computed(() => {
       return state.props.filters
-    })
+    }),
+    userPreferencesKey: computed(() => `${state.systemName}-table-filters-values` ), 
+    hasFilters: computed(() => Object.keys(state.filterItems).length > 0)
   }
 
   // Methods
@@ -82,20 +102,24 @@ export default function controller(props: any, emit: any) {
     },
 
     async init(options = { runGetUrlFilter: true }) {
-      state.userData = clone(store.state.quserAuth.userData)
+      state.loading = true
+      state.userData = clone(store.state.quserAuth.userData)      
       state.props.filters = methods.removeNullValues(clone(props.filters))
       state.systemName = props?.systemName || ''
       state.props.systemName = state.systemName
-      state.useAdminFilter = state.userData.hasOwnProperty('fields')
+      state.useUserPreferences = state.userData.hasOwnProperty('preferences')
       await methods.setFilterValues()
 
       if (options.runGetUrlFilter) await methods.getUrlFilters()
       await methods.addLoadedOptionsCallback()
       await methods.setQuickFilters()
+      state.loading = false
       methods.emitValues()
     },
 
     showModal(){
+      state.draggingFilter = false
+      state.draggedFilter = null
       emit('showModal')
     },
 
@@ -112,21 +136,46 @@ export default function controller(props: any, emit: any) {
           if( Array.isArray(state.props.filters[key]?.value)){
             if(!state.props.filters[key]?.value.length) return
           }
+          /* prevents the overwrite loop when props.filters changes */ 
+          if(!state.filterValues[key]){
+            state.filterValues[key] = state.props.filters[key]
+            state.readOnlyData[key] = {
+              label: state.props.filters[key]?.props?.label || '',
+              value: state.props.filters[key].value
+            }
 
-          state.filterValues[key] = state.props.filters[key]
-          state.readOnlyData[key] = {
-            label: state.props.filters[key]?.props?.label || '',
-            value: state.props.filters[key].value
-          }
-
-          if(state.props.filters[key]?.quickFilter){
-            state.quickFilterValues[key] = state.props.filters[key].value
-          } else {
-            if(state.props.filters[key]?.loadOptions){
-              state.hidenFields[key] = {...state.props.filters[key]}
+            if(state.props.filters[key]?.quickFilter){
+              state.quickFilterValues[key] = state.props.filters[key].value
+            } else {
+              if(state.props.filters[key]?.loadOptions){
+                state.hidenFields[key] = {...state.props.filters[key]}
+              }
             }
           }
         })
+
+        /*
+          setup values for filters from dynamicCruds
+        */
+        const filterValues = await methods.getUserPreferences()
+        if(Object.keys(filterValues).length !== 0){
+          Object.keys(filterValues).forEach(key => {
+            if(!state.props.filters[key]) return
+            state.filterValues[key] = filterValues[key]
+            state.readOnlyData[key] = {
+              label: state.props?.filters[key].props?.label || '',
+              value: filterValues[key]
+            }
+
+            if(state.props.filters[key]?.quickFilter){
+              state.quickFilterValues[key] = filterValues[key]
+            } else {
+              if(state.props.filters[key]?.loadOptions){
+                state.hidenFields[key] = {...state.props.filters[key]}
+              }
+            }
+          })
+        }
       }
     },
 
@@ -294,13 +343,176 @@ export default function controller(props: any, emit: any) {
       }
     },
 
-    /* quickFiltres*/
+    // Build the draggable source list from the configured filters.
+    setFilterItems(){
+      state.filterItems = Object.keys(state.props.filters).map(key => ({
+        key,
+        field: state.props.filters[key]
+      }))
+    },
+
     async setQuickFilters(){
-      Object.keys(state.props.filters).forEach(key => {
+      state.quickFilters = {}
+      const quickFilterKeys = Object.keys(state.props.filters).filter(key => {
+        return state.props.filters[key]?.quickFilter
+      })
+      quickFilterKeys.sort((firstKey, secondKey) => {
+        const firstOrder = state.props.filters[firstKey]?.quickFilterOrder
+        const secondOrder = state.props.filters[secondKey]?.quickFilterOrder
+        if(Number.isFinite(firstOrder) && Number.isFinite(secondOrder)) return firstOrder - secondOrder
+        if(Number.isFinite(firstOrder)) return -1
+        if(Number.isFinite(secondOrder)) return 1
+        return 0
+      })
+      quickFilterKeys.forEach(key => {
         if(state.props.filters[key]?.quickFilter){
           state.quickFilters[key] = state.props.filters[key]
         }
       })
+      state.quickFilterItems = Object.keys(state.quickFilters).map(key => ({
+        key,
+        field: state.quickFilters[key]
+      }))
+      methods.setFilterItems()
+    },
+
+    // Clone a filter definition without changing the modal source list.
+    cloneFilterItem(item){
+      return {
+        key: item.key,
+        field: item.field
+      }
+    },
+
+    // Store the filter being dragged and activate the quick filter editor.
+    handleFilterDragStart(change){
+      state.draggedFilter = methods.cloneFilterItem(state.filterItems[change?.oldIndex])
+      state.draggingFilter = true
+      state.editingQuickFilters = true
+    },
+
+    // Add the dragged filter to quickfilters when it is dropped in the target.
+    handleFilterDragEnd(change){
+      const dropTarget = change?.to
+      const droppedOnQuickFilters = dropTarget?.classList?.contains('quick-filters-dropzone')
+      if(droppedOnQuickFilters && state.draggedFilter){
+        const exists = state.quickFilterItems.some(item => item.key === state.draggedFilter.key)
+        if(!exists) state.quickFilterItems.push(state.draggedFilter)
+        methods.addQuickFilter(state.draggedFilter)
+        if(state.useUserPreferences) methods.setUserPreferences(methods.getCurrentFilterValues())
+      }
+      state.draggedFilter = null
+      state.draggingFilter = false
+      state.editingQuickFilters = false
+      methods.hideModal()
+    },
+
+    // Mark a filter as a quickfilter and initialize its current value.
+    addQuickFilter(item){
+      const key = item?.key
+      const field = state.props.filters[key]
+      if(!key || !field) return
+
+      field.quickFilter = true
+      item.field = field
+      state.quickFilters[key] = field
+      if(state.quickFilterValues[key] === undefined){
+        state.quickFilterValues[key] = state.readOnlyData[key]?.value ?? state.filterValues[key]?.value ?? field.value ?? null
+      }
+    },
+
+    // Return a quickfilter to the modal while preserving its current value.
+    removeQuickFilter(key){
+      const field = state.props.filters[key]
+      if(!field) return
+
+      const hasQuickFilterValue = Object.prototype.hasOwnProperty.call(state.quickFilterValues, key)
+      const value = hasQuickFilterValue ? state.quickFilterValues[key] : state.readOnlyData[key]?.value ?? state.filterValues[key]?.value ?? state.filterValues[key] ?? field.value ?? null
+      field.quickFilter = false
+      state.filterValues[key] = value
+      state.readOnlyData[key] = {
+        label: field.props?.label || '',
+        value
+      }
+      delete state.quickFilterValues[key]
+      delete state.quickFilters[key]
+
+      const itemIndex = state.quickFilterItems.findIndex(item => item.key === key)
+      if(itemIndex !== -1) state.quickFilterItems.splice(itemIndex, 1)
+      delete field.quickFilterOrder
+
+      methods.setFilterItems()
+      methods.setReadValues()
+      if(state.useUserPreferences) methods.setUserPreferences(methods.getCurrentFilterValues())
+    },
+
+    // Toggle quickfilter editing controls and drag support.
+    toggleQuickFiltersEdit(){
+      state.editingQuickFilters = !state.editingQuickFilters
+    },
+
+    // Collect each filter's current value for preference persistence.
+    getCurrentFilterValues(fallbackValues = {}){
+      const values = {}
+      Object.keys(state.props.filters).forEach(key => {
+        const field = state.props.filters[key]
+        const fieldValue = state.filterValues[key]
+        const hasQuickFilterValue = Object.prototype.hasOwnProperty.call(state.quickFilterValues, key)
+        const hasReadValue = state.readOnlyData[key] && Object.prototype.hasOwnProperty.call(state.readOnlyData[key], 'value')
+        const hasFallbackValue = Object.prototype.hasOwnProperty.call(fallbackValues, key)
+        const hasStoredFieldValue = fieldValue && typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, 'value')
+
+        if(field.quickFilter && hasQuickFilterValue){
+          values[key] = state.quickFilterValues[key]
+        } else if(hasReadValue){
+          values[key] = state.readOnlyData[key].value
+        } else if(hasFallbackValue){
+          values[key] = fallbackValues[key]
+        } else if(Object.prototype.hasOwnProperty.call(state.filterValues, key)){
+          values[key] = hasStoredFieldValue ? fieldValue.value : fieldValue
+        } else {
+          values[key] = field.value ?? null
+        }
+      })
+      return values
+    },
+
+    handleQuickFilterAdd(change){
+      const addedItem = state.quickFilterItems[change?.newIndex]
+      if(!addedItem) return
+      methods.addQuickFilter(addedItem)
+    },
+
+    // Keep quickfilter state synchronized after a drag operation changes the list.
+    handleQuickFilterChange(change){
+      if(change?.moved){
+        if(state.useUserPreferences) methods.setUserPreferences(methods.getCurrentFilterValues())
+        return
+      }
+
+      const addedItem = change?.added?.element
+      if(!addedItem){
+        return
+      }
+
+      const key = addedItem.key
+      const field = state.props.filters[key]
+      if(!field){
+        return
+      }
+
+      const duplicateIndex = state.quickFilterItems.findIndex(item => item.key === key && item !== addedItem)
+      if(duplicateIndex !== -1){
+        state.quickFilterItems.splice(change.added.newIndex, 1)
+        return
+      }
+
+      field.quickFilter = true
+      addedItem.field = field
+      state.quickFilters[key] = field
+      if(state.quickFilterValues[key] === undefined){
+        state.quickFilterValues[key] = state.filterValues[key] ?? field.value ?? null
+      }
     },
     /* quickFiltres*/
     quickFilterHandler(key){
@@ -333,8 +545,8 @@ export default function controller(props: any, emit: any) {
       methods.setReadValues()
       methods.mutateURLFilters({...filters})
       methods.emitModelValue(filters)
-      if(updateUserData && state.useAdminFilter){
-        methods.setAdminFilter(filters)
+      if(updateUserData && state.useUserPreferences && !state.loading){
+        methods.setUserPreferences(filters)
       }
       methods.hideModal()
     },
@@ -385,10 +597,10 @@ export default function controller(props: any, emit: any) {
         }
       }
 
-      if(state.useAdminFilter){
+      if(state.useUserPreferences){
         if(Object.keys(filterValues).length === 0){
-          const filters = methods.getAdminFilter()
-          filterValues = {...filters[state.systemName]}
+          const filters = methods.getUserPreferences()          
+          filterValues = filters
         }
       }
 
@@ -413,55 +625,54 @@ export default function controller(props: any, emit: any) {
       }
     },
 
-    getAdminFilter(){
-      let filters = {}
+    getUserPreferences(){      
+      let filters = getUserPreferences(computeds.userPreferencesKey.value) || {}
+      const values = {}
+      Object.keys(filters || {}).forEach(key => {
+        const preference = filters[key]
+        const hasQuickFilterState = preference && typeof preference === 'object' && typeof preference.quickFilter === 'boolean' && Object.prototype.hasOwnProperty.call(preference, 'value')
 
-      if(state.userData?.fields){
-        if (Array.isArray(state.userData.fields)){
-          if(state.userData.fields.length > 0){
-            const adminFilters = state.userData.fields.find((element) => element.name == 'adminFilters') || false
-            if(adminFilters && adminFilters?.value){
-              return adminFilters.value
+        if(hasQuickFilterState){
+          values[key] = preference.value
+          if(state.props.filters[key]){
+            state.props.filters[key].quickFilter = preference.quickFilter
+            if(preference.quickFilter && Number.isFinite(preference.quickFilterOrder)){
+              state.props.filters[key].quickFilterOrder = preference.quickFilterOrder
             }
           }
+        } else {
+          values[key] = preference
         }
-      }
-      return filters
+      })
+      return values
     },
 
-    async setAdminFilter(filters){
+    async setUserPreferences(filters){      
       if(!state.systemName) return
-      const adminFilters = methods.getAdminFilter()
 
-      if(Object.keys(adminFilters).length !== 0){
-        state.userData.fields.find((element) => {
-          if(element.name == 'adminFilters'){
-            element.value[state.systemName] = filters
-          }
-        })
-      } else {
-        const valueFilter = {}
-        valueFilter[state.systemName] = filters
-        const fields = {
-          name: 'adminFilters',
-          value: {
-            ...valueFilter,
-          }
+      const currentValues = methods.getCurrentFilterValues(filters)
+      const filterPreferences = {}
+      Object.keys(state.props.filters).forEach(key => {
+        const field = state.props.filters[key]
+
+        filterPreferences[key] = {
+          value: currentValues[key],
+          quickFilter: Boolean(field.quickFilter)
         }
-        state.userData.fields.push(fields)
-      }
+        if(field.quickFilter){
+          const quickFilterOrder = state.quickFilterItems.findIndex(item => item.key === key)
+          if(quickFilterOrder !== -1) filterPreferences[key].quickFilterOrder = quickFilterOrder
+        }
+      })
 
-      const data = {
-        email: state.userData.email,
-        fields: state.userData.fields,
-        first_name: state.userData.firstName,
-        full_name: state.userData.fullName,
-        id: state.userData.id,
-        is_activated: state.userData.isActivated,
-        last_name: state.userData.lastName,
-      }
-      //update value on backend...
-      const response = service.updateUserData(false, state.userData.id, data)
+      const userData = clone(store.state.quserAuth.userData)
+      const currentPreferences = userData?.preferences?.find(item => item.key == computeds.userPreferencesKey.value)
+      const areEqual = _.isEqual(filterPreferences, currentPreferences?.value)
+      if(areEqual) return
+      
+      return updateOrCreateUserPreferences(computeds.userPreferencesKey.value, filterPreferences).then( (response) => {
+        state.userData = clone(store.state.quserAuth.userData)
+      })
     },
 
     getUrlQueries(){
@@ -533,12 +744,15 @@ export default function controller(props: any, emit: any) {
   // Watch - Sincronizar cambios dinámicos en props.filters
   watch(
     () => props.filters,
-    (newFilters) => {
+    async (newFilters) => {
       state.props.filters = methods.removeNullValues(clone(newFilters))
       if (Object.keys(state.props.filters).length > 0) {
+        state.loading = true
+        await methods.getUserPreferences()
         methods.setFilterValues()
         methods.addLoadedOptionsCallback()
         methods.setQuickFilters()
+        state.loading = false
       }
     },
     { deep: true }
