@@ -11,8 +11,8 @@ const en = {
     year: 'numeric', month: 'long', day: '2-digit'
   },
   long: {
-    year: 'numeric', month: 'long', day: '2-digit',
-    hour: 'numeric', minute: 'numeric', hour12: false
+    year: 'numeric', month: 'short', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
   },
   explicit: {
     weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
@@ -47,8 +47,8 @@ export default {
       year: 'numeric', month: 'long', day: '2-digit'
     },
     long: {
-      year: 'numeric', month: 'long', day: '2-digit',
-      hour: 'numeric', minute: 'numeric', hour12: false
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
     },
     explicit: {
       weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
