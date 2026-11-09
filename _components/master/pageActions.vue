@@ -44,8 +44,20 @@
         <q-btn-dropdown
           v-bind="{ ...buttonProps }"
           v-if="btn.type == 'btn-dropdown'"
-          class="btn-border-dropdown-custom"
-          :label="btn.props.label"
+          :class="[
+            'btn-border-dropdown-custom',
+            {
+              'refresh-dropdown-countdown': btn.countdown,
+              'refresh-countdown-urgent':
+                btn.countdown && refreshRemainingSeconds <= 10,
+            },
+          ]"
+          :label="btn.countdown || btn.props.label"
+          :aria-label="
+            btn.countdown
+              ? $tr('isite.cms.label.refreshIn', { time: btn.countdown })
+              : null
+          "
           :icon="btn.props.icon"
           :data-testid="`${btn.type}-${btn.props.label || ''}-${keyAction}`"
         >
@@ -246,6 +258,8 @@ export default {
       syncParams: false,
       search: null,
       refreshIntervalId: null,
+      refreshCountdownIntervalId: null,
+      refreshRemainingSeconds: 0,
       titleRefresh: this.$tr('isite.cms.label.refreshAtOnce'),
       timeRefresh: 0,
       drawer: {
@@ -363,10 +377,25 @@ export default {
       this.clearInterval();
       const interval = 1000 * 60 * time;
       this.emitRefresh();
+      this.$alert.info({
+        message:
+          time > 0
+            ? this.$tr('isite.cms.label.refreshAutomaticallyEveryMinutes', {
+                min: time,
+              })
+            : this.$tr('isite.cms.label.refreshManuallyOnly'),
+      });
       if (time > 0) {
+        this.refreshRemainingSeconds = time * 60;
         this.refreshIntervalId = setInterval(() => {
           this.emitRefresh();
+          this.refreshRemainingSeconds = time * 60;
         }, interval);
+        this.refreshCountdownIntervalId = setInterval(() => {
+          if (this.refreshRemainingSeconds > 0) {
+            this.refreshRemainingSeconds -= 1;
+          }
+        }, 1000);
       }
     },
     //Emit refresh
@@ -382,6 +411,19 @@ export default {
         clearInterval(this.refreshIntervalId);
         this.refreshIntervalId = null;
       }
+      if (this.refreshCountdownIntervalId) {
+        clearInterval(this.refreshCountdownIntervalId);
+        this.refreshCountdownIntervalId = null;
+      }
+      this.refreshRemainingSeconds = 0;
+    },
+    getRefreshCountdown() {
+      const minutes = Math.floor(this.refreshRemainingSeconds / 60);
+      const seconds = this.refreshRemainingSeconds % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(
+        2,
+        '0'
+      )}`;
     },
     //Handle start tour
     startTour(forceStart) {
@@ -552,6 +594,8 @@ export default {
             icon: 'fa-light fa-rotate-right',
             id: 'refresh-button-crud',
           },
+          countdown:
+            this.timeRefresh > 0 ? this.getRefreshCountdown() : null,
           badge: {
             vIf: !!this.expiresIn && this.badgeAppear,
             floating: true,
@@ -694,6 +738,26 @@ export default {
 
     .q-field__append .q-icon {
       color: $tertiary;
+    }
+
+    .refresh-dropdown-countdown .q-btn__content .block {
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .refresh-countdown-urgent .q-btn__content .block {
+      animation: refresh-countdown-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes refresh-countdown-pulse {
+      0%,
+      100% {
+        color: #c62828;
+      }
+      50% {
+        color: #ef9a9a;
+      }
     }
 
     @media screen and (max-width: $breakpoint-md) {
