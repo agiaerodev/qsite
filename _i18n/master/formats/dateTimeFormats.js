@@ -11,18 +11,18 @@ const en = {
     year: 'numeric', month: 'long', day: '2-digit'
   },
   long: {
-    year: 'numeric', month: 'long', day: '2-digit',
-    hour: 'numeric', minute: 'numeric', hour12: true
+    year: 'numeric', month: 'short', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
   },
   explicit: {
     weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
   },
   time: {
-    hour: '2-digit', minute: 'numeric', hour12: true
+    hour: '2-digit', minute: 'numeric', hour12: false
   },
   shortHuman: {
     weekday: 'long', day: '2-digit', month: 'long',
-    hour: '2-digit', minute: 'numeric', hour12: true
+    hour: '2-digit', minute: 'numeric', hour12: false
   },
   dayHuman: {
     weekday: 'long', day: '2-digit', month: 'long'
@@ -47,18 +47,18 @@ export default {
       year: 'numeric', month: 'long', day: '2-digit'
     },
     long: {
-      year: 'numeric', month: 'long', day: '2-digit',
-      hour: 'numeric', minute: 'numeric', hour12: true
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
     },
     explicit: {
       weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
     },
     time: {
-      hour: '2-digit', minute: 'numeric', hour12: true
+      hour: '2-digit', minute: 'numeric', hour12: false
     },
     shortHuman: {
       weekday: 'long', day: '2-digit', month: 'long',
-      hour: '2-digit', minute: 'numeric', hour12: true
+      hour: '2-digit', minute: 'numeric', hour12: false
     },
     dayHuman: {
       weekday: 'long', day: '2-digit', month: 'long'
