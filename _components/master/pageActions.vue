@@ -660,6 +660,14 @@ export default {
             },
             {
               label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                min: 0.10,
+              }),
+              action: () => {
+                this.refreshByTime(1 / 6);
+              },
+            },
+            {
+              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
                 min: 1,
               }),
               action: () => {
