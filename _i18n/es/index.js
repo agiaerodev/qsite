@@ -456,6 +456,7 @@ export default {
         'token': 'Token',
         'refreshAtOnce': 'Refrescar de una vez',
         'refreshEveryMinutes': 'Refrescar cada {min} minutos',
+        'refreshEverySeconds': 'Refrescar cada {min} segundos',
         'refreshIn': 'Se actualizará en {time}',
         'refreshAutomaticallyEveryMinutes': 'La información se actualizará automáticamente cada {min} minutos.',
         'refreshManuallyOnly': 'La información se está actualizando ahora. No habrá actualizaciones automáticas.',
