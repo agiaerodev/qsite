@@ -459,6 +459,7 @@ export default {
         'refreshEverySeconds': 'Refrescar cada {min} segundos',
         'refreshIn': 'Se actualizará en {time}',
         'refreshAutomaticallyEveryMinutes': 'La información se actualizará automáticamente cada {min} minutos.',
+        'refreshAutomaticallyEverySeconds': 'La información se actualizará automáticamente cada {sec} segundos.',
         'refreshManuallyOnly': 'La información se está actualizando ahora. No habrá actualizaciones automáticas.',
         'refreshEveryMinute': 'Refrescar cada {min} minuto',
         'offline': 'Sin conexión',

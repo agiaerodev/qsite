@@ -461,6 +461,7 @@ export default {
         "refreshEverySeconds": "Refresh every {min} seconds",
         "refreshIn": "Refreshes in {time}",
         "refreshAutomaticallyEveryMinutes": "The data will refresh automatically every {min} minutes.",
+        "refreshAutomaticallyEverySeconds": "The data will refresh automatically every {sec} seconds.",
         "refreshManuallyOnly": "The data is refreshing now. Automatic refresh is disabled.",
         "refreshEveryMinute": "Refresh every {min} minute",
         "offline": "Offline",
