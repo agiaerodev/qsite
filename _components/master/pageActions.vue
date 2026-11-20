@@ -227,6 +227,7 @@ export default {
     extraActions: { type: Array },
     excludeActions: { default: false },
     searchAction: { default: true },
+    refreshOptions: { type: Array, default: null },
     multipleRefresh: {
       type: Boolean,
       default: () => false,
@@ -240,8 +241,8 @@ export default {
     expiresIn: { type: Number },
     /*dynamic filter*/
     systemName: null,
-    loadDynamicFilter: { 
-      type: Boolean, default: () => true 
+    loadDynamicFilter: {
+      type: Boolean, default: () => true
     },
     dynamicFilter: {
       required: false,
@@ -265,6 +266,7 @@ export default {
     'search',
     'new',
     'refresh',
+    'refresh-by-time',
     'activateTour',
     'updateDynamicFilterValues',
     'updateDynamicSummary',
@@ -400,6 +402,10 @@ export default {
       this.showBadgeRefresh(this.expiresIn);
       this.validateEnableTour();
       this.getVisibleColumns();
+      const defaultRefresh = this.refreshOptions?.find((option) => option.default === true);
+      if (defaultRefresh) {
+        this.refreshByTime(defaultRefresh.time, defaultRefresh.prefix);
+      }
     },
     async validateEnableTour() {
       if (
@@ -416,7 +422,8 @@ export default {
         }
       }
     },
-    refreshByTime(time) {
+    refreshByTime(time, prefix = null) {
+      this.$emit('refresh-by-time', prefix);
       this.timeRefresh = time;
       this.titleRefresh =
         time === 0
@@ -425,14 +432,20 @@ export default {
       this.clearInterval();
       const interval = 1000 * 60 * time;
       this.emitRefresh();
-      this.$alert.info({
-        message:
-          time > 0
-            ? this.$tr('isite.cms.label.refreshAutomaticallyEveryMinutes', {
-                min: time,
+      let refreshMessage;
+      if (time > 0) {
+        refreshMessage =
+          time < 1
+            ? this.$tr('isite.cms.label.refreshAutomaticallyEverySeconds', {
+                sec: Math.round(time * 60),
               })
-            : this.$tr('isite.cms.label.refreshManuallyOnly'),
-      });
+            : this.$tr('isite.cms.label.refreshAutomaticallyEveryMinutes', {
+                min: time,
+              });
+      } else {
+        refreshMessage = this.$tr('isite.cms.label.refreshManuallyOnly');
+      }
+      this.$alert.info({ message: refreshMessage });
       if (time > 0) {
         this.refreshRemainingSeconds = time * 60;
         this.refreshIntervalId = setInterval(() => {
@@ -651,54 +664,50 @@ export default {
             rounded: true,
             show: true,
           },
-          items: [
-            {
-              label: this.$tr('isite.cms.label.refreshAtOnce'),
-              action: () => {
-                this.refreshByTime(0);
+          items: (
+            this.refreshOptions || [
+              {
+                label: this.$tr('isite.cms.label.refreshAtOnce'),
+                time: 0,
               },
-            },
-            {
-              label: this.$tr('isite.cms.label.refreshEverySeconds', {
-                min: 10,
-              }),
-              action: () => {
-                this.refreshByTime(1 / 6);
+              {
+                label: this.$tr('isite.cms.label.refreshEverySeconds', {
+                  min: 10,
+                }),
+                time: 1 / 6,
               },
-            },
-            {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
-                min: 1,
-              }),
-              action: () => {
-                this.refreshByTime(1);
+              {
+                label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                  min: 1,
+                }),
+                time: 1,
               },
-            },
-            {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
-                min: 5,
-              }),
-              action: () => {
-                this.refreshByTime(5);
+              {
+                label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                  min: 5,
+                }),
+                time: 5,
               },
-            },
-            {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
-                min: 10,
-              }),
-              action: () => {
-                this.refreshByTime(10);
+              {
+                label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                  min: 10,
+                }),
+                time: 10,
               },
-            },
-            {
-              label: this.$tr('isite.cms.label.refreshEveryMinutes', {
-                min: 15,
-              }),
-              action: () => {
-                this.refreshByTime(15);
+              {
+                label: this.$tr('isite.cms.label.refreshEveryMinutes', {
+                  min: 15,
+                }),
+                time: 15,
               },
+            ]
+          ).map(({ label, time, prefix }) => ({
+            label,
+            prefix: prefix || null,
+            action: () => {
+              this.refreshByTime(time, prefix);
             },
-          ],
+          })),
           action: () => {
             this.emitRefresh();
           },
